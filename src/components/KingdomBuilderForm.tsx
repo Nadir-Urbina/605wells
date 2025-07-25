@@ -48,7 +48,6 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
 
   const {
     register,
-    handleSubmit,
     formState: { errors },
     setValue,
     watch,

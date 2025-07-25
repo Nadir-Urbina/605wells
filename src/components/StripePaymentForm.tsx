@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '@/lib/stripe';
 
@@ -68,7 +67,7 @@ function PaymentForm({
         }),
       });
 
-      const { clientSecret, subscriptionId, customerId, error } = await response.json();
+      const { clientSecret, error } = await response.json();
 
       if (error) {
         onError(error);
