@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
     const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || 'us1';
 
     if (!apiKey || !audienceId) {
-      console.error('Mailchimp credentials not configured');
+      console.warn('Mailchimp credentials not configured - skipping email subscription');
       return NextResponse.json(
-        { error: 'Mailchimp not configured' },
-        { status: 500 }
+        { success: true, message: 'Mailchimp not configured' },
+        { status: 200 }
       );
     }
 

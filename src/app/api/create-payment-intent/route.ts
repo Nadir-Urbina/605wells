@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
-});
+// Initialize Stripe only if the secret key is available
+const getStripeInstance = () => {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  
+  return new Stripe(secretKey, {
+    apiVersion: '2025-06-30.basil',
+  });
+};
 
 export async function POST(request: NextRequest) {
   try {
+    // Get Stripe instance with proper error handling
+    const stripe = getStripeInstance();
+    
     const { amount, donationType, customerInfo, motivationMessage } = await request.json();
 
     // Validate amount
@@ -93,11 +105,29 @@ export async function POST(request: NextRequest) {
         expand: ['latest_invoice.payment_intent'],
       });
 
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
-      const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+      // Type the expanded invoice properly
+      const invoice = subscription.latest_invoice as Stripe.Invoice & {
+        payment_intent: Stripe.PaymentIntent | string;
+      };
+      
+      // Handle the payment intent properly
+      if (!invoice.payment_intent) {
+        throw new Error('Payment intent not found on invoice');
+      }
+      
+      // payment_intent can be either a string ID or the expanded object
+      let clientSecret: string;
+      if (typeof invoice.payment_intent === 'string') {
+        // If it's just an ID, we need to retrieve it
+        const paymentIntent = await stripe.paymentIntents.retrieve(invoice.payment_intent);
+        clientSecret = paymentIntent.client_secret!;
+      } else {
+        // It's already the expanded PaymentIntent object
+        clientSecret = invoice.payment_intent.client_secret!;
+      }
 
       return NextResponse.json({
-        clientSecret: paymentIntent.client_secret,
+        clientSecret,
         subscriptionId: subscription.id,
         customerId: customer.id,
       });
