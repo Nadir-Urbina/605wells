@@ -166,7 +166,7 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                    <div className="relative z-10">
                      <h4 className="font-semibold text-purple-800 mb-2">Our Goal: 120 Kingdom Builders</h4>
                      <p className="text-purple-700 text-sm">
-                       We're seeking 120 committed Kingdom Builders to partner with us monthly at $120 each 
+                       We&apos;re seeking 120 committed Kingdom Builders to partner with us monthly at $120 each 
                        for the next 12 months to transform 605 Wells into a regional Kingdom Hub.
                      </p>
                    </div>
@@ -527,7 +527,7 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                          <p>Path: {donationType === 'monthly' ? 'Monthly Partner' : 'One-Time Gift'}</p>
                          {donationType === 'monthly' && (
                            <p className="text-sm mt-2 text-purple-600">
-                             ✓ You'll receive full Kingdom Builder benefits
+                             ✓ You&apos;ll receive full Kingdom Builder benefits
                            </p>
                          )}
                        </div>
