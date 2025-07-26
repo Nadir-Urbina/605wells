@@ -5,6 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import TypingEffect from "@/components/TypingEffect";
 import KingdomBuilderForm from "@/components/KingdomBuilderForm";
+import Header from "@/components/Header";
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -26,8 +27,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* Header */}
+      <Header onDonateClick={openKingdomBuilderForm} />
+
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -44,10 +48,10 @@ export default function Home() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto">
+        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 w-full max-w-7xl mx-auto pt-16 sm:pt-20">
           {/* Main heading with animation */}
           <motion.div 
-            className="mb-8 sm:mb-12"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -62,13 +66,13 @@ export default function Home() {
 
           {/* Love, Live, Labor, Lead - Prominent Display */}
           <motion.div 
-            className="mb-12 sm:mb-16"
+            className="mb-8 sm:mb-12"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 1.0 }}
           >
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-12 max-w-6xl mx-auto">
-              {["LOVE.", "LIVE.", "LABOR.", "LEAD."].map((word, index) => (
+              {["LOVE·", "LIVE·", "LABOR·", "LEAD·"].map((word, index) => (
                 <motion.div
                   key={word}
                   className="text-center"
@@ -76,7 +80,7 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 1.2 + index * 0.1 }}
                 >
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white font-montserrat tracking-wider drop-shadow-2xl"
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white font-montserrat tracking-wider drop-shadow-2xl"
                       style={{
                         textShadow: '0 0 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6), 2px 2px 4px rgba(0,0,0,0.9)'
                       }}>
@@ -89,7 +93,7 @@ export default function Home() {
 
           {/* Typing effect section with enhanced styling */}
           <motion.div 
-            className="mt-8 sm:mt-16 bg-black/50 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16 border border-white/30 shadow-2xl max-w-5xl mx-auto"
+            className="mt-6 sm:mt-8 bg-black/50 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border border-white/30 shadow-2xl max-w-5xl mx-auto"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1.6 }}
@@ -99,7 +103,7 @@ export default function Home() {
             </p>
             
             {/* Typing effect container with fixed height */}
-            <div className="min-h-[60px] sm:min-h-[80px] md:min-h-[100px] flex items-center justify-center mb-8 sm:mb-10">
+            <div className="min-h-[50px] sm:min-h-[60px] md:min-h-[80px] flex items-center justify-center mb-6 sm:mb-8">
               <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-center">
                 <TypingEffect 
                   phrases={ministryActivities}
@@ -111,7 +115,7 @@ export default function Home() {
             </div>
             
             <motion.p 
-              className="text-gray-300 text-base sm:text-lg md:text-xl max-w-4xl mx-auto mb-8 sm:mb-10 leading-relaxed"
+              className="text-gray-300 text-base sm:text-lg md:text-xl max-w-4xl mx-auto mb-6 sm:mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 2.0 }}
@@ -119,7 +123,7 @@ export default function Home() {
               A Transformational Gathering Place
             </motion.p>
             <motion.p 
-              className="text-gray-300 text-base sm:text-lg md:text-xl max-w-4xl mx-auto mb-8 sm:mb-10 leading-relaxed"
+              className="text-gray-300 text-base sm:text-lg md:text-xl max-w-4xl mx-auto mb-6 sm:mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 2.1 }}
@@ -136,14 +140,14 @@ export default function Home() {
             >
               <motion.button 
                 onClick={openKingdomBuilderForm}
-                className="w-full max-w-sm bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-4 sm:py-5 px-8 sm:px-10 rounded-xl text-lg sm:text-xl shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation"
+                className="w-full max-w-xs bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Become a Kingdom Builder
               </motion.button>
               <motion.button 
-                className="w-full max-w-sm border-2 border-white text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl text-lg sm:text-xl hover:bg-white hover:text-gray-900 transition-all duration-300 touch-manipulation"
+                className="w-full max-w-xs border-2 border-white text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg hover:bg-white hover:text-gray-900 transition-all duration-300 touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -154,7 +158,7 @@ export default function Home() {
 
           {/* Scripture references */}
           <motion.div 
-            className="mt-12 sm:mt-16 text-center px-4"
+            className="mt-8 sm:mt-12 text-center px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 2.4 }}
@@ -181,7 +185,7 @@ export default function Home() {
       </div>
 
       {/* Mission section */}
-      <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white">
+      <section id="about" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             className="text-center mb-12 sm:mb-16"
@@ -242,6 +246,33 @@ export default function Home() {
                 <p className="text-gray-600 text-base sm:text-lg leading-relaxed">{item.description}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Placeholder sections for future development */}
+      <section id="events" className="py-16 sm:py-20 bg-gray-100 min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-montserrat">Events</h2>
+          <p className="text-gray-600 text-lg">Coming Soon - Stay tuned for upcoming events at 605 Wells!</p>
+        </div>
+      </section>
+
+      <section id="blog" className="py-16 sm:py-20 bg-white min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-montserrat">Blog</h2>
+          <p className="text-gray-600 text-lg">Coming Soon - Kingdom insights and updates from our leadership!</p>
+        </div>
+      </section>
+
+      <section id="contact" className="py-16 sm:py-20 bg-gray-900 text-white min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-4xl font-bold mb-4 font-montserrat">Contact Us</h2>
+          <p className="text-gray-300 text-lg mb-6">Get in touch with the 605 Wells community</p>
+          <div className="space-y-2 text-gray-400">
+            <p>📍 605 Wells Road</p>
+            <p>📧 info@605wells.com</p>
+            <p>📞 Coming Soon</p>
           </div>
         </div>
       </section>

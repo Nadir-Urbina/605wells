@@ -30,18 +30,24 @@ interface KingdomBuilderFormProps {
   onClose: () => void;
 }
 
-const donationAmounts = [
+const monthlyAmounts = [
+  { value: 120, label: '$120', featured: true, description: 'Join our core mission!' },
+  { value: 60, label: '$60' },
+  { value: 180, label: '$180' },
+  { value: 240, label: '$240' },
+];
+
+const oneTimeAmounts = [
+  { value: 50, label: '$50', featured: true, description: 'Suggested amount' },
   { value: 25, label: '$25' },
-  { value: 50, label: '$50' },
   { value: 100, label: '$100' },
   { value: 250, label: '$250' },
   { value: 500, label: '$500' },
-  { value: 1000, label: '$1,000' },
 ];
 
 export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFormProps) {
   const [step, setStep] = useState(1);
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(120); // Default to $120 goal
   const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -55,7 +61,8 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
   } = useForm<KingdomBuilderFormData>({
     resolver: zodResolver(kingdomBuilderSchema),
     defaultValues: {
-      donationType: 'one-time',
+      donationType: 'monthly',
+      amount: 120, // Default to $120 goal amount
     },
   });
 
@@ -108,7 +115,9 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white p-6 rounded-t-2xl">
+          <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-800 text-white p-6 rounded-t-2xl relative overflow-hidden">
+            {/* Animated border beam effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600 opacity-20 animate-pulse"></div>
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold font-montserrat">
@@ -149,56 +158,166 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
               >
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Choose Your Impact</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Join the Kingdom Builder Community</h3>
+                
+                                 {/* Mission Statement */}
+                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-6 relative overflow-hidden">
+                   <div className="absolute inset-0 bg-gradient-to-r from-purple-200 via-blue-200 to-purple-300 opacity-20"></div>
+                   <div className="relative z-10">
+                     <h4 className="font-semibold text-purple-800 mb-2">Our Goal: 120 Kingdom Builders</h4>
+                     <p className="text-purple-700 text-sm">
+                       We're seeking 120 committed Kingdom Builders to partner with us monthly at $120 each 
+                       for the next 12 months to transform 605 Wells into a regional Kingdom Hub.
+                     </p>
+                   </div>
+                 </div>
+
+                                 {/* Kingdom Builder Benefits */}
+                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6 relative overflow-hidden">
+                   <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-purple-200 to-blue-300 opacity-20"></div>
+                   <div className="relative z-10">
+                     <h4 className="font-semibold text-blue-800 mb-3">Kingdom Builder Benefits</h4>
+                     <ul className="text-blue-700 text-sm space-y-1">
+                       <li>• 50% off all registration fees within 605 Wells</li>
+                       <li>• Waived application fees for trips</li>
+                       <li>• Waived admission fee into Kingdom Champions College</li>
+                     </ul>
+                   </div>
+                 </div>
                 
                 {/* Donation Type */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Donation Type
+                    Choose Your Kingdom Builder Path
                   </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {['one-time', 'monthly', 'custom'].map((type) => (
-                      <label key={type} className="cursor-pointer">
-                        <input
-                          type="radio"
-                          value={type}
-                          {...register('donationType')}
-                          className="sr-only"
-                        />
-                        <div className={`p-3 text-center border-2 rounded-lg transition-all ${
-                          donationType === type
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}>
-                          <div className="font-semibold capitalize">{type.replace('-', ' ')}</div>
-                        </div>
-                      </label>
-                    ))}
+                  <div className="grid grid-cols-2 gap-4">
+                                         <label className="cursor-pointer">
+                       <input
+                         type="radio"
+                         value="monthly"
+                         {...register('donationType')}
+                         className="sr-only"
+                       />
+                       <div className={`p-4 text-center border-2 rounded-lg transition-all relative overflow-hidden ${
+                         donationType === 'monthly'
+                           ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
+                           : 'border-gray-200 hover:border-gray-300'
+                       }`}>
+                         {donationType === 'monthly' && (
+                           <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
+                             <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
+                           </div>
+                         )}
+                         <div className="relative z-10">
+                           <div className="font-bold text-lg">Monthly Partner</div>
+                           <div className="text-sm text-gray-600">Join our core mission</div>
+                           {donationType === 'monthly' && (
+                             <div className="text-xs text-purple-600 mt-1">✓ Full Kingdom Builder benefits</div>
+                           )}
+                         </div>
+                       </div>
+                     </label>
+                                         <label className="cursor-pointer">
+                       <input
+                         type="radio"
+                         value="one-time"
+                         {...register('donationType')}
+                         className="sr-only"
+                       />
+                       <div className={`p-4 text-center border-2 rounded-lg transition-all relative overflow-hidden ${
+                         donationType === 'one-time'
+                           ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
+                           : 'border-gray-200 hover:border-gray-300'
+                       }`}>
+                         {donationType === 'one-time' && (
+                           <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
+                             <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
+                           </div>
+                         )}
+                         <div className="relative z-10">
+                           <div className="font-bold text-lg">One-Time Gift</div>
+                           <div className="text-sm text-gray-600">Support the vision</div>
+                           {donationType === 'one-time' && (
+                             <div className="text-xs text-purple-600 mt-1">✓ Every gift makes a difference</div>
+                           )}
+                         </div>
+                       </div>
+                     </label>
                   </div>
                 </div>
 
                 {/* Amount Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Select Amount {donationType === 'monthly' && '(Monthly)'}
+                    {donationType === 'monthly' ? 'Select Monthly Amount' : 'Select One-Time Amount'}
                   </label>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    {donationAmounts.map((amount) => (
-                      <button
-                        key={amount.value}
-                        type="button"
-                        onClick={() => handleAmountSelect(amount.value)}
-                        className={`p-4 text-center border-2 rounded-lg transition-all font-semibold ${
-                          selectedAmount === amount.value
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        {amount.label}
-                        {donationType === 'monthly' && <div className="text-xs text-gray-500">per month</div>}
-                      </button>
-                    ))}
-                  </div>
+                  
+                  {donationType === 'monthly' ? (
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {monthlyAmounts.map((amount) => (
+                                                 <button
+                           key={amount.value}
+                           type="button"
+                           onClick={() => handleAmountSelect(amount.value)}
+                           className={`p-4 text-center border-2 rounded-lg transition-all font-semibold relative overflow-hidden ${
+                             selectedAmount === amount.value
+                               ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
+                               : 'border-gray-200 hover:border-gray-300'
+                           }`}
+                         >
+                           {selectedAmount === amount.value && (
+                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
+                               <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
+                             </div>
+                           )}
+                           {amount.featured && (
+                             <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-black text-xs px-2 py-1 rounded-full font-bold shadow-lg">
+                               GOAL
+                             </div>
+                           )}
+                           <div className="relative z-10">
+                             <div className="text-lg">{amount.label}</div>
+                             <div className="text-xs text-gray-500">per month</div>
+                             {amount.description && (
+                               <div className={`text-xs mt-1 ${selectedAmount === amount.value ? 'text-purple-600' : 'text-blue-600'}`}>{amount.description}</div>
+                             )}
+                           </div>
+                         </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      {oneTimeAmounts.map((amount) => (
+                                                 <button
+                           key={amount.value}
+                           type="button"
+                           onClick={() => handleAmountSelect(amount.value)}
+                           className={`p-3 text-center border-2 rounded-lg transition-all font-semibold relative overflow-hidden ${
+                             selectedAmount === amount.value
+                               ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
+                               : 'border-gray-200 hover:border-gray-300'
+                           }`}
+                         >
+                           {selectedAmount === amount.value && (
+                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
+                               <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
+                             </div>
+                           )}
+                           {amount.featured && (
+                             <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-400 to-purple-400 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
+                               ★
+                             </div>
+                           )}
+                           <div className="relative z-10">
+                             <div>{amount.label}</div>
+                             {amount.description && (
+                               <div className={`text-xs mt-1 ${selectedAmount === amount.value ? 'text-purple-600' : 'text-blue-600'}`}>{amount.description}</div>
+                             )}
+                           </div>
+                         </button>
+                      ))}
+                    </div>
+                  )}
                   
                   {/* Custom Amount */}
                   <button
@@ -398,14 +517,22 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Complete Your Donation</h3>
                 
-                {/* Donation Summary */}
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-                  <h4 className="font-semibold text-orange-800 mb-2">Donation Summary</h4>
-                  <div className="text-orange-700">
-                    <p>Amount: ${selectedAmount || watch('amount')} {donationType === 'monthly' && '(Monthly)'}</p>
-                    <p>Type: {donationType.replace('-', ' ').charAt(0).toUpperCase() + donationType.slice(1).replace('-', ' ')}</p>
-                  </div>
-                </div>
+                                                    {/* Donation Summary */}
+                   <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-6 relative overflow-hidden">
+                     <div className="absolute inset-0 bg-gradient-to-r from-purple-200 via-blue-200 to-purple-300 opacity-20"></div>
+                     <div className="relative z-10">
+                       <h4 className="font-semibold text-purple-800 mb-2">Your Kingdom Builder Commitment</h4>
+                       <div className="text-purple-700">
+                         <p className="font-semibold">Amount: ${selectedAmount || watch('amount')} {donationType === 'monthly' && '(Monthly)'}</p>
+                         <p>Path: {donationType === 'monthly' ? 'Monthly Partner' : 'One-Time Gift'}</p>
+                         {donationType === 'monthly' && (
+                           <p className="text-sm mt-2 text-purple-600">
+                             ✓ You'll receive full Kingdom Builder benefits
+                           </p>
+                         )}
+                       </div>
+                     </div>
+                   </div>
 
                 {/* Optional Message */}
                 <div className="mb-6">
