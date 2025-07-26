@@ -67,31 +67,47 @@ function PaymentForm({
         }),
       });
 
-      const { clientSecret, error } = await response.json();
+      const { clientSecret, subscriptionId, customerId, error } = await response.json();
 
       if (error) {
         onError(error);
         return;
       }
 
-      // Confirm payment
-      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: `${customerInfo.firstName} ${customerInfo.lastName}`,
-            email: customerInfo.email,
-            phone: customerInfo.phone,
-            address: {
-              line1: customerInfo.address,
-              city: customerInfo.city,
-              state: customerInfo.state,
-              postal_code: customerInfo.zipCode,
-              country: 'US',
-            },
-          },
+      const billingDetails = {
+        name: `${customerInfo.firstName} ${customerInfo.lastName}`,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        address: {
+          line1: customerInfo.address,
+          city: customerInfo.city,
+          state: customerInfo.state,
+          postal_code: customerInfo.zipCode,
+          country: 'US',
         },
-      });
+      };
+
+      let paymentResult;
+
+      if (donationType === 'monthly' && subscriptionId) {
+        // For subscriptions, confirm the setup intent
+        paymentResult = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: billingDetails,
+          },
+        });
+      } else {
+        // For one-time payments, confirm the payment intent
+        paymentResult = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: billingDetails,
+          },
+        });
+      }
+
+      const { error: confirmError, paymentIntent } = paymentResult;
 
       if (confirmError) {
         onError(confirmError.message || 'Payment failed');
@@ -110,6 +126,8 @@ function PaymentForm({
               ...customerInfo,
               donationType,
               amount,
+              subscriptionId: subscriptionId || undefined,
+              customerId: customerId || undefined,
             }),
           });
         } catch (mailchimpError) {
@@ -150,7 +168,7 @@ function PaymentForm({
         <label className="block text-sm font-medium text-gray-700 mb-3">
           Payment Information
         </label>
-        <div className="p-4 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+        <div className="p-4 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
           <CardElement options={cardElementOptions} />
         </div>
       </div>
@@ -169,7 +187,7 @@ function PaymentForm({
       <button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-4 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isProcessing ? (
           <div className="flex items-center justify-center">
@@ -179,8 +197,10 @@ function PaymentForm({
             </svg>
             Processing Payment...
           </div>
+        ) : donationType === 'monthly' ? (
+          `Start Monthly Support - $${amount}/month`
         ) : (
-          `Donate $${amount} ${donationType === 'monthly' ? '(Monthly)' : ''}`
+          `Donate $${amount}`
         )}
       </button>
     </form>

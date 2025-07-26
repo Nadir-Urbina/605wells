@@ -57,17 +57,17 @@ export default function Header({ onDonateClick }: HeaderProps) {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="text-gray-300 hover:text-yellow-400 font-medium transition-colors duration-300 relative group"
+                className="text-gray-300 hover:text-purple-400 font-medium transition-colors duration-300 relative group"
               >
                 {item.name}
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-yellow-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </button>
             ))}
             
             {/* Desktop Donate Button */}
             <motion.button
               onClick={handleDonateClick}
-              className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -79,7 +79,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-300 hover:text-yellow-400 focus:outline-none focus:text-yellow-400 transition-colors duration-300"
+              className="text-gray-300 hover:text-purple-400 focus:outline-none focus:text-purple-400 transition-colors duration-300"
               aria-label="Toggle mobile menu"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,7 +109,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
                 <motion.button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className="block w-full text-left px-4 py-3 text-gray-300 hover:text-yellow-400 hover:bg-gray-800 rounded-lg font-medium transition-all duration-300"
+                  className="block w-full text-left px-4 py-3 text-gray-300 hover:text-purple-400 hover:bg-gray-800 rounded-lg font-medium transition-all duration-300"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -121,7 +121,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
               {/* Mobile Donate Button */}
               <motion.button
                 onClick={handleDonateClick}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-4 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 shadow-lg mt-4"
+                className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg mt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: navItems.length * 0.1 }}

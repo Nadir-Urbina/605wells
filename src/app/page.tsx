@@ -71,7 +71,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 1.0 }}
           >
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-12 max-w-6xl mx-auto">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6 lg:gap-8 xl:gap-12 max-w-6xl mx-auto">
               {["LOVE·", "LIVE·", "LABOR·", "LEAD·"].map((word, index) => (
                 <motion.div
                   key={word}
@@ -109,7 +109,7 @@ export default function Home() {
                   phrases={ministryActivities}
                   interval={2000}
                   typingSpeed={60}
-                  className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500"
+                  className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600"
                 />
               </div>
             </div>
@@ -140,18 +140,19 @@ export default function Home() {
             >
               <motion.button 
                 onClick={openKingdomBuilderForm}
-                className="w-full max-w-xs bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation"
+                className="w-full max-w-xs bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg shadow-xl hover:shadow-2xl hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 touch-manipulation"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Become a Kingdom Builder
               </motion.button>
               <motion.button 
-                className="w-full max-w-xs border-2 border-white text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg hover:bg-white hover:text-gray-900 transition-all duration-300 touch-manipulation"
+                className="w-full max-w-xs relative overflow-hidden border-2 border-purple-400 text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg text-base sm:text-lg hover:border-blue-400 transition-all duration-300 touch-manipulation backdrop-blur-sm group"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Learn More About Our Vision
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-blue-600/0 to-purple-600/0 group-hover:from-purple-600/20 group-hover:via-blue-600/20 group-hover:to-purple-600/20 transition-all duration-300"></div>
+                <span className="relative z-10">Learn More About Our Vision</span>
               </motion.button>
             </motion.div>
           </motion.div>
