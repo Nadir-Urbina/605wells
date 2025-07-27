@@ -10,8 +10,18 @@ const getStripeInstance = () => {
   }
   
   return new Stripe(secretKey, {
-    apiVersion: '2025-06-30.basil',
+    apiVersion: '2024-06-20', // Use stable API version
   });
+};
+
+// Pre-defined price IDs for each donation amount
+const PRICE_IDS = {
+  monthly: {
+    60: process.env.STRIPE_PRICE_ID_MONTHLY_60,   
+    120: process.env.STRIPE_PRICE_ID_MONTHLY_120,  
+    180: process.env.STRIPE_PRICE_ID_MONTHLY_180, 
+    240: process.env.STRIPE_PRICE_ID_MONTHLY_240, 
+  }
 };
 
 export async function POST(request: NextRequest) {
@@ -23,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Validate amount
     const donationAmount = Math.round(amount * 100); // Convert to cents
-    const minAmount = 10 * 100; // $10 minimum
+    const minAmount = 1 * 100; // $1 minimum
     const maxAmount = 10000 * 100; // $10,000 maximum
 
     if (donationAmount < minAmount || donationAmount > maxAmount) {
@@ -54,10 +64,10 @@ export async function POST(request: NextRequest) {
       receipt_email: customerInfo.email,
     };
 
-    // If it's a monthly donation, we'll need to create a subscription instead
     if (donationType === 'monthly') {
-      // For monthly donations, we'll create a subscription
-      // First, create or retrieve customer
+      console.log('Creating monthly subscription for:', customerInfo.email);
+      
+      // Create customer
       const customer = await stripe.customers.create({
         email: customerInfo.email,
         name: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -70,67 +80,23 @@ export async function POST(request: NextRequest) {
           country: 'US',
         },
         metadata: {
-          motivationMessage: motivationMessage || '',
+          motivationMessage: (motivationMessage || '').substring(0, 500),
           project: '605Wells Kingdom Builder',
+          donationType: donationType,
+          amount: (donationAmount / 100).toString(),
         },
       });
-
-      // Create a product for the monthly donation
-      const product = await stripe.products.create({
-        name: '605 Wells Kingdom Builder - Monthly Support',
-        description: 'Monthly recurring donation to support 605 Wells transformation project',
-      });
-
-      // Create a price for the monthly donation
-      const price = await stripe.prices.create({
-        product: product.id,
-        unit_amount: donationAmount,
-        currency: 'usd',
-        recurring: {
-          interval: 'month',
-        },
-      });
-
-      // Create a subscription with payment intent
-      const subscription = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [{
-          price: price.id,
-        }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          payment_method_types: ['card'],
-          save_default_payment_method: 'on_subscription',
-        },
-        expand: ['latest_invoice.payment_intent'],
-      });
-
-      // Type the expanded invoice properly
-      const invoice = subscription.latest_invoice as Stripe.Invoice & {
-        payment_intent: Stripe.PaymentIntent | string;
-      };
       
-      // Handle the payment intent properly
-      if (!invoice.payment_intent) {
-        throw new Error('Payment intent not found on invoice');
-      }
+      console.log('Customer created:', customer.id);
+
+      // Get the appropriate price ID for this amount
+      const priceId = getPriceIdForAmount(donationAmount / 100);
       
-      // payment_intent can be either a string ID or the expanded object
-      let clientSecret: string;
-      if (typeof invoice.payment_intent === 'string') {
-        // If it's just an ID, we need to retrieve it
-        const paymentIntent = await stripe.paymentIntents.retrieve(invoice.payment_intent);
-        clientSecret = paymentIntent.client_secret!;
-      } else {
-        // It's already the expanded PaymentIntent object
-        clientSecret = invoice.payment_intent.client_secret!;
+      if (!priceId) {
+        throw new Error(`No price configured for amount $${donationAmount / 100}. Please use one of: $60, $120, $180, $240`);
       }
 
-      return NextResponse.json({
-        clientSecret,
-        subscriptionId: subscription.id,
-        customerId: customer.id,
-      });
+      return createSubscriptionWithPrice(stripe, customer.id, priceId);
     } else {
       // One-time donation
       const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
@@ -141,9 +107,112 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error creating payment intent:', error);
+    
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return NextResponse.json(
-      { error: 'Error creating payment intent' },
+      { 
+        error: 'Error creating payment intent',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
-} 
+}
+
+// Helper function to get price ID for standard amounts
+function getPriceIdForAmount(amount: number): string | null {
+  const standardAmounts = [60, 120, 180, 240];
+  
+  if (standardAmounts.includes(amount)) {
+    return PRICE_IDS.monthly[amount as keyof typeof PRICE_IDS.monthly] || null;
+  }
+  
+  return null;
+}
+
+// Simplified subscription creation - THE KEY FIX
+async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, priceId: string) {
+  console.log('Creating subscription with price:', priceId);
+  
+  // Create subscription - this is the CORRECT way
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: priceId }],
+    payment_behavior: 'default_incomplete',
+    payment_settings: {
+      payment_method_types: ['card'],
+      save_default_payment_method: 'on_subscription',
+    },
+    expand: ['latest_invoice.payment_intent'],
+    metadata: {
+      project: '605Wells Kingdom Builder',
+      donationType: 'monthly',
+    },
+  });
+
+  console.log('Subscription created:', subscription.id);
+  
+  // Get the payment intent from the subscription
+  const invoice = subscription.latest_invoice as Stripe.Invoice;
+  
+  if (!invoice) {
+    throw new Error('No latest invoice found on subscription');
+  }
+
+  console.log('Invoice status:', invoice.status);
+  console.log('Invoice ID:', invoice.id);
+
+  // The key fix: Handle the payment intent properly without refinalizing
+  let clientSecret: string;
+  
+  if (invoice.payment_intent) {
+    // Payment intent exists - extract client secret
+    if (typeof invoice.payment_intent === 'string') {
+      const paymentIntent = await stripe.paymentIntents.retrieve(invoice.payment_intent);
+      clientSecret = paymentIntent.client_secret!;
+      console.log('Retrieved payment intent client secret');
+    } else {
+      clientSecret = invoice.payment_intent.client_secret!;
+      console.log('Extracted payment intent client secret from object');
+    }
+  } else {
+    // This should rarely happen with the correct setup
+    console.log('No payment intent on invoice - this is unexpected');
+    
+    // Only try to finalize if the invoice is actually in draft status
+    if (invoice.status === 'draft') {
+      console.log('Invoice is draft, finalizing...');
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+      
+      if (finalizedInvoice.payment_intent) {
+        if (typeof finalizedInvoice.payment_intent === 'string') {
+          const paymentIntent = await stripe.paymentIntents.retrieve(finalizedInvoice.payment_intent);
+          clientSecret = paymentIntent.client_secret!;
+        } else {
+          clientSecret = finalizedInvoice.payment_intent.client_secret!;
+        }
+      } else {
+        throw new Error('Failed to create payment intent after finalizing invoice');
+      }
+    } else {
+      throw new Error(`Invoice is in ${invoice.status} status and has no payment intent`);
+    }
+  }
+  
+  if (!clientSecret) {
+    throw new Error('Failed to extract client secret from payment intent');
+  }
+  
+  console.log('Successfully extracted client secret');
+
+  return NextResponse.json({
+    clientSecret,
+    subscriptionId: subscription.id,
+    customerId: subscription.customer as string,
+  });
+}

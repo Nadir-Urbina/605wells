@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,9 +17,8 @@ const kingdomBuilderSchema = z.object({
   city: z.string().min(2, 'Please enter your city'),
   state: z.string().min(2, 'Please enter your state'),
   zipCode: z.string().min(5, 'Please enter your ZIP code'),
-  donationType: z.enum(['one-time', 'monthly', 'custom']),
-  amount: z.number().min(10, 'Minimum donation is $10'),
-  customAmount: z.number().optional(),
+  donationType: z.enum(['one-time', 'monthly']),
+  amount: z.number().min(1, 'Minimum donation is $1'),
   motivationMessage: z.string().optional(),
 });
 
@@ -28,6 +27,7 @@ type KingdomBuilderFormData = z.infer<typeof kingdomBuilderSchema>;
 interface KingdomBuilderFormProps {
   isOpen: boolean;
   onClose: () => void;
+  onPaymentSuccess?: () => void;
 }
 
 const monthlyAmounts = [
@@ -37,18 +37,11 @@ const monthlyAmounts = [
   { value: 240, label: '$240' },
 ];
 
-const oneTimeAmounts = [
-  { value: 50, label: '$50', featured: true, description: 'Suggested amount' },
-  { value: 25, label: '$25' },
-  { value: 100, label: '$100' },
-  { value: 250, label: '$250' },
-  { value: 500, label: '$500' },
-];
+// Removed oneTimeAmounts - using direct input for one-time donations
 
-export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFormProps) {
+export default function KingdomBuilderForm({ isOpen, onClose, onPaymentSuccess }: KingdomBuilderFormProps) {
   const [step, setStep] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(120); // Default to $120 goal
-  const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -68,25 +61,48 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
 
   const donationType = watch('donationType');
 
+  // Ensure form initializes with correct defaults when opened
+  useEffect(() => {
+    if (isOpen) {
+      setValue('donationType', 'monthly');
+      setValue('amount', 120);
+      setSelectedAmount(120);
+    }
+  }, [isOpen, setValue]);
+
+  // Reset amount when switching donation types
+  useEffect(() => {
+    if (donationType === 'monthly') {
+      setSelectedAmount(120);
+      setValue('amount', 120);
+    } else if (donationType === 'one-time') {
+      setSelectedAmount(null);
+      setValue('amount', 0); // Will be set by user input
+    }
+  }, [donationType, setValue]);
+
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
-    setIsCustomAmount(false);
     setValue('amount', amount);
   };
 
-  const handleCustomAmount = () => {
-    setIsCustomAmount(true);
-    setSelectedAmount(null);
-  };
-
   const handlePaymentSuccess = () => {
-    alert('Thank you for becoming a Kingdom Builder! You will receive a confirmation email shortly.');
-    reset();
+    reset({
+      donationType: 'monthly',
+      amount: 120,
+    });
     setStep(1);
-    setSelectedAmount(null);
-    setIsCustomAmount(false);
+    setSelectedAmount(120);
     setPaymentError(null);
-    onClose();
+    
+    // Call the parent success handler if provided
+    if (onPaymentSuccess) {
+      onPaymentSuccess();
+    } else {
+      // Fallback for backward compatibility
+      alert('Thank you for becoming a Kingdom Builder! You will receive a confirmation email shortly.');
+      onClose();
+    }
   };
 
   const handlePaymentError = (error: string) => {
@@ -118,20 +134,21 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
           <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-800 text-white p-6 rounded-t-2xl relative overflow-hidden">
             {/* Animated border beam effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600 opacity-20 animate-pulse"></div>
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold font-montserrat">
+            <div className="flex justify-between items-start relative z-10">
+              <div className="flex-1 pr-4">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold font-montserrat leading-tight">
                   Become a Kingdom Builder
                 </h2>
-                <p className="text-yellow-100 mt-2">
+                <p className="text-yellow-100 mt-1 sm:mt-2 text-sm sm:text-base leading-tight">
                   Join us in building God&apos;s Kingdom at 605 Wells
                 </p>
               </div>
               <button 
                 onClick={onClose}
-                className="text-white hover:text-yellow-200 transition-colors"
+                className="text-white hover:text-yellow-200 transition-colors relative z-20 flex-shrink-0 p-1"
+                aria-label="Close form"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -253,20 +270,20 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                   </label>
                   
                   {donationType === 'monthly' ? (
-                    <div className="grid grid-cols-2 gap-3 mb-4">
+                                        <div className="grid grid-cols-2 gap-3 mb-4 pt-3">
                       {monthlyAmounts.map((amount) => (
-                                                 <button
+                        <button
                            key={amount.value}
                            type="button"
                            onClick={() => handleAmountSelect(amount.value)}
-                           className={`p-4 text-center border-2 rounded-lg transition-all font-semibold relative overflow-hidden ${
+                           className={`p-4 text-center border-2 rounded-lg transition-all font-semibold relative ${
                              selectedAmount === amount.value
                                ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
                                : 'border-gray-200 hover:border-gray-300'
                            }`}
                          >
                            {selectedAmount === amount.value && (
-                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
+                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg overflow-hidden">
                                <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
                              </div>
                            )}
@@ -285,67 +302,29 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                          </button>
                       ))}
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      {oneTimeAmounts.map((amount) => (
-                                                 <button
-                           key={amount.value}
-                           type="button"
-                           onClick={() => handleAmountSelect(amount.value)}
-                           className={`p-3 text-center border-2 rounded-lg transition-all font-semibold relative overflow-hidden ${
-                             selectedAmount === amount.value
-                               ? 'border-transparent bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700'
-                               : 'border-gray-200 hover:border-gray-300'
-                           }`}
-                         >
-                           {selectedAmount === amount.value && (
-                             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600 p-[2px] rounded-lg">
-                               <div className="h-full w-full bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg"></div>
-                             </div>
-                           )}
-                           {amount.featured && (
-                             <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-400 to-purple-400 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
-                               ★
-                             </div>
-                           )}
-                           <div className="relative z-10">
-                             <div>{amount.label}</div>
-                             {amount.description && (
-                               <div className={`text-xs mt-1 ${selectedAmount === amount.value ? 'text-purple-600' : 'text-blue-600'}`}>{amount.description}</div>
-                             )}
-                           </div>
-                         </button>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Custom Amount */}
-                  <button
-                    type="button"
-                    onClick={handleCustomAmount}
-                    className={`w-full p-4 text-center border-2 rounded-lg transition-all font-semibold mb-4 ${
-                      isCustomAmount
-                        ? 'border-orange-500 bg-orange-50 text-orange-700'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    Custom Amount
-                  </button>
-
-                  {isCustomAmount && (
-                    <div>
+                                    ) : (
+                    <div className="mb-4 pt-3">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Enter Custom Amount
+                        Enter Your Donation Amount
                       </label>
-                      <input
-                        type="number"
-                        min="10"
-                        placeholder="Enter amount"
-                        {...register('amount', { valueAsNumber: true })}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">$</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          placeholder="0.00"
+                          {...register('amount', { valueAsNumber: true })}
+                          className="w-full pl-8 pr-4 py-4 text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        />
+                      </div>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Enter any amount you feel led to give (minimum $1)
+                      </p>
                     </div>
                   )}
+
+                  
                   {errors.amount && (
                     <p className="text-red-500 text-sm mt-1">{errors.amount.message}</p>
                   )}
@@ -354,7 +333,7 @@ export default function KingdomBuilderForm({ isOpen, onClose }: KingdomBuilderFo
                 <button
                   type="button"
                   onClick={nextStep}
-                  disabled={!selectedAmount && !isCustomAmount}
+                  disabled={donationType === 'monthly' ? !selectedAmount : !watch('amount') || watch('amount') < 1}
                   className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-4 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Continue to Personal Information

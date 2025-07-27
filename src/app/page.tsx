@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   const ministryActivities = [
     "Discipling",
@@ -24,6 +25,16 @@ export default function Home() {
 
   const openKingdomBuilderForm = () => setIsFormOpen(true);
   const closeKingdomBuilderForm = () => setIsFormOpen(false);
+  
+  const handlePaymentSuccess = () => {
+    setIsFormOpen(false);
+    setShowSuccessMessage(true);
+    
+    // Auto close after 10 seconds
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 10000);
+  };
 
   return (
     <div className="min-h-screen">
@@ -251,35 +262,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Placeholder sections for future development */}
-      <section id="events" className="py-16 sm:py-20 bg-gray-100 min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-montserrat">Events</h2>
-          <p className="text-gray-600 text-lg">Coming Soon - Stay tuned for upcoming events at 605 Wells!</p>
-        </div>
-      </section>
 
-      <section id="blog" className="py-16 sm:py-20 bg-white min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4 font-montserrat">Blog</h2>
-          <p className="text-gray-600 text-lg">Coming Soon - Kingdom insights and updates from our leadership!</p>
-        </div>
-      </section>
 
-      <section id="contact" className="py-16 sm:py-20 bg-gray-900 text-white min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold mb-4 font-montserrat">Contact Us</h2>
-          <p className="text-gray-300 text-lg mb-6">Get in touch with the 605 Wells community</p>
-          <div className="space-y-2 text-gray-400">
-            <p>📍 605 Wells Road</p>
-            <p>📧 info@605wells.com</p>
-            <p>📞 Coming Soon</p>
+      {/* Success Message Modal */}
+      <motion.div 
+        className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 ${showSuccessMessage ? 'block' : 'hidden'}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showSuccessMessage ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div 
+          className="bg-white rounded-2xl max-w-md w-full p-8 text-center"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: showSuccessMessage ? 1 : 0.8, opacity: showSuccessMessage ? 1 : 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-        </div>
-      </section>
+          
+          <h3 className="text-2xl font-bold text-gray-900 mb-2 font-montserrat">
+            Welcome, Kingdom Builder!
+          </h3>
+          
+          <p className="text-gray-600 mb-4">
+            Thank you for joining our mission! You&apos;ll receive a confirmation email shortly with your Kingdom Builder benefits.
+          </p>
+          
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+            <p className="text-purple-700 text-sm font-medium">
+              🎉 Monthly support activated • Full benefits unlocked
+            </p>
+          </div>
+          
+          <div className="text-xs text-gray-500">
+            This window will close automatically...
+          </div>
+        </motion.div>
+      </motion.div>
 
       {/* Kingdom Builder Form Modal */}
-      <KingdomBuilderForm isOpen={isFormOpen} onClose={closeKingdomBuilderForm} />
+      <KingdomBuilderForm isOpen={isFormOpen} onClose={closeKingdomBuilderForm} onPaymentSuccess={handlePaymentSuccess} />
     </div>
   );
 }

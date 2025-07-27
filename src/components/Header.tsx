@@ -18,10 +18,11 @@ export default function Header({ onDonateClick }: HeaderProps) {
     // Close mobile menu
     setIsMobileMenuOpen(false);
     
-    // Smooth scroll to section (when sections are created)
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    // Navigate to the page or scroll to home section
+    if (sectionId === 'home') {
+      window.location.href = '/';
+    } else {
+      window.location.href = `/${sectionId}`;
     }
   };
 
@@ -33,7 +34,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
   const navItems = [
     { name: 'About', id: 'about' },
     { name: 'Events', id: 'events' },
-    { name: 'Blog', id: 'blog' },
+    { name: 'News', id: 'news' },
     { name: 'Contact', id: 'contact' },
   ];
 
