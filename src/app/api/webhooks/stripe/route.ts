@@ -63,7 +63,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+async function handlePaymentSucceeded(invoice: Stripe.Invoice & { 
+  subscription?: string;
+  amount_paid?: number;
+}) {
   console.log('Payment succeeded for invoice:', invoice.id);
   
   if (invoice.subscription) {
@@ -88,7 +91,11 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 }
 
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
+async function handlePaymentFailed(invoice: Stripe.Invoice & { 
+  subscription?: string;
+  hosted_invoice_url?: string;
+  amount_due?: number;
+}) {
   console.log('Payment failed for invoice:', invoice.id);
   
   if (invoice.subscription) {
