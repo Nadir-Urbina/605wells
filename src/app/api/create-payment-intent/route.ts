@@ -10,7 +10,7 @@ const getStripeInstance = () => {
   }
   
   return new Stripe(secretKey, {
-    apiVersion: '2024-06-20', // Use stable API version
+    apiVersion: '2025-06-30.basil',
   });
 };
 

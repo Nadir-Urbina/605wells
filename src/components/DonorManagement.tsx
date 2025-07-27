@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 interface Subscription {
@@ -41,11 +41,7 @@ export default function DonorManagement({ customerEmail, onClose }: DonorManagem
     { value: 240, label: '$240/month' },
   ];
 
-  useEffect(() => {
-    fetchSubscription();
-  }, [customerEmail]);
-
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     try {
       const response = await fetch('/api/get-subscription', {
         method: 'POST',
@@ -65,7 +61,11 @@ export default function DonorManagement({ customerEmail, onClose }: DonorManagem
     } finally {
       setLoading(false);
     }
-  };
+  }, [customerEmail]);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
 
   const updateSubscription = async (newAmount: number) => {
     if (!subscription) return;

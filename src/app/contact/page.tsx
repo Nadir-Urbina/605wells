@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import { useState } from "react";
 
 export default function Contact() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [, setIsFormOpen] = useState(false);
   
   const openKingdomBuilderForm = () => setIsFormOpen(true);
 

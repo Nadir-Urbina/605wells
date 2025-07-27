@@ -1,12 +1,11 @@
 'use client';
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { useState } from "react";
 
 export default function About() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [, setIsFormOpen] = useState(false);
   
   const openKingdomBuilderForm = () => setIsFormOpen(true);
 
