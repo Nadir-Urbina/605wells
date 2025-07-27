@@ -188,6 +188,9 @@ async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, p
     
     // Only try to finalize if the invoice is actually in draft status
     if (invoice.status === 'draft') {
+      if (!invoice.id) {
+        throw new Error('Invoice ID is missing');
+      }
       console.log('Invoice is draft, finalizing...');
       const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
       
