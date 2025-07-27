@@ -158,7 +158,9 @@ async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, p
   console.log('Subscription created:', subscription.id);
   
   // Get the payment intent from the subscription
-  const invoice = subscription.latest_invoice as Stripe.Invoice;
+  const invoice = subscription.latest_invoice as Stripe.Invoice & { 
+    payment_intent?: Stripe.PaymentIntent | string; 
+  };
   
   if (!invoice) {
     throw new Error('No latest invoice found on subscription');
