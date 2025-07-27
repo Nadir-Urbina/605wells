@@ -26,11 +26,18 @@ export async function POST(request: NextRequest) {
     // Handle different event types
     switch (event.type) {
       case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object as Stripe.Invoice);
+        await handlePaymentSucceeded(event.data.object as Stripe.Invoice & { 
+          subscription?: string;
+          amount_paid?: number;
+        });
         break;
 
       case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object as Stripe.Invoice);
+        await handlePaymentFailed(event.data.object as Stripe.Invoice & { 
+          subscription?: string;
+          hosted_invoice_url?: string | null;
+          amount_due?: number;
+        });
         break;
 
       case 'customer.subscription.created':
@@ -84,7 +91,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice & {
     await sendThankYouEmail({
       email: customer.email!,
       name: customer.name!,
-      amount: invoice.amount_paid / 100,
+      amount: (invoice.amount_paid || 0) / 100,
       type: 'monthly',
       subscriptionId: subscription.id,
     });
@@ -93,7 +100,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice & {
 
 async function handlePaymentFailed(invoice: Stripe.Invoice & { 
   subscription?: string;
-  hosted_invoice_url?: string;
+  hosted_invoice_url?: string | null;
   amount_due?: number;
 }) {
   console.log('Payment failed for invoice:', invoice.id);
@@ -112,8 +119,8 @@ async function handlePaymentFailed(invoice: Stripe.Invoice & {
     await sendPaymentFailedEmail({
       email: customer.email!,
       name: customer.name!,
-      amount: invoice.amount_due / 100,
-      invoiceUrl: invoice.hosted_invoice_url!,
+      amount: (invoice.amount_due || 0) / 100,
+      invoiceUrl: invoice.hosted_invoice_url || '',
     });
   }
 }
