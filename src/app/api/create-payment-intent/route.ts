@@ -192,7 +192,9 @@ async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, p
         throw new Error('Invoice ID is missing');
       }
       console.log('Invoice is draft, finalizing...');
-      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id) as Stripe.Invoice & { 
+        payment_intent?: Stripe.PaymentIntent | string; 
+      };
       
       if (finalizedInvoice.payment_intent) {
         if (typeof finalizedInvoice.payment_intent === 'string') {
