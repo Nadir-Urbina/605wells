@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successDonationType, setSuccessDonationType] = useState<'monthly' | 'one-time'>('monthly');
   
   const ministryActivities = [
     "Discipling",
@@ -26,8 +27,9 @@ export default function Home() {
   const openKingdomBuilderForm = () => setIsFormOpen(true);
   const closeKingdomBuilderForm = () => setIsFormOpen(false);
   
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (donationType: 'monthly' | 'one-time' = 'monthly') => {
     setIsFormOpen(false);
+    setSuccessDonationType(donationType);
     setShowSuccessMessage(true);
     
     // Auto close after 10 seconds
@@ -283,19 +285,31 @@ export default function Home() {
             </svg>
           </div>
           
-          <h3 className="text-2xl font-bold text-gray-900 mb-2 font-montserrat">
-            Welcome, Kingdom Builder!
-          </h3>
-          
-          <p className="text-gray-600 mb-4">
-            Thank you for joining our mission! You&apos;ll receive a confirmation email shortly with your Kingdom Builder benefits.
-          </p>
-          
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-            <p className="text-purple-700 text-sm font-medium">
-              🎉 Monthly support activated • Full benefits unlocked
-            </p>
-          </div>
+                         <h3 className="text-2xl font-bold text-gray-900 mb-2 font-montserrat">
+                 {successDonationType === 'monthly' ? 'Welcome, Kingdom Builder!' : 'Thank You for Your Generous Gift!'}
+               </h3>
+
+               <p className="text-gray-600 mb-4">
+                 {successDonationType === 'monthly' 
+                   ? "Thank you for joining our mission! You'll receive a confirmation email shortly with your Kingdom Builder benefits."
+                   : "Thank you for your generous heart and for sowing into God's Kingdom work at 605 Wells! You'll receive a confirmation email shortly."
+                 }
+               </p>
+
+               <div className={`border rounded-lg p-3 mb-4 ${
+                 successDonationType === 'monthly' 
+                   ? 'bg-purple-50 border-purple-200' 
+                   : 'bg-green-50 border-green-200'
+               }`}>
+                 <p className={`text-sm font-medium ${
+                   successDonationType === 'monthly' ? 'text-purple-700' : 'text-green-700'
+                 }`}>
+                   {successDonationType === 'monthly' 
+                     ? '🎉 Monthly support activated • Full benefits unlocked'
+                     : '🙏 Your gift makes a difference • Consider joining our Kingdom Builders'
+                   }
+                 </p>
+               </div>
           
           <div className="text-xs text-gray-500">
             This window will close automatically...

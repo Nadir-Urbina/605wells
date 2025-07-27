@@ -27,7 +27,7 @@ type KingdomBuilderFormData = z.infer<typeof kingdomBuilderSchema>;
 interface KingdomBuilderFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onPaymentSuccess?: () => void;
+  onPaymentSuccess?: (donationType: 'monthly' | 'one-time') => void;
 }
 
 const monthlyAmounts = [
@@ -97,10 +97,13 @@ export default function KingdomBuilderForm({ isOpen, onClose, onPaymentSuccess }
     
     // Call the parent success handler if provided
     if (onPaymentSuccess) {
-      onPaymentSuccess();
+      onPaymentSuccess(donationType);
     } else {
       // Fallback for backward compatibility
-      alert('Thank you for becoming a Kingdom Builder! You will receive a confirmation email shortly.');
+      const message = donationType === 'monthly' 
+        ? 'Thank you for becoming a Kingdom Builder! You will receive a confirmation email shortly.'
+        : 'Thank you for your generous gift! You will receive a confirmation email shortly.';
+      alert(message);
       onClose();
     }
   };

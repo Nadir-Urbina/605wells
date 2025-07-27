@@ -6,15 +6,6 @@ export async function POST(request: NextRequest) {
 
     console.log('Mailchimp subscription request:', { email, donationType, amount });
 
-    // Only process monthly donors through Mailchimp (Kingdom Builders)
-    if (donationType !== 'monthly') {
-      console.log('Skipping Mailchimp for one-time donor - will use Resend instead');
-      return NextResponse.json(
-        { success: true, message: 'One-time donor - handled separately' },
-        { status: 200 }
-      );
-    }
-
     const apiKey = process.env.MAILCHIMP_API_KEY;
     const audienceId = process.env.MAILCHIMP_AUDIENCE_ID;
     const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || 'us1';
@@ -27,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Processing Kingdom Builder for Mailchimp:', email);
+    console.log(`Processing ${donationType === 'monthly' ? 'Kingdom Builder' : 'one-time giver'} for Mailchimp:`, email);
 
     const url = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members`;
 
@@ -49,16 +40,21 @@ export async function POST(request: NextRequest) {
         SUBID: subscriptionId || '',
         CUSTID: customerId || ''
       },
-      tags: [
+      tags: donationType === 'monthly' ? [
         'kingdom builders',  // Lowercase as requested for customer journey
         '605 Wells',
         'Monthly Recurring',
         `Monthly-$${amount}`,
         'Active Subscription'
+      ] : [
+        'one-time givers',   // Different tag for one-time donors
+        '605 Wells',
+        'One-Time Donation',
+        `One-Time-$${amount}`
       ]
     };
 
-    console.log('Sending to Mailchimp:', { email_address: email, tags: data.tags });
+          console.log(`Sending to Mailchimp with ${donationType} tags:`, { email_address: email, tags: data.tags });
 
     const response = await fetch(url, {
       method: 'POST',
@@ -69,17 +65,17 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(data),
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Mailchimp subscription successful:', result.id);
-      return NextResponse.json({ success: true, mailchimp_id: result.id });
+          if (response.ok) {
+        const result = await response.json();
+        console.log(`Mailchimp subscription successful for ${donationType} donor:`, result.id);
+        return NextResponse.json({ success: true, mailchimp_id: result.id });
     } else {
       const errorData = await response.json();
       console.error('Mailchimp error:', errorData);
       
       // If the email is already subscribed, update their tags
-      if (errorData.title === 'Member Exists') {
-        console.log('Member exists, updating tags...');
+              if (errorData.title === 'Member Exists') {
+          console.log(`Member exists, updating tags for ${donationType} donor...`);
         
         // Update existing member with new tags
         const updateUrl = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${Buffer.from(email.toLowerCase()).toString('hex')}`;
@@ -95,9 +91,9 @@ export async function POST(request: NextRequest) {
           }),
         });
         
-        if (updateResponse.ok) {
-          console.log('Tags updated for existing member');
-          return NextResponse.json({ success: true, message: 'Tags updated for existing subscriber' });
+                  if (updateResponse.ok) {
+            console.log(`Tags updated for existing ${donationType} donor`);
+            return NextResponse.json({ success: true, message: `Tags updated for existing ${donationType} donor` });
         } else {
           console.error('Failed to update tags:', await updateResponse.json());
           return NextResponse.json({ success: true, message: 'Already subscribed but failed to update tags' });
