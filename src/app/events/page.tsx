@@ -1,13 +1,18 @@
 'use client';
 
 import { motion } from "framer-motion";
+import { track } from '@vercel/analytics';
 import Header from "@/components/Header";
 import { useState } from "react";
 
 export default function Events() {
   const [, setIsFormOpen] = useState(false);
   
-  const openKingdomBuilderForm = () => setIsFormOpen(true);
+  const openKingdomBuilderForm = () => {
+    // Track Kingdom Builder button click
+    track('Kingdom Builder Form Opened', { location: 'events' });
+    setIsFormOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

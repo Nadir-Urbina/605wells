@@ -1,6 +1,7 @@
 'use client';
 
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { track } from '@vercel/analytics';
 import { getStripe } from '@/lib/stripe';
 
 interface PaymentFormProps {
@@ -51,6 +52,13 @@ function PaymentForm({
     }
 
     setIsProcessing(true);
+
+    // Track donation attempt
+    track('Donation Attempt', { 
+      amount: amount,
+      donationType: donationType,
+      location: 'payment_form'
+    });
 
     try {
       // Create payment intent on the server
@@ -145,6 +153,13 @@ function PaymentForm({
           console.warn('⚠️ Mailchimp timeout or network error (non-critical):', mailchimpError);
           // Payment succeeded - Mailchimp failure is not critical
         }
+
+        // Track successful donation
+        track('Donation Completed', { 
+          amount: amount,
+          donationType: donationType,
+          location: 'payment_form'
+        });
 
         // Always proceed with success if payment succeeded
         onSuccess();

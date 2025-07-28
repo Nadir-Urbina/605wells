@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { track } from '@vercel/analytics';
 
 interface HeaderProps {
   onDonateClick: () => void;
@@ -27,6 +28,8 @@ export default function Header({ onDonateClick }: HeaderProps) {
   };
 
   const handleDonateClick = () => {
+    // Track donate button click
+    track('Donate Button Clicked', { location: 'header' });
     setIsMobileMenuOpen(false);
     onDonateClick();
   };

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { track } from '@vercel/analytics';
 import TypingEffect from "@/components/TypingEffect";
 import KingdomBuilderForm from "@/components/KingdomBuilderForm";
 import Header from "@/components/Header";
@@ -25,7 +26,11 @@ export default function Home() {
     "East Gate Jax"
   ];
 
-  const openKingdomBuilderForm = () => setIsFormOpen(true);
+  const openKingdomBuilderForm = () => {
+    // Track Kingdom Builder button click
+    track('Kingdom Builder Form Opened', { location: 'hero' });
+    setIsFormOpen(true);
+  };
   const closeKingdomBuilderForm = () => setIsFormOpen(false);
   
   const handlePaymentSuccess = (donationType: 'monthly' | 'one-time' = 'monthly') => {
