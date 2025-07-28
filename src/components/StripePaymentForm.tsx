@@ -115,9 +115,9 @@ function PaymentForm({
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Subscribe to Mailchimp
+        // Subscribe to Mailchimp (non-critical for payment success)
         try {
-          await fetch('/api/mailchimp-subscribe', {
+          const mailchimpResponse = await fetch('/api/mailchimp-subscribe', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -130,11 +130,23 @@ function PaymentForm({
               customerId: customerId || undefined,
             }),
           });
+
+          if (mailchimpResponse.ok) {
+            const result = await mailchimpResponse.json();
+            if (result.success) {
+              console.log('✅ Successfully added to Mailchimp');
+            } else {
+              console.warn('⚠️ Mailchimp subscription failed (non-critical):', result.message);
+            }
+          } else {
+            console.warn('⚠️ Mailchimp API error (non-critical) - HTTP', mailchimpResponse.status);
+          }
         } catch (mailchimpError) {
-          console.warn('Mailchimp subscription failed:', mailchimpError);
-          // Don't fail the whole process if Mailchimp fails
+          console.warn('⚠️ Mailchimp timeout or network error (non-critical):', mailchimpError);
+          // Payment succeeded - Mailchimp failure is not critical
         }
 
+        // Always proceed with success if payment succeeded
         onSuccess();
       }
     } catch (error) {

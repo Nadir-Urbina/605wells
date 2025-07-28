@@ -51,6 +51,10 @@ export async function POST(request: NextRequest) {
 
           console.log(`Sending to Mailchimp with ${donationType} tags:`, { email_address: email, tags: data.tags });
 
+    // Create AbortController for 5-second timeout
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 5000);
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -58,12 +62,20 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
+      signal: abortController.signal,
     });
+
+    // Clear timeout if request completes successfully
+    clearTimeout(timeoutId);
 
           if (response.ok) {
         const result = await response.json();
         console.log(`Mailchimp subscription successful for ${donationType} donor:`, result.id);
-        return NextResponse.json({ success: true, mailchimp_id: result.id });
+        return NextResponse.json({ 
+          success: true, 
+          mailchimp_id: result.id,
+          message: `Successfully added ${donationType} donor to Mailchimp`
+        });
     } else {
       const errorData = await response.json();
       console.error('Mailchimp error:', errorData);
@@ -72,39 +84,80 @@ export async function POST(request: NextRequest) {
               if (errorData.title === 'Member Exists') {
           console.log(`Member exists, updating tags for ${donationType} donor...`);
         
-        // Update existing member with new tags
-        const updateUrl = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${Buffer.from(email.toLowerCase()).toString('hex')}`;
+        try {
+          // Update existing member with new tags (also with timeout)
+          const updateController = new AbortController();
+          const updateTimeoutId = setTimeout(() => updateController.abort(), 5000);
+          
+          const updateUrl = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${Buffer.from(email.toLowerCase()).toString('hex')}`;
+          
+          const updateResponse = await fetch(updateUrl, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              tags: data.tags.map(tag => ({ name: tag, status: 'active' }))
+            }),
+            signal: updateController.signal,
+          });
+
+          clearTimeout(updateTimeoutId);
         
-        const updateResponse = await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            tags: data.tags.map(tag => ({ name: tag, status: 'active' }))
-          }),
-        });
-        
-                  if (updateResponse.ok) {
-            console.log(`Tags updated for existing ${donationType} donor`);
-            return NextResponse.json({ success: true, message: `Tags updated for existing ${donationType} donor` });
-        } else {
-          console.error('Failed to update tags:', await updateResponse.json());
-          return NextResponse.json({ success: true, message: 'Already subscribed but failed to update tags' });
+                    if (updateResponse.ok) {
+              console.log(`Tags updated for existing ${donationType} donor`);
+              return NextResponse.json({ 
+                success: true, 
+                message: `Tags updated for existing ${donationType} donor`,
+                updated: true
+              });
+          } else {
+            const updateError = await updateResponse.json();
+            console.error('Failed to update tags:', updateError);
+            return NextResponse.json({ 
+              success: true,  // Still consider it success since user is already subscribed
+              message: 'Already subscribed but failed to update tags',
+              updated: false
+            });
+          }
+        } catch (updateError) {
+          console.error('Update tags timeout or error:', updateError);
+          return NextResponse.json({ 
+            success: true,  // Still consider it success since user is already subscribed
+            message: 'Already subscribed - tag update timed out',
+            timeout: true,
+            updated: false
+          });
         }
       }
       
-      return NextResponse.json(
-        { error: 'Failed to subscribe to mailing list', details: errorData },
-        { status: response.status }
-      );
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Failed to subscribe to mailing list',
+        mailchimp_error: errorData.title,
+        details: errorData.detail 
+      }, { status: 400 });
     }
   } catch (error) {
     console.error('Error subscribing to Mailchimp:', error);
-    return NextResponse.json(
-      { error: 'Error subscribing to mailing list' },
-      { status: 500 }
-    );
+    
+    // Handle timeout errors specifically
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('⚠️ Mailchimp API timeout (5 seconds)');
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Mailchimp API timeout',
+        timeout: true,
+        message: 'Request timed out after 5 seconds'
+      }, { status: 408 });
+    }
+    
+    // Handle other errors
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Error subscribing to mailing list',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 } 
