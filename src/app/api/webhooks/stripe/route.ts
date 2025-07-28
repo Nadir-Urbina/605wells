@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou } from '@/lib/resend';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -161,19 +162,42 @@ async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
 async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log('One-time payment succeeded:', paymentIntent.id);
   
-  // Handle one-time donations
-  // Send thank you email, update database, etc.
-  
-  await sendThankYouEmail({
-    email: paymentIntent.receipt_email!,
-    name: paymentIntent.metadata.customerName || 'Friend',
-    amount: paymentIntent.amount / 100,
-    type: 'one-time',
-    paymentIntentId: paymentIntent.id,
-  });
-}
+  try {
+    // Get email from receipt_email or customer email
+    let email = paymentIntent.receipt_email;
+    let customerName = paymentIntent.metadata.customerName || 'Friend';
 
-// Email helper functions (implement with your email service)
+    // If no receipt_email, try to get from customer
+    if (!email && paymentIntent.customer) {
+      const customer = await stripe.customers.retrieve(paymentIntent.customer as string) as Stripe.Customer;
+      email = customer.email;
+      customerName = customer.name || customerName;
+    }
+
+    // Get email from metadata as backup
+    if (!email) {
+      email = paymentIntent.metadata.customerEmail;
+    }
+
+    if (email) {
+      console.log('Sending one-time donation thank you email to:', email);
+      
+      await sendThankYouEmail({
+        email: email,
+        name: customerName,
+        amount: paymentIntent.amount / 100,
+        type: 'one-time',
+        paymentIntentId: paymentIntent.id,
+      });
+    } else {
+      console.warn('No email found for one-time donation:', paymentIntent.id);
+    }
+  } catch (error) {
+    console.error('Error handling one-time payment success:', error);
+  }
+}
+  
+  // Email helper functions
 async function sendThankYouEmail(data: {
   email: string;
   name: string;
@@ -184,8 +208,38 @@ async function sendThankYouEmail(data: {
 }) {
   console.log(`Sending thank you email to ${data.email} for ${data.type} donation of $${data.amount}`);
   
-  // TODO: Implement with your email service (SendGrid, Resend, etc.)
-  // Include Kingdom Builder benefits information for monthly donors
+  try {
+    // Parse first name and last name
+    const nameParts = data.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    if (data.type === 'monthly' && data.subscriptionId) {
+      // Send Kingdom Builder welcome email
+      await sendKingdomBuilderWelcomeEmail({
+        email: data.email,
+        firstName,
+        lastName,
+        amount: data.amount,
+        transactionId: data.paymentIntentId || 'N/A',
+        subscriptionId: data.subscriptionId,
+      });
+      console.log('✅ Kingdom Builder welcome email sent successfully');
+    } else {
+      // Send one-time donor thank you email
+      await sendOneTimeDonorThankYou({
+        email: data.email,
+        firstName,
+        lastName,
+        amount: data.amount,
+        transactionId: data.paymentIntentId || 'N/A',
+      });
+      console.log('✅ One-time donor thank you email sent successfully');
+    }
+  } catch (error) {
+    console.error('❌ Failed to send thank you email:', error);
+    // Don't throw error - we don't want email failures to break payment processing
+  }
 }
 
 async function sendPaymentFailedEmail(data: {
@@ -196,6 +250,7 @@ async function sendPaymentFailedEmail(data: {
 }) {
   console.log(`Sending payment failed email to ${data.email}`);
   
-  // TODO: Implement with your email service
-  // Include link to update payment method
+  // TODO: Implement payment failed email template if needed
+  // For now, just log the failure
+  console.log('Payment failed email placeholder - implement if needed');
 } 

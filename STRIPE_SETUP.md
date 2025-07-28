@@ -26,7 +26,26 @@ Your Kingdom Builder donation system is ready! Follow these steps to configure S
    STRIPE_SECRET_KEY=sk_test_your_actual_key_here
    ```
 
-### 📧 Mailchimp Configuration
+### 📧 Email Configuration
+
+#### Resend Setup (Required for Thank You Emails)
+
+1. **Get Resend API Key**:
+   - Go to [Resend Dashboard](https://resend.com)
+   - Navigate to **API Keys**
+   - Create a new API key
+
+2. **Verify Domain**:
+   - Go to **Domains** in Resend dashboard
+   - Add and verify `605wells.com`
+   - Follow DNS verification steps
+
+3. **Add to `.env.local`**:
+   ```bash
+   RESEND_API_KEY=re_your_actual_api_key_here
+   ```
+
+#### Mailchimp Configuration (Optional for CRM)
 
 1. **Get Mailchimp API Key**:
    - Go to [Mailchimp Dashboard](https://mailchimp.com)
@@ -48,6 +67,41 @@ Your Kingdom Builder donation system is ready! Follow these steps to configure S
    MAILCHIMP_SERVER_PREFIX=us1
    ```
 
+## 🧪 Testing Email Integration
+
+Once you've configured Resend, test the email functionality:
+
+1. **Test Kingdom Builder Email**:
+   ```bash
+   curl -X POST http://localhost:3000/api/test-email \
+     -H "Content-Type: application/json" \
+     -d '{
+       "type": "kingdom-builder",
+       "email": "your-email@example.com",
+       "firstName": "Test",
+       "lastName": "User",
+       "amount": 120
+     }'
+   ```
+
+2. **Test One-Time Donor Email**:
+   ```bash
+   curl -X POST http://localhost:3000/api/test-email \
+     -H "Content-Type: application/json" \
+     -d '{
+       "type": "one-time",
+       "email": "your-email@example.com",
+       "firstName": "Test",
+       "lastName": "User", 
+       "amount": 50
+     }'
+   ```
+
+3. **Check Email Delivery**:
+   - Check your email inbox for the test messages
+   - Verify the styling and content look correct
+   - Test on mobile and desktop email clients
+
 ## 🎯 Features Included
 
 ### ✅ **Donation Form**
@@ -66,7 +120,11 @@ Your Kingdom Builder donation system is ready! Follow these steps to configure S
 - **Mobile-optimized** payment forms
 
 ### ✅ **Email Integration**
-- **Mailchimp subscription** for Kingdom Builders
+- **Automatic thank you emails** via Resend
+- **Kingdom Builder welcome emails** with benefits and next steps
+- **One-time donor thank you** with CTA to join Kingdom Builders
+- **Beautiful HTML templates** matching your brand
+- **Mailchimp subscription** for Kingdom Builders (optional)
 - **Automatic tagging** based on donation type
 - **Donor segmentation** for targeted communications
 - **Address collection** for complete donor profiles

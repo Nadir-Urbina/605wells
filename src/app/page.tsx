@@ -21,7 +21,8 @@ export default function Home() {
     "Old Way Fellowship",
     "Prayer and Intercession",
     "Kingdom Champions College",
-    "Apostolic Family Gathering"
+    "Apostolic Family Gathering",
+    "East Gate Jax"
   ];
 
   const openKingdomBuilderForm = () => setIsFormOpen(true);
