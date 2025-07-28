@@ -41,16 +41,11 @@ export async function POST(request: NextRequest) {
         CUSTID: customerId || ''
       },
       tags: donationType === 'monthly' ? [
-        'kingdom builders',  // Lowercase as requested for customer journey
-        '605 Wells',
-        'Monthly Recurring',
-        `Monthly-$${amount}`,
-        'Active Subscription'
+        'kingdom builders',
+        '605 Wells givers'
       ] : [
-        'one-time givers',   // Different tag for one-time donors
-        '605 Wells',
-        'One-Time Donation',
-        `One-Time-$${amount}`
+        'one-time givers',
+        '605 Wells givers'
       ]
     };
 
