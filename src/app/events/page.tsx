@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
-import { client, eventQueries, urlFor, type SanityEvent } from '@/lib/sanity';
+import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<SanityEvent[]>([]);
@@ -61,7 +61,7 @@ export default function EventsPage() {
     setFilteredEvents(filtered);
   }, [events, selectedCategory, searchTerm]);
 
-  const formatEventSchedule = (eventSchedule: any[]) => {
+  const formatEventSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
       return { month: '---', day: '---', timeDisplay: 'TBD', fullDate: 'Date TBD' };
     }

@@ -10,7 +10,7 @@ export const client = createClient({
 
 const builder = imageUrlBuilder(client)
 
-export function urlFor(source: any) {
+export function urlFor(source: string | object) {
   return builder.image(source)
 }
 
@@ -92,7 +92,11 @@ export interface SanityEvent {
     current: string
   }
   description: string
-  content?: any[]
+  content?: Array<{
+    _type: string;
+    _key: string;
+    [key: string]: unknown;
+  }>
   featuredImage?: {
     asset: {
       _ref: string

@@ -39,7 +39,7 @@ export default function Footer() {
         setSubmitStatus('error');
         setErrorMessage(result.error || 'Something went wrong. Please try again.');
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
       setErrorMessage('Network error. Please check your connection and try again.');
     } finally {
@@ -120,7 +120,7 @@ export default function Footer() {
                     </svg>
                     <div>
                       <p className="text-xs font-semibold text-green-300">Message Sent!</p>
-                      <p className="text-xs text-green-400">We'll get back to you soon!</p>
+                      <p className="text-xs text-green-400">We&apos;ll get back to you soon!</p>
                     </div>
                   </div>
                 </div>

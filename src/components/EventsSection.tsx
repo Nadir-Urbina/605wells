@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { client, eventQueries, urlFor, type SanityEvent } from '@/lib/sanity';
+import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 
 export default function EventsSection() {
   const [events, setEvents] = useState<SanityEvent[]>([]);
@@ -25,7 +25,7 @@ export default function EventsSection() {
     fetchEvents();
   }, []);
 
-  const formatEventSchedule = (eventSchedule: any[]) => {
+  const formatEventSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
       return { month: '---', day: '---', timeDisplay: 'TBD' };
     }

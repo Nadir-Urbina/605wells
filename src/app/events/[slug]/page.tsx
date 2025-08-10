@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
-import { client, eventQueries, urlFor, type SanityEvent } from '@/lib/sanity';
+import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 import { PortableText } from '@portabletext/react';
 
 export default function EventDetailPage() {
@@ -38,7 +38,7 @@ export default function EventDetailPage() {
     }
   }, [slug]);
 
-  const formatSchedule = (eventSchedule: any[]) => {
+  const formatSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
       return { 
         primaryDate: 'Date TBD',
@@ -117,56 +117,7 @@ export default function EventDetailPage() {
     return value ? categories[value as keyof typeof categories] || value : '';
   };
 
-  // Portable Text components for rich content
-  const portableTextComponents = {
-    types: {
-      image: ({ value }: any) => (
-        <div className="my-8">
-          <Image
-            src={urlFor(value).width(800).url()}
-            alt={value.alt || ''}
-            width={800}
-            height={400}
-            className="rounded-lg w-full h-auto"
-          />
-          {value.caption && (
-            <p className="text-sm text-gray-600 text-center mt-2 italic">
-              {value.caption}
-            </p>
-          )}
-        </div>
-      ),
-    },
-    block: {
-      h2: ({ children }: any) => (
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{children}</h2>
-      ),
-      h3: ({ children }: any) => (
-        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{children}</h3>
-      ),
-      normal: ({ children }: any) => (
-        <p className="text-gray-700 leading-relaxed mb-4">{children}</p>
-      ),
-    },
-    marks: {
-      strong: ({ children }: any) => (
-        <strong className="font-semibold text-gray-900">{children}</strong>
-      ),
-      em: ({ children }: any) => (
-        <em className="italic text-gray-700">{children}</em>
-      ),
-      link: ({ children, value }: any) => (
-        <a
-          href={value.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-purple-600 hover:text-purple-800 underline"
-        >
-          {children}
-        </a>
-      ),
-    },
-  };
+
 
   if (loading) {
     return (
@@ -330,14 +281,15 @@ export default function EventDetailPage() {
                   </div>
 
                   {/* Rich Content */}
-                  {event.content && event.content.length > 0 && (
+                  {event.content && Array.isArray(event.content) && event.content.length > 0 && (
                     <div className="bg-white rounded-xl shadow-lg p-8">
                       <h2 className="text-2xl font-bold text-gray-900 mb-6">Event Details</h2>
                       <div className="prose prose-lg max-w-none">
-                        <PortableText
-                          value={event.content}
-                          components={portableTextComponents}
-                        />
+                        {event.content && (
+                          <PortableText
+                            value={event.content}
+                          />
+                        )}
                       </div>
                     </div>
                   )}

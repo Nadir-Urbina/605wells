@@ -1,11 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import {defineConfig} from 'sanity'
-import {structureTool} from 'sanity/structure'
-import {visionTool} from '@sanity/vision'
+import { defineConfig } from 'sanity'
+import { structureTool } from 'sanity/structure'
+import { visionTool } from '@sanity/vision'
 
-// Import our event schema
+// Import our event schema from the sanity folder
 import event from '../../../../sanity/schemaTypes/event'
 
 const NextStudio = dynamic(
@@ -29,4 +29,4 @@ const config = defineConfig({
 
 export default function StudioWrapper() {
   return <NextStudio config={config} />
-} 
+}
