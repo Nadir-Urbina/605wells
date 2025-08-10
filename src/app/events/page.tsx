@@ -63,7 +63,7 @@ export default function EventsPage() {
 
   const formatEventSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
-      return { month: '---', day: '---', timeDisplay: 'TBD', fullDate: 'Date TBD' };
+      return { month: 'TBD', day: '', timeDisplay: 'TBD', fullDate: 'Date TBD' };
     }
 
     const firstSession = eventSchedule[0];

@@ -27,7 +27,7 @@ export default function EventsSection() {
 
   const formatEventSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
-      return { month: '---', day: '---', timeDisplay: 'TBD' };
+      return { month: 'TBD', day: '', timeDisplay: 'TBD' };
     }
 
     const firstSession = eventSchedule[0];

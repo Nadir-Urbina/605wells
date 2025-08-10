@@ -143,7 +143,7 @@ export default defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.required().min(1).error('Please add at least one session'),
+      validation: (Rule) => Rule.min(1).error('Please add at least one session'),
     }),
 
     defineField({

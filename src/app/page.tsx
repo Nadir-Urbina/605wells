@@ -272,6 +272,134 @@ export default function Home() {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about-605-wells" className="py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-montserrat">
+              About 605 Wells
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main Content - 8 columns */}
+            <motion.div
+              className="lg:col-span-8 space-y-6"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="prose prose-lg prose-invert max-w-none">
+                <p className="text-lg leading-relaxed text-gray-200 mb-5">
+                  605 Wells is more than a building. It is a <strong className="text-yellow-400">Kingdom gathering place</strong> where transformation begins with people and overflows into places.
+                </p>
+                
+                <p className="text-lg leading-relaxed text-gray-200 mb-5">
+                  Right in the heart of Orange Park, Florida, 605 Wells stands as a <strong className="text-blue-300">regional apostolic hub</strong>. This space is built to disciple, develop, and deploy leaders into every sphere of culture.
+                </p>
+
+                <p className="text-lg leading-relaxed text-gray-200 mb-6">
+                  The name 605 Wells carries both a physical location and a <strong className="text-purple-300">prophetic assignment</strong>. Psalm 60:5 and Isaiah 60:5 come together here, marking this place as a well of love and restoration.
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
+                <p className="text-lg font-semibold text-yellow-300 text-center">
+                  What God starts here will touch cities, regions, and nations.
+                </p>
+              </div>
+
+              {/* More Than a Building */}
+              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-lg p-5 border border-yellow-400/30">
+                <h3 className="text-xl font-bold mb-4 text-yellow-300 text-center">More Than a Building</h3>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                  {[
+                    "Basecamp for Kingdom exploits",
+                    "Place of presence", 
+                    "House of prayer",
+                    "Launching pad for leaders",
+                    "Family table",
+                    "Place of strategy",
+                    "Center of worship",
+                    "Hub of commissioning"
+                  ].map((descriptor, index) => (
+                    <div key={descriptor} className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-gray-200 text-sm">{descriptor}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Sidebar - 4 columns */}
+            <motion.div
+              className="lg:col-span-4"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 h-fit sticky top-8">
+                <h3 className="text-xl font-bold mb-5 text-yellow-400 text-center">Active Six Days a Week</h3>
+                <div className="space-y-3">
+                  {[
+                    "Healing Streams Encounter",
+                    "East Gate Jacksonville", 
+                    "Kingdom Champions College",
+                    "House of Prayer for All Nations",
+                    "La Cresta de la Ola",
+                    "Old Way Fellowship"
+                  ].map((ministry, index) => (
+                    <motion.div 
+                      key={ministry} 
+                      className="flex items-start space-x-3 group"
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0 group-hover:bg-yellow-400 transition-colors"></div>
+                      <span className="text-gray-200 text-sm leading-relaxed">{ministry}</span>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="border-t border-white/20 mt-5 pt-4">
+                  <p className="text-xs text-gray-300 italic text-center leading-relaxed">
+                    Each expression carries a part of the Kingdom, forming a whole family of impact.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Closing Statement */}
+          <motion.div
+            className="text-center mt-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-gradient-to-r from-purple-600/30 to-blue-600/30 backdrop-blur-sm rounded-xl p-6 border border-purple-400/30 max-w-4xl mx-auto">
+              <h3 className="text-2xl lg:text-3xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-montserrat">
+                This is 605 Wells
+              </h3>
+              <p className="text-xl lg:text-2xl text-gray-200 font-medium">
+                Where love lives and leaders are launched.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Events Section */}
       <EventsSection />
 

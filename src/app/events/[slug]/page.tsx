@@ -41,9 +41,14 @@ export default function EventDetailPage() {
   const formatSchedule = (eventSchedule: EventSession[]) => {
     if (!eventSchedule || eventSchedule.length === 0) {
       return { 
-        primaryDate: 'Date TBD',
-        primaryTime: 'Time TBD',
-        allSessions: []
+        primaryDate: 'Date & Time TBD',
+        primaryTime: 'TBD',
+        allSessions: [{ 
+          date: 'Date TBD', 
+          time: 'Time TBD', 
+          title: 'Schedule to be announced', 
+          notes: 'Please check back later for updated schedule information.' 
+        }]
       };
     }
 

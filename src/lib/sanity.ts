@@ -17,7 +17,7 @@ export function urlFor(source: string | object) {
 // GROQ queries for events
 export const eventQueries = {
   // Get all published events, ordered by date
-  allEvents: `*[_type == "event" && published == true] | order(eventSchedule[0].startTime asc) {
+  allEvents: `*[_type == "event" && published == true] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
     _id,
     title,
     slug,
@@ -32,7 +32,7 @@ export const eventQueries = {
   }`,
 
   // Get featured events for homepage
-  featuredEvents: `*[_type == "event" && published == true && featured == true] | order(eventSchedule[0].startTime asc) [0...3] {
+  featuredEvents: `*[_type == "event" && published == true && featured == true] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) [0...3] {
     _id,
     title,
     slug,
@@ -45,8 +45,8 @@ export const eventQueries = {
     category
   }`,
 
-  // Get upcoming events
-  upcomingEvents: `*[_type == "event" && published == true && eventSchedule[0].startTime >= now()] | order(eventSchedule[0].startTime asc) {
+  // Get upcoming events (including TBD events)
+  upcomingEvents: `*[_type == "event" && published == true && (eventSchedule[0].startTime >= now() || !defined(eventSchedule[0].startTime))] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
     _id,
     title,
     slug,
