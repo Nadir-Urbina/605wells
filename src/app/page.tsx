@@ -7,6 +7,8 @@ import { track } from '@vercel/analytics';
 import TypingEffect from "@/components/TypingEffect";
 import KingdomBuilderForm from "@/components/KingdomBuilderForm";
 import Header from "@/components/Header";
+import EventsSection from "@/components/EventsSection";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -91,7 +93,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 1.0 }}
           >
             <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6 lg:gap-8 xl:gap-12 max-w-6xl mx-auto">
-              {["LOVE·", "LIVE·", "LABOR·", "LEAD·"].map((word, index) => (
+              {["LOVE", "LIVE", "LABOR", "LEAD"].map((word, index) => (
                 <motion.div
                   key={word}
                   className="text-center"
@@ -270,7 +272,8 @@ export default function Home() {
         </div>
       </section>
 
-
+      {/* Events Section */}
+      <EventsSection />
 
       {/* Success Message Modal */}
       <motion.div 
@@ -325,6 +328,9 @@ export default function Home() {
 
       {/* Kingdom Builder Form Modal */}
       <KingdomBuilderForm isOpen={isFormOpen} onClose={closeKingdomBuilderForm} onPaymentSuccess={handlePaymentSuccess} />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
