@@ -22,6 +22,18 @@ export default function Header({ onDonateClick }: HeaderProps) {
     // Navigate to the page or scroll to home section
     if (sectionId === 'home') {
       window.location.href = '/';
+    } else if (sectionId === 'about') {
+      // Navigate to homepage and scroll to about section
+      if (window.location.pathname === '/') {
+        // Already on homepage, just scroll to about section
+        const aboutSection = document.getElementById('about-605-wells');
+        if (aboutSection) {
+          aboutSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to homepage with about section hash
+        window.location.href = '/#about-605-wells';
+      }
     } else {
       window.location.href = `/${sectionId}`;
     }
