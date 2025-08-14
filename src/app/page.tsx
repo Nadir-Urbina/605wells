@@ -24,7 +24,7 @@ export default function Home() {
     "Old Way Fellowship",
     "Prayer and Intercession",
     "Kingdom Champions College",
-    "Apostolic Family Gathering",
+    "Kingdom Family Gathering",
     "East Gate Jax"
   ];
 
