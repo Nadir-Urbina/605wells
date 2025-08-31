@@ -329,7 +329,7 @@ export default function Home() {
                     "Place of strategy",
                     "Center of worship",
                     "Hub of commissioning"
-                  ].map((descriptor, index) => (
+                  ].map((descriptor) => (
                     <div key={descriptor} className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-3 flex-shrink-0"></div>
                       <span className="text-gray-200 text-sm">{descriptor}</span>

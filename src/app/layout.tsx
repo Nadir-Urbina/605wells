@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
 import "./globals.css";
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const inter = Inter({
   subsets: ["latin"],

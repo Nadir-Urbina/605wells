@@ -49,6 +49,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
   const navItems = [
     { name: 'About', id: 'about' },
     { name: 'Events', id: 'events' },
+    { name: 'Calendar', id: 'calendar' },
     { name: 'News', id: 'news' },
     { name: 'Contact', id: 'contact' },
   ];
