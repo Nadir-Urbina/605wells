@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou } from '@/lib/resend';
+import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou, sendEventRegistrationConfirmation } from '@/lib/resend';
+import { createEventRegistration, type SanityEventRegistration } from '@/lib/sanity';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
@@ -163,6 +164,13 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
   console.log('One-time payment succeeded:', paymentIntent.id);
   
   try {
+    // Check if this is an event registration
+    if (paymentIntent.metadata.type === 'event_registration') {
+      await handleEventRegistrationSuccess(paymentIntent);
+      return;
+    }
+
+    // Handle regular donation
     // Get email from receipt_email or customer email
     let email = paymentIntent.receipt_email;
     let customerName = paymentIntent.metadata.customerName || 'Friend';
@@ -194,6 +202,167 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
     }
   } catch (error) {
     console.error('Error handling one-time payment success:', error);
+  }
+}
+
+interface EventScheduleData {
+  startTime?: string;
+  endTime?: string;
+  sessionTitle?: string;
+  notes?: string;
+}
+
+interface EventLocationData {
+  name?: string;
+  address?: string;
+}
+
+async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Event registration payment succeeded:', paymentIntent.id);
+  
+  try {
+    const metadata = paymentIntent.metadata;
+    
+    // Extract registration details from metadata
+    const attendeeEmail = metadata.attendeeEmail || metadata.customerEmail;
+    const attendeeName = metadata.attendeeName || metadata.customerName || 'Attendee';
+    const eventTitle = metadata.eventTitle;
+    const finalPrice = parseFloat(metadata.finalPrice || '0');
+    const isKingdomBuilder = metadata.isKingdomBuilder === 'true';
+    const discountApplied = metadata.discountApplied === 'true';
+    
+    if (!attendeeEmail) {
+      console.error('No attendee email found for event registration:', paymentIntent.id);
+      return;
+    }
+
+    console.log(`Event registration confirmed: ${attendeeName} for ${eventTitle}`);
+    
+    // Parse event details for future email use
+    let eventSchedule: EventScheduleData = {};
+    let eventLocation: EventLocationData = {};
+    try {
+      eventSchedule = JSON.parse(metadata.eventSchedule || '{}');
+      eventLocation = JSON.parse(metadata.eventLocation || '{}');
+    } catch {
+      console.warn('Could not parse event details from metadata');
+    }
+
+    // Format event date and time for email
+    let eventDate = 'Date TBD';
+    let eventTime = 'Time TBD';
+    
+    if (eventSchedule && eventSchedule.startTime && eventSchedule.endTime) {
+      const startDate = new Date(eventSchedule.startTime);
+      const endDate = new Date(eventSchedule.endTime);
+      
+      eventDate = startDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      
+      eventTime = `${startDate.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      })} - ${endDate.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      })}`;
+    }
+
+    // Send event registration confirmation email
+    try {
+      await sendEventRegistrationConfirmation({
+        email: attendeeEmail,
+        firstName: attendeeName.split(' ')[0] || '',
+        lastName: attendeeName.split(' ').slice(1).join(' ') || '',
+        eventTitle,
+        eventDate,
+        eventTime,
+        eventLocation: eventLocation.name,
+        eventAddress: eventLocation.address,
+        finalPrice,
+        originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
+        isKingdomBuilder,
+        discountApplied,
+        transactionId: paymentIntent.id,
+        registrationInstructions: metadata.registrationInstructions,
+        promoCode: metadata.promoCode || undefined,
+        promoCodeDiscount: metadata.promoCodeDiscount ? parseFloat(metadata.promoCodeDiscount) : undefined,
+      });
+      
+      console.log('✅ Event registration confirmation email sent to:', attendeeEmail);
+    } catch (emailError) {
+      console.error('❌ Failed to send registration confirmation email:', emailError);
+      // Don't throw error - payment succeeded, email failure shouldn't break the flow
+    }
+    
+    // Log registration details for debugging
+    console.log('Registration completed:', {
+      eventTitle,
+      attendeeName,
+      attendeeEmail,
+      finalPrice,
+      isKingdomBuilder,
+      discountApplied,
+      paymentIntentId: paymentIntent.id,
+    });
+
+    // Create registration record in Sanity
+    try {
+      const registrationData: SanityEventRegistration = {
+        _type: 'eventRegistration',
+        event: {
+          _type: 'reference',
+          _ref: metadata.eventId || '',
+        },
+        attendee: {
+          firstName: metadata.attendeeFirstName || attendeeName.split(' ')[0] || '',
+          lastName: metadata.attendeeLastName || attendeeName.split(' ').slice(1).join(' ') || '',
+          email: attendeeEmail,
+          phone: metadata.attendeePhone,
+        },
+        customer: metadata.customerEmail !== attendeeEmail ? {
+          firstName: metadata.customerFirstName,
+          lastName: metadata.customerLastName,
+          email: metadata.customerEmail,
+          phone: metadata.customerPhone,
+          address: metadata.customerAddress,
+          city: metadata.customerCity,
+          state: metadata.customerState,
+          zipCode: metadata.customerZipCode,
+        } : undefined,
+        payment: {
+          stripePaymentIntentId: paymentIntent.id,
+          amount: finalPrice,
+          originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
+          discountApplied,
+          discountAmount: discountApplied ? parseFloat(metadata.originalPrice || '0') - finalPrice : 0,
+          paymentMethod: 'card',
+          status: 'completed',
+        },
+        registrationDate: new Date().toISOString(),
+        status: 'confirmed',
+        emailsSent: [{
+          type: 'confirmation',
+          sentAt: new Date().toISOString(),
+          subject: `Registration Confirmation - ${eventTitle}`,
+        }],
+      };
+
+      await createEventRegistration(registrationData);
+      console.log('✅ Event registration saved to Sanity');
+    } catch (sanityError) {
+      console.error('❌ Failed to save registration to Sanity:', sanityError);
+      // Don't throw error - payment succeeded, database failure shouldn't break the flow
+    }
+    
+  } catch (error) {
+    console.error('Error handling event registration success:', error);
   }
 }
   

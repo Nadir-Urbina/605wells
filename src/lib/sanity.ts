@@ -8,6 +8,15 @@ export const client = createClient({
   apiVersion: '2024-01-01',
 })
 
+// Write client for creating documents (uses API token)
+export const writeClient = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'new',
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+  useCdn: false,
+  apiVersion: '2024-01-01',
+  token: process.env.SANITY_API_TOKEN,
+})
+
 const builder = imageUrlBuilder(client)
 
 export function urlFor(source: string | object) {
@@ -28,7 +37,13 @@ export const eventQueries = {
     registrationLink,
     price,
     category,
-    featured
+    featured,
+    registrationType,
+    registrationLimit,
+    registrationClosed,
+    requiresKingdomBuilderDiscount,
+    registrationDeadline,
+    registrationInstructions
   }`,
 
   // Get featured events for homepage
@@ -42,7 +57,13 @@ export const eventQueries = {
     location,
     registrationLink,
     price,
-    category
+    category,
+    registrationType,
+    registrationLimit,
+    registrationClosed,
+    requiresKingdomBuilderDiscount,
+    registrationDeadline,
+    registrationInstructions
   }`,
 
   // Get upcoming events (including TBD events)
@@ -57,7 +78,13 @@ export const eventQueries = {
     registrationLink,
     price,
     category,
-    featured
+    featured,
+    registrationType,
+    registrationLimit,
+    registrationClosed,
+    requiresKingdomBuilderDiscount,
+    registrationDeadline,
+    registrationInstructions
   }`,
 
   // Get single event by slug
@@ -73,7 +100,13 @@ export const eventQueries = {
     registrationLink,
     price,
     capacity,
-    category
+    category,
+    registrationType,
+    registrationLimit,
+    registrationClosed,
+    requiresKingdomBuilderDiscount,
+    registrationDeadline,
+    registrationInstructions
   }`,
 }
 
@@ -113,4 +146,119 @@ export interface SanityEvent {
   capacity?: number
   category?: string
   featured?: boolean
+  registrationType?: 'internal' | 'external' | 'none'
+  registrationLimit?: number
+  registrationClosed?: boolean
+  requiresKingdomBuilderDiscount?: boolean
+  registrationDeadline?: string
+  registrationInstructions?: string
+}
+
+// Event Registration interfaces
+export interface RegistrationAttendee {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+}
+
+export interface RegistrationCustomer {
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  address?: string
+  city?: string
+  state?: string
+  zipCode?: string
+}
+
+export interface RegistrationPayment {
+  stripePaymentIntentId: string
+  amount: number
+  originalPrice?: number
+  discountApplied?: boolean
+  discountAmount?: number
+  paymentMethod?: 'card' | 'free'
+  status?: 'completed' | 'pending' | 'failed' | 'refunded'
+}
+
+export interface SanityEventRegistration {
+  _type: 'eventRegistration'
+  event: {
+    _type: 'reference'
+    _ref: string
+  }
+  attendee: RegistrationAttendee
+  customer?: RegistrationCustomer
+  payment: RegistrationPayment
+  registrationDate: string
+  status?: 'confirmed' | 'cancelled' | 'no-show' | 'checked-in'
+  emailsSent?: Array<{
+    type: 'confirmation' | 'reminder-1week' | 'reminder-1day' | 'custom'
+    sentAt: string
+    subject?: string
+  }>
+  notes?: string
+}
+
+// Event Registration functions
+export async function createEventRegistration(registrationData: SanityEventRegistration) {
+  try {
+    const result = await writeClient.create(registrationData)
+    console.log('Created event registration:', result._id)
+    return result
+  } catch (error) {
+    console.error('Error creating event registration:', error)
+    throw error
+  }
+}
+
+export async function getEventRegistrations(eventId: string) {
+  try {
+    const registrations = await client.fetch(
+      `*[_type == "eventRegistration" && event._ref == $eventId] | order(registrationDate desc) {
+        _id,
+        attendee,
+        customer,
+        payment,
+        registrationDate,
+        status,
+        emailsSent,
+        notes
+      }`,
+      { eventId }
+    )
+    return registrations
+  } catch (error) {
+    console.error('Error fetching event registrations:', error)
+    throw error
+  }
+}
+
+export async function getEventRegistrationStats(eventId: string) {
+  try {
+    const stats = await client.fetch(
+      `{
+        "totalRegistrations": count(*[_type == "eventRegistration" && event._ref == $eventId && status != "cancelled"]),
+        "totalRevenue": math::sum(*[_type == "eventRegistration" && event._ref == $eventId && status != "cancelled"].payment.amount),
+        "statusBreakdown": *[_type == "eventRegistration" && event._ref == $eventId] | {
+          "status": status,
+          "count": count(*)
+        } | group(status),
+        "recentRegistrations": *[_type == "eventRegistration" && event._ref == $eventId] | order(registrationDate desc) [0...5] {
+          _id,
+          attendee,
+          registrationDate,
+          status,
+          payment.amount
+        }
+      }`,
+      { eventId }
+    )
+    return stats
+  } catch (error) {
+    console.error('Error fetching event registration stats:', error)
+    throw error
+  }
 } 

@@ -22,6 +22,16 @@ interface PaymentFormProps {
   onError: (error: string) => void;
   isProcessing: boolean;
   setIsProcessing: (processing: boolean) => void;
+  eventRegistrationData?: {
+    eventId: string;
+    attendeeInfo: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+    };
+    promoCode?: string;
+  };
 }
 
 function PaymentForm({ 
@@ -32,7 +42,8 @@ function PaymentForm({
   onSuccess, 
   onError, 
   isProcessing, 
-  setIsProcessing 
+  setIsProcessing,
+  eventRegistrationData
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -62,20 +73,30 @@ function PaymentForm({
 
     try {
       // Create payment intent on the server
-      const response = await fetch('/api/create-payment-intent', {
+      const isEventRegistration = donationType === 'event_registration' && eventRegistrationData;
+      const apiEndpoint = isEventRegistration ? '/api/events/register' : '/api/create-payment-intent';
+      
+      const requestBody = isEventRegistration ? {
+        eventId: eventRegistrationData!.eventId,
+        attendeeInfo: eventRegistrationData!.attendeeInfo,
+        customerInfo,
+        promoCode: eventRegistrationData!.promoCode,
+      } : {
+        amount,
+        donationType,
+        customerInfo,
+        motivationMessage,
+      };
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount,
-          donationType,
-          customerInfo,
-          motivationMessage,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const { clientSecret, subscriptionId, customerId, error } = await response.json();
+      const { clientSecret, subscriptionId, error } = await response.json();
 
       if (error) {
         onError(error);
@@ -123,36 +144,9 @@ function PaymentForm({
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Subscribe to Mailchimp (non-critical for payment success)
-        try {
-          const mailchimpResponse = await fetch('/api/mailchimp-subscribe', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...customerInfo,
-              donationType,
-              amount,
-              subscriptionId: subscriptionId || undefined,
-              customerId: customerId || undefined,
-            }),
-          });
-
-          if (mailchimpResponse.ok) {
-            const result = await mailchimpResponse.json();
-            if (result.success) {
-              console.log('✅ Successfully added to Mailchimp');
-            } else {
-              console.warn('⚠️ Mailchimp subscription failed (non-critical):', result.message);
-            }
-          } else {
-            console.warn('⚠️ Mailchimp API error (non-critical) - HTTP', mailchimpResponse.status);
-          }
-        } catch (mailchimpError) {
-          console.warn('⚠️ Mailchimp timeout or network error (non-critical):', mailchimpError);
-          // Payment succeeded - Mailchimp failure is not critical
-        }
+        // All email notifications are now handled by Stripe webhooks + Resend
+        // No need for frontend Mailchimp calls - webhook handles everything
+        console.log('✅ Payment succeeded - email will be sent via webhook');
 
         // Track successful donation
         track('Donation Completed', { 
@@ -247,6 +241,8 @@ function PaymentForm({
           </div>
         ) : donationType === 'monthly' ? (
           `Start Monthly Support - $${amount}/month`
+        ) : donationType === 'event_registration' ? (
+          `Complete Registration - $${amount}`
         ) : (
           `Donate $${amount}`
         )}

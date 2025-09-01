@@ -241,6 +241,204 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
 </html>
 `;
 
+export const EVENT_REGISTRATION_CONFIRMATION = (data: {
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventLocation?: string;
+  eventAddress?: string;
+  finalPrice: number;
+  originalPrice?: number;
+  isKingdomBuilder: boolean;
+  discountApplied: boolean;
+  transactionId: string;
+  date: string;
+  email: string;
+  registrationInstructions?: string;
+  promoCode?: string;
+  promoCodeDiscount?: number;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Registration Confirmed!</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+    .confirmation-banner { background-color: #10b981; color: white; padding: 20px; margin: 20px; border-radius: 12px; text-align: center; }
+    .confirmation-banner h2 { margin: 0 0 10px 0; font-size: 20px; }
+    .confirmation-banner p { margin: 0; font-size: 16px; }
+    .content { padding: 20px 30px; color: #374151; line-height: 1.6; }
+    .event-details { background-color: #f3f4f6; padding: 25px; margin: 20px 0; border-radius: 12px; border-left: 4px solid #8b5cf6; }
+    .event-details h3 { margin: 0 0 15px 0; color: #8b5cf6; font-size: 18px; }
+    .event-details .detail-row { margin: 8px 0; display: flex; }
+    .event-details .detail-label { font-weight: bold; width: 120px; color: #4b5563; }
+    .event-details .detail-value { color: #1f2937; }
+    .price-section { background-color: #f9fafb; text-align: center; padding: 20px; margin: 20px 0; border-radius: 12px; }
+    .price-section h3 { margin: 0 0 10px 0; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .price { font-size: 24px; font-weight: bold; color: #8b5cf6; margin: 0; }
+    .discount-info { background-color: #ecfdf5; border: 2px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 12px; text-align: center; }
+    .discount-info h3 { margin: 0 0 10px 0; color: #047857; }
+    .discount-info p { margin: 0; color: #065f46; }
+    .transaction-details { background-color: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; font-size: 14px; }
+    .transaction-details div { margin: 5px 0; }
+    .instructions { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .instructions h3 { margin: 0 0 15px 0; color: #92400e; }
+    .instructions p { margin: 10px 0; color: #78350f; }
+    .calendar-button { display: inline-block; background-color: #8b5cf6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 10px 0; }
+    .next-steps { margin: 20px 0; }
+    .next-steps h3 { color: #1f2937; margin-bottom: 15px; }
+    .next-steps ul { padding-left: 20px; margin: 0; }
+    .next-steps li { margin: 8px 0; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer h3 { margin: 0 0 10px 0; font-size: 18px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>605 Wells</h1>
+      <p>A Transformational Gathering Place</p>
+    </div>
+
+    <!-- Confirmation Banner -->
+    <div class="confirmation-banner">
+      <h2>🎉 Registration Confirmed!</h2>
+      <p>You're all set for ${data.eventTitle}</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p>Dear ${data.firstName} ${data.lastName},</p>
+      
+      <p>Thank you for registering! Your spot is confirmed for <strong>${data.eventTitle}</strong>. We're excited to see you there!</p>
+
+      <!-- Event Details -->
+      <div class="event-details">
+        <h3>📅 Event Information</h3>
+        <div class="detail-row">
+          <span class="detail-label">Event:</span>
+          <span class="detail-value">${data.eventTitle}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${data.eventDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.eventTime}</span>
+        </div>
+        ${data.eventLocation ? `
+        <div class="detail-row">
+          <span class="detail-label">Location:</span>
+          <span class="detail-value">${data.eventLocation}</span>
+        </div>
+        ` : ''}
+        ${data.eventAddress ? `
+        <div class="detail-row">
+          <span class="detail-label">Address:</span>
+          <span class="detail-value">${data.eventAddress}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Price Information -->
+      ${data.finalPrice > 0 ? `
+      <div class="price-section">
+        <h3>Registration Fee</h3>
+        ${data.discountApplied ? `
+          <div style="text-decoration: line-through; color: #6b7280; font-size: 16px; margin-bottom: 5px;">
+            Original: $${data.originalPrice?.toFixed(2) || data.finalPrice.toFixed(2)}
+          </div>
+        ` : ''}
+        <div class="price">$${data.finalPrice.toFixed(2)}</div>
+      </div>
+      ` : `
+      <div class="price-section">
+        <h3>Registration Fee</h3>
+        <div class="price" style="color: #10b981;">FREE EVENT</div>
+      </div>
+      `}
+
+      <!-- Discount Information -->
+      ${data.discountApplied ? `
+      <div class="discount-info">
+        ${data.promoCode ? `
+          <h3>🎁 Promo Code Discount Applied!</h3>
+          <p><strong>Code Used:</strong> ${data.promoCode}</p>
+          <p>You saved ${data.promoCodeDiscount ? `$${data.promoCodeDiscount.toFixed(2)}` : '50%'} with your promo code!</p>
+        ` : data.isKingdomBuilder ? `
+          <h3>🎁 Kingdom Builder Discount Applied!</h3>
+          <p>You saved ${data.originalPrice && data.finalPrice ? `$${(data.originalPrice - data.finalPrice).toFixed(2)}` : '50%'} with your Kingdom Builder membership!</p>
+        ` : `
+          <h3>🎁 Discount Applied!</h3>
+          <p>You saved ${data.originalPrice && data.finalPrice ? `$${(data.originalPrice - data.finalPrice).toFixed(2)}` : ''} on your registration!</p>
+        `}
+      </div>
+      ` : ''}
+
+      <!-- Transaction Details -->
+      ${data.finalPrice > 0 ? `
+      <div class="transaction-details">
+        <div><strong>Transaction ID:</strong> ${data.transactionId}</div>
+        <div><strong>Registration Date:</strong> ${data.date}</div>
+        <div><strong>Email:</strong> ${data.email}</div>
+      </div>
+      ` : ''}
+
+      <!-- Special Instructions -->
+      ${data.registrationInstructions ? `
+      <div class="instructions">
+        <h3>📝 Important Information</h3>
+        <p>${data.registrationInstructions}</p>
+      </div>
+      ` : ''}
+
+      <!-- Next Steps -->
+      <div class="next-steps">
+        <h3>What's Next?</h3>
+        <ul>
+          <li>Save this confirmation email for your records</li>
+          <li>Add the event to your calendar using the date and time above</li>
+          <li>Arrive 15 minutes early for check-in</li>
+          <li>Bring a valid photo ID if required</li>
+          ${data.eventLocation ? `<li>Plan your route to ${data.eventLocation}</li>` : ''}
+        </ul>
+      </div>
+
+      <p>If you have any questions about this event, please don't hesitate to contact us. We're looking forward to an incredible time together!</p>
+
+      <p>Blessings,<br>
+      <strong>The 605 Wells Team</strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <h3>605 Wells</h3>
+      <p>A Transformational Gathering Place</p>
+      <p>Where the Waters Run Deep</p>
+      <br>
+      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <br>
+      <p style="font-size: 12px; opacity: 0.6;">This is your event registration confirmation. Keep this email for your records.<br>
+      ${data.finalPrice > 0 ? 'Your payment receipt has been sent separately by Stripe.<br>' : ''}
+      605 Wells is a registered nonprofit organization.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 // Email sending functions
 export async function sendKingdomBuilderWelcomeEmail(data: {
   email: string;
@@ -313,6 +511,54 @@ export async function sendOneTimeDonorThankYou(data: {
     return { success: true, id: emailData?.id };
   } catch (error) {
     console.error('Error sending one-time donor thank you email:', error);
+    throw error;
+  }
+}
+
+export async function sendEventRegistrationConfirmation(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventLocation?: string;
+  eventAddress?: string;
+  finalPrice: number;
+  originalPrice?: number;
+  isKingdomBuilder: boolean;
+  discountApplied: boolean;
+  transactionId: string;
+  registrationInstructions?: string;
+  promoCode?: string;
+  promoCodeDiscount?: number;
+}) {
+  try {
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells <noreply@605wells.com>',
+      to: [data.email],
+      subject: `🎉 Registration Confirmed: ${data.eventTitle}`,
+      html: EVENT_REGISTRATION_CONFIRMATION({
+        ...data,
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }),
+    });
+
+    if (error) {
+      console.error('Failed to send event registration confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Event registration confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending event registration confirmation email:', error);
     throw error;
   }
 } 

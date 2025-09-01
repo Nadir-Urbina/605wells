@@ -175,6 +175,121 @@ const eventSchema = defineType({
       type: 'boolean',
       initialValue: true,
     }),
+    defineField({
+      name: 'registrationType',
+      title: 'Registration Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Internal Registration (Stripe)', value: 'internal'},
+          {title: 'External Registration Link', value: 'external'},
+          {title: 'No Registration Required', value: 'none'},
+        ],
+      },
+      initialValue: 'external',
+    }),
+    defineField({
+      name: 'registrationLimit',
+      title: 'Registration Limit',
+      type: 'number',
+    }),
+    defineField({
+      name: 'registrationClosed',
+      title: 'Registration Closed',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'requiresKingdomBuilderDiscount',
+      title: 'Apply Kingdom Builder Discount',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'registrationDeadline',
+      title: 'Registration Deadline',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'registrationInstructions',
+      title: 'Registration Instructions',
+      type: 'text',
+      rows: 3,
+    }),
+  ],
+})
+
+// Define event registration schema
+const eventRegistrationSchema = defineType({
+  name: 'eventRegistration',
+  title: 'Event Registration',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'event',
+      title: 'Event',
+      type: 'reference',
+      to: [{type: 'event'}],
+    }),
+    defineField({
+      name: 'attendee',
+      title: 'Attendee Information',
+      type: 'object',
+      fields: [
+        {
+          name: 'firstName',
+          title: 'First Name',
+          type: 'string',
+        },
+        {
+          name: 'lastName',
+          title: 'Last Name',
+          type: 'string',
+        },
+        {
+          name: 'email',
+          title: 'Email',
+          type: 'email',
+        },
+        {
+          name: 'phone',
+          title: 'Phone',
+          type: 'string',
+        },
+      ],
+    }),
+    defineField({
+      name: 'payment',
+      title: 'Payment Information',
+      type: 'object',
+      fields: [
+        {
+          name: 'stripePaymentIntentId',
+          title: 'Stripe Payment Intent ID',
+          type: 'string',
+        },
+        {
+          name: 'amount',
+          title: 'Amount Paid',
+          type: 'number',
+        },
+        {
+          name: 'status',
+          title: 'Payment Status',
+          type: 'string',
+        },
+      ],
+    }),
+    defineField({
+      name: 'registrationDate',
+      title: 'Registration Date',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'status',
+      title: 'Registration Status',
+      type: 'string',
+    }),
   ],
 })
 
@@ -188,7 +303,7 @@ const config = defineConfig({
   plugins: [structureTool(), visionTool()],
   
   schema: {
-    types: [eventSchema],
+    types: [eventSchema, eventRegistrationSchema],
   },
 })
 

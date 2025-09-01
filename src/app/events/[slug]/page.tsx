@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
+import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 import { PortableText } from '@portabletext/react';
 
@@ -15,6 +16,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<SanityEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRegistrationFormOpen, setIsRegistrationFormOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -120,6 +122,49 @@ export default function EventDetailPage() {
       fellowship: 'Fellowship',
     };
     return value ? categories[value as keyof typeof categories] || value : '';
+  };
+
+  const isRegistrationAvailable = (event: SanityEvent) => {
+    // Check if internal registration is enabled
+    if (event.registrationType !== 'internal') return false;
+    
+    // Check if registration is manually closed
+    if (event.registrationClosed) return false;
+    
+    // Check registration deadline
+    if (event.registrationDeadline) {
+      const deadline = new Date(event.registrationDeadline);
+      if (new Date() > deadline) return false;
+    }
+    
+    // Check if event has passed (simplified check)
+    if (event.eventSchedule && event.eventSchedule.length > 0) {
+      const firstSession = event.eventSchedule[0];
+      if (firstSession.startTime) {
+        const eventStart = new Date(firstSession.startTime);
+        if (new Date() > eventStart) return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const getRegistrationButtonText = (event: SanityEvent) => {
+    if (event.registrationType === 'internal') {
+      if (event.registrationClosed) return 'Registration Closed';
+      if (event.registrationDeadline) {
+        const deadline = new Date(event.registrationDeadline);
+        if (new Date() > deadline) return 'Registration Deadline Passed';
+      }
+      const price = formatPrice(event.price);
+      return price === 'Free Event' ? 'Register (Free)' : `Register - ${price}`;
+    }
+    return 'Register Now';
+  };
+
+  const handleRegistrationSuccess = () => {
+    setIsRegistrationFormOpen(false);
+    alert('Registration successful! You will receive a confirmation email shortly.');
   };
 
 
@@ -247,20 +292,51 @@ export default function EventDetailPage() {
               </div>
 
               {/* Registration Button */}
-              {event.registrationLink && (
-                <motion.a
-                  href={event.registrationLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-xl"
+              {((event.registrationType === 'internal') || event.registrationLink) && (
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Register Now
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </motion.a>
+                  {event.registrationType === 'internal' ? (
+                    <button
+                      onClick={() => setIsRegistrationFormOpen(true)}
+                      disabled={!isRegistrationAvailable(event)}
+                      className={`inline-flex items-center font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 shadow-xl ${
+                        isRegistrationAvailable(event)
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                          : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                      }`}
+                    >
+                      {getRegistrationButtonText(event)}
+                      {isRegistrationAvailable(event) && (
+                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      )}
+                    </button>
+                  ) : event.registrationLink ? (
+                    <a
+                      href={event.registrationLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-xl"
+                    >
+                      Register Now
+                      <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </a>
+                  ) : null}
+                </motion.div>
+              )}
+
+              {/* Kingdom Builder Discount Badge */}
+              {event.registrationType === 'internal' && event.requiresKingdomBuilderDiscount && (
+                <div className="mt-4">
+                  <span className="inline-block bg-yellow-500/90 text-black px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                    🎁 Kingdom Builder Discount Available
+                  </span>
+                </div>
               )}
             </motion.div>
           </div>
@@ -385,19 +461,38 @@ export default function EventDetailPage() {
                     </div>
 
                     {/* Registration Button (Mobile) */}
-                    {event.registrationLink && (
+                    {((event.registrationType === 'internal') || event.registrationLink) && (
                       <div className="mt-6 pt-6 border-t border-gray-200">
-                        <a
-                          href={event.registrationLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-2"
-                        >
-                          Register Now
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                          </svg>
-                        </a>
+                        {event.registrationType === 'internal' ? (
+                          <button
+                            onClick={() => setIsRegistrationFormOpen(true)}
+                            disabled={!isRegistrationAvailable(event)}
+                            className={`w-full font-semibold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                              isRegistrationAvailable(event)
+                                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                                : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                            }`}
+                          >
+                            {getRegistrationButtonText(event)}
+                            {isRegistrationAvailable(event) && (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            )}
+                          </button>
+                        ) : event.registrationLink ? (
+                          <a
+                            href={event.registrationLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-2"
+                          >
+                            Register Now
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                          </a>
+                        ) : null}
                       </div>
                     )}
                   </div>
@@ -434,6 +529,16 @@ export default function EventDetailPage() {
           </div>
         </section>
       </div>
+
+      {/* Event Registration Form */}
+      {event && (
+        <EventRegistrationForm
+          event={event}
+          isOpen={isRegistrationFormOpen}
+          onClose={() => setIsRegistrationFormOpen(false)}
+          onSuccess={handleRegistrationSuccess}
+        />
+      )}
     </div>
   );
 } 

@@ -213,6 +213,58 @@ export default defineType({
       description: 'Ready to display on the website',
       initialValue: true,
     }),
+    defineField({
+      name: 'registrationType',
+      title: 'Registration Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Internal Registration (Stripe)', value: 'internal'},
+          {title: 'External Registration Link', value: 'external'},
+          {title: 'No Registration Required', value: 'none'},
+        ],
+      },
+      initialValue: 'external',
+      description: 'How attendees register for this event',
+    }),
+    defineField({
+      name: 'registrationLimit',
+      title: 'Registration Limit',
+      type: 'number',
+      description: 'Maximum number of registrations (leave empty for unlimited)',
+      hidden: ({document}) => document?.registrationType !== 'internal',
+    }),
+    defineField({
+      name: 'registrationClosed',
+      title: 'Registration Closed',
+      type: 'boolean',
+      description: 'Manually close registration even if limit not reached',
+      initialValue: false,
+      hidden: ({document}) => document?.registrationType !== 'internal',
+    }),
+    defineField({
+      name: 'requiresKingdomBuilderDiscount',
+      title: 'Apply Kingdom Builder Discount',
+      type: 'boolean',
+      description: 'Kingdom Builders get 50% off registration fee',
+      initialValue: false,
+      hidden: ({document}) => document?.registrationType !== 'internal' || !document?.price || document?.price === 0,
+    }),
+    defineField({
+      name: 'registrationDeadline',
+      title: 'Registration Deadline',
+      type: 'datetime',
+      description: 'Last date/time to register (optional)',
+      hidden: ({document}) => document?.registrationType !== 'internal',
+    }),
+    defineField({
+      name: 'registrationInstructions',
+      title: 'Registration Instructions',
+      type: 'text',
+      rows: 3,
+      description: 'Special instructions sent in confirmation email',
+      hidden: ({document}) => document?.registrationType !== 'internal',
+    }),
   ],
   preview: {
     select: {
