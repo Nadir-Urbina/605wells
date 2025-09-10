@@ -241,6 +241,151 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
 </html>
 `;
 
+export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventLocation?: string;
+  eventAddress?: string;
+  date: string;
+  email: string;
+  registrationInstructions?: string;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Event Registration Confirmed!</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+    .confirmation-banner { background-color: #10b981; color: white; padding: 20px; margin: 20px; border-radius: 12px; text-align: center; }
+    .confirmation-banner h2 { margin: 0 0 10px 0; font-size: 20px; }
+    .confirmation-banner p { margin: 0; font-size: 16px; }
+    .content { padding: 20px 30px; color: #374151; line-height: 1.6; }
+    .event-details { background-color: #f3f4f6; padding: 25px; margin: 20px 0; border-radius: 12px; border-left: 4px solid #8b5cf6; }
+    .event-details h3 { margin: 0 0 15px 0; color: #8b5cf6; font-size: 18px; }
+    .event-details .detail-row { margin: 8px 0; display: flex; }
+    .event-details .detail-label { font-weight: bold; width: 120px; color: #4b5563; }
+    .event-details .detail-value { color: #1f2937; }
+    .free-badge { background-color: #10b981; color: white; padding: 15px; margin: 20px 0; border-radius: 12px; text-align: center; }
+    .free-badge h3 { margin: 0 0 5px 0; font-size: 18px; }
+    .free-badge p { margin: 0; font-size: 14px; opacity: 0.9; }
+    .instructions { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .instructions h3 { margin: 0 0 15px 0; color: #92400e; }
+    .instructions p { margin: 10px 0; color: #78350f; }
+    .next-steps { margin: 20px 0; }
+    .next-steps h3 { color: #1f2937; margin-bottom: 15px; }
+    .next-steps ul { padding-left: 20px; margin: 0; }
+    .next-steps li { margin: 8px 0; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer h3 { margin: 0 0 10px 0; font-size: 18px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>605 Wells</h1>
+      <p>A Transformational Gathering Place</p>
+    </div>
+
+    <!-- Confirmation Banner -->
+    <div class="confirmation-banner">
+      <h2>🎉 Registration Confirmed!</h2>
+      <p>You're all set for ${data.eventTitle}</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p>Dear ${data.firstName},</p>
+      
+      <p>Thank you for registering! Your spot is confirmed for <strong>${data.eventTitle}</strong>. We're excited to see you there!</p>
+
+      <!-- Event Details -->
+      <div class="event-details">
+        <h3>📅 Event Information</h3>
+        <div class="detail-row">
+          <span class="detail-label">Event:</span>
+          <span class="detail-value">${data.eventTitle}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${data.eventDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.eventTime}</span>
+        </div>
+        ${data.eventLocation ? `
+        <div class="detail-row">
+          <span class="detail-label">Location:</span>
+          <span class="detail-value">${data.eventLocation}</span>
+        </div>
+        ` : ''}
+        ${data.eventAddress ? `
+        <div class="detail-row">
+          <span class="detail-label">Address:</span>
+          <span class="detail-value">${data.eventAddress}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Free Event Badge -->
+      <div class="free-badge">
+        <h3>🎁 FREE EVENT</h3>
+        <p>No payment required - just bring yourself!</p>
+      </div>
+
+      <!-- Special Instructions -->
+      ${data.registrationInstructions ? `
+      <div class="instructions">
+        <h3>📝 Important Information</h3>
+        <p>${data.registrationInstructions}</p>
+      </div>
+      ` : ''}
+
+      <!-- Next Steps -->
+      <div class="next-steps">
+        <h3>What's Next?</h3>
+        <ul>
+          <li><strong>Save the date</strong> - Add this event to your calendar</li>
+          <li><strong>Arrive on time</strong> - Doors open 15 minutes before start time</li>
+          <li><strong>Bring a friend</strong> - Share this event with others who might be interested</li>
+          <li><strong>Questions?</strong> Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></li>
+        </ul>
+      </div>
+
+      <p>We can't wait to see you at 605 Wells!</p>
+      
+      <p>Blessings,<br>
+      <strong>The 605 Wells Team</strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <h3>605 Wells</h3>
+      <p>A Transformational Gathering Place</p>
+      <p>Where the Waters Run Deep</p>
+      <br>
+      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <br>
+      <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
+      605 Wells • Jacksonville, FL</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 export const EVENT_REGISTRATION_CONFIRMATION = (data: {
   firstName: string;
   lastName: string;
@@ -511,6 +656,47 @@ export async function sendOneTimeDonorThankYou(data: {
     return { success: true, id: emailData?.id };
   } catch (error) {
     console.error('Error sending one-time donor thank you email:', error);
+    throw error;
+  }
+}
+
+export async function sendFreeEventRegistrationConfirmation(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventLocation?: string;
+  eventAddress?: string;
+  registrationInstructions?: string;
+}) {
+  try {
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells <noreply@605wells.com>',
+      to: [data.email],
+      subject: `🎉 Registration Confirmed: ${data.eventTitle}`,
+      html: FREE_EVENT_REGISTRATION_CONFIRMATION({
+        ...data,
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }),
+    });
+
+    if (error) {
+      console.error('Failed to send free event registration confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Free event registration confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending free event registration confirmation email:', error);
     throw error;
   }
 }

@@ -247,7 +247,11 @@ function AdminDashboardContent() {
                           <div className="text-sm text-gray-500">
                             {event.registrationType === 'internal' ? (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Internal Registration
+                                Internal Registration (Paid)
+                              </span>
+                            ) : event.registrationType === 'internal-free' ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                Internal Registration (Free)
                               </span>
                             ) : event.registrationType === 'external' ? (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -279,7 +283,7 @@ function AdminDashboardContent() {
                         {formatCurrency(event.totalRevenue)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {event.registrationType === 'internal' && event.totalRegistrations > 0 ? (
+                        {(event.registrationType === 'internal' || event.registrationType === 'internal-free') && event.totalRegistrations > 0 ? (
                           <Link
                             href={`/admin/events/${event._id}`}
                             className="text-orange-600 hover:text-orange-900"

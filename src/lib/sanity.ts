@@ -146,7 +146,7 @@ export interface SanityEvent {
   capacity?: number
   category?: string
   featured?: boolean
-  registrationType?: 'internal' | 'external' | 'none'
+  registrationType?: 'internal' | 'internal-free' | 'external' | 'none'
   registrationLimit?: number
   registrationClosed?: boolean
   requiresKingdomBuilderDiscount?: boolean
@@ -191,7 +191,7 @@ export interface SanityEventRegistration {
   }
   attendee: RegistrationAttendee
   customer?: RegistrationCustomer
-  payment: RegistrationPayment
+  payment?: RegistrationPayment // Optional for free events
   registrationDate: string
   status?: 'confirmed' | 'cancelled' | 'no-show' | 'checked-in'
   emailsSent?: Array<{

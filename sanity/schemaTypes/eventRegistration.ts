@@ -95,19 +95,20 @@ export default defineType({
       name: 'payment',
       title: 'Payment Information',
       type: 'object',
+      description: 'Payment details (optional for free events)',
       fields: [
         {
           name: 'stripePaymentIntentId',
           title: 'Stripe Payment Intent ID',
           type: 'string',
-          validation: (Rule) => Rule.required(),
+          description: 'Only for paid registrations',
         },
         {
           name: 'amount',
           title: 'Amount Paid',
           type: 'number',
-          description: 'Final amount paid (after discounts)',
-          validation: (Rule) => Rule.required().min(0),
+          description: 'Final amount paid (0 for free events)',
+          validation: (Rule) => Rule.min(0),
         },
         {
           name: 'originalPrice',
@@ -156,7 +157,6 @@ export default defineType({
           initialValue: 'completed',
         },
       ],
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'registrationDate',

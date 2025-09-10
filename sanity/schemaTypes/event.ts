@@ -220,6 +220,7 @@ export default defineType({
       options: {
         list: [
           {title: 'Internal Registration (Stripe)', value: 'internal'},
+          {title: 'Internal Registration (Free)', value: 'internal-free'},
           {title: 'External Registration Link', value: 'external'},
           {title: 'No Registration Required', value: 'none'},
         ],

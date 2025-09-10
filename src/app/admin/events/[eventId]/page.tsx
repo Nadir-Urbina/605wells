@@ -35,7 +35,7 @@ interface Registration {
     state?: string
     zipCode?: string
   }
-  payment: {
+  payment?: {
     stripePaymentIntentId: string
     amount: number
     originalPrice?: number
@@ -327,8 +327,8 @@ function EventRegistrationsContent() {
                         {formatDate(registration.registrationDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(registration.payment.amount)}
-                        {registration.payment.discountApplied && (
+                        {registration.payment?.amount ? formatCurrency(registration.payment.amount) : 'Free'}
+                        {registration.payment?.discountApplied && (
                           <div className="text-xs text-green-600">
                             (Discount applied)
                           </div>
