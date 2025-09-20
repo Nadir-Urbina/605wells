@@ -183,6 +183,7 @@ const eventSchema = defineType({
         list: [
           {title: 'Internal Registration (Stripe)', value: 'internal'},
           {title: 'Internal Registration (Free)', value: 'internal-free'},
+          {title: 'Hybrid Event (In-Person + Online)', value: 'hybrid'},
           {title: 'External Registration Link', value: 'external'},
           {title: 'No Registration Required', value: 'none'},
         ],
@@ -216,6 +217,82 @@ const eventSchema = defineType({
       title: 'Registration Instructions',
       type: 'text',
       rows: 3,
+    }),
+    // Livestream Settings for Hybrid Events
+    defineField({
+      name: 'onlinePrice',
+      title: 'Online Attendance Price',
+      type: 'number',
+    }),
+    defineField({
+      name: 'restreamEmbedCode',
+      title: 'Restream Embed Code',
+      type: 'text',
+      rows: 4,
+    }),
+    defineField({
+      name: 'livestreamEnabled',
+      title: 'Enable Livestream',
+      type: 'boolean',
+      initialValue: false,
+    }),
+  ],
+})
+
+// Define livestream access schema
+const livestreamAccessSchema = defineType({
+  name: 'livestreamAccess',
+  title: 'Livestream Access Token',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'event',
+      title: 'Event',
+      type: 'reference',
+      to: [{type: 'event'}],
+    }),
+    defineField({
+      name: 'eventRegistration',
+      title: 'Event Registration',
+      type: 'reference',
+      to: [{type: 'eventRegistration'}],
+    }),
+    defineField({
+      name: 'accessToken',
+      title: 'Access Token',
+      type: 'string',
+    }),
+    defineField({
+      name: 'attendeeEmail',
+      title: 'Attendee Email',
+      type: 'email',
+    }),
+    defineField({
+      name: 'attendeeName',
+      title: 'Attendee Name',
+      type: 'string',
+    }),
+    defineField({
+      name: 'isActive',
+      title: 'Token Active',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'createdAt',
+      title: 'Created At',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'lastAccessed',
+      title: 'Last Accessed',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'accessCount',
+      title: 'Access Count',
+      type: 'number',
+      initialValue: 0,
     }),
   ],
 })
@@ -275,6 +352,26 @@ const eventRegistrationSchema = defineType({
           type: 'number',
         },
         {
+          name: 'originalPrice',
+          title: 'Original Price',
+          type: 'number',
+        },
+        {
+          name: 'discountApplied',
+          title: 'Discount Applied',
+          type: 'boolean',
+        },
+        {
+          name: 'discountAmount',
+          title: 'Discount Amount',
+          type: 'number',
+        },
+        {
+          name: 'paymentMethod',
+          title: 'Payment Method',
+          type: 'string',
+        },
+        {
           name: 'status',
           title: 'Payment Status',
           type: 'string',
@@ -291,6 +388,33 @@ const eventRegistrationSchema = defineType({
       title: 'Registration Status',
       type: 'string',
     }),
+    defineField({
+      name: 'emailsSent',
+      title: 'Emails Sent',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'type',
+              title: 'Email Type',
+              type: 'string',
+            },
+            {
+              name: 'sentAt',
+              title: 'Sent At',
+              type: 'datetime',
+            },
+            {
+              name: 'subject',
+              title: 'Email Subject',
+              type: 'string',
+            },
+          ],
+        },
+      ],
+    }),
   ],
 })
 
@@ -304,7 +428,7 @@ const config = defineConfig({
   plugins: [structureTool(), visionTool()],
   
   schema: {
-    types: [eventSchema, eventRegistrationSchema],
+    types: [eventSchema, livestreamAccessSchema, eventRegistrationSchema],
   },
 })
 

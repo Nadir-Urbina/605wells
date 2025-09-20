@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import FreeEventRegistrationForm from '@/components/FreeEventRegistrationForm';
+import HybridEventRegistrationForm from '@/components/HybridEventRegistrationForm';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 import { PortableText } from '@portabletext/react';
 
@@ -19,6 +20,7 @@ export default function EventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isRegistrationFormOpen, setIsRegistrationFormOpen] = useState(false);
   const [isFreeRegistrationFormOpen, setIsFreeRegistrationFormOpen] = useState(false);
+  const [isHybridRegistrationFormOpen, setIsHybridRegistrationFormOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -127,8 +129,8 @@ export default function EventDetailPage() {
   };
 
   const isRegistrationAvailable = (event: SanityEvent) => {
-    // Check if internal registration is enabled (paid or free)
-    if (event.registrationType !== 'internal' && event.registrationType !== 'internal-free') return false;
+    // Check if internal registration is enabled (paid, free, or hybrid)
+    if (event.registrationType !== 'internal' && event.registrationType !== 'internal-free' && event.registrationType !== 'hybrid') return false;
     
     // Check if registration is manually closed
     if (event.registrationClosed) return false;
@@ -152,7 +154,7 @@ export default function EventDetailPage() {
   };
 
   const getRegistrationButtonText = (event: SanityEvent) => {
-    if (event.registrationType === 'internal' || event.registrationType === 'internal-free') {
+    if (event.registrationType === 'internal' || event.registrationType === 'internal-free' || event.registrationType === 'hybrid') {
       if (event.registrationClosed) return 'Registration Closed';
       if (event.registrationDeadline) {
         const deadline = new Date(event.registrationDeadline);
@@ -161,6 +163,12 @@ export default function EventDetailPage() {
       
       if (event.registrationType === 'internal-free') {
         return 'Register for Free';
+      }
+      
+      if (event.registrationType === 'hybrid') {
+        const inPersonPrice = formatPrice(event.price);
+        const onlinePrice = formatPrice(event.onlinePrice);
+        return `Register - In-Person ${inPersonPrice} • Online ${onlinePrice}`;
       }
       
       const price = formatPrice(event.price);
@@ -176,6 +184,11 @@ export default function EventDetailPage() {
 
   const handleFreeRegistrationSuccess = () => {
     setIsFreeRegistrationFormOpen(false);
+    // Success message is handled by the form's internal success state
+  };
+
+  const handleHybridRegistrationSuccess = () => {
+    setIsHybridRegistrationFormOpen(false);
     // Success message is handled by the form's internal success state
   };
 
@@ -304,7 +317,7 @@ export default function EventDetailPage() {
               </div>
 
               {/* Registration Button */}
-              {((event.registrationType === 'internal') || (event.registrationType === 'internal-free') || event.registrationLink) && (
+              {((event.registrationType === 'internal') || (event.registrationType === 'internal-free') || (event.registrationType === 'hybrid') || event.registrationLink) && (
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -329,6 +342,23 @@ export default function EventDetailPage() {
                   ) : event.registrationType === 'internal-free' ? (
                     <button
                       onClick={() => setIsFreeRegistrationFormOpen(true)}
+                      disabled={!isRegistrationAvailable(event)}
+                      className={`inline-flex items-center font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 shadow-xl ${
+                        isRegistrationAvailable(event)
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                          : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                      }`}
+                    >
+                      {getRegistrationButtonText(event)}
+                      {isRegistrationAvailable(event) && (
+                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      )}
+                    </button>
+                  ) : event.registrationType === 'hybrid' ? (
+                    <button
+                      onClick={() => setIsHybridRegistrationFormOpen(true)}
                       disabled={!isRegistrationAvailable(event)}
                       className={`inline-flex items-center font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 shadow-xl ${
                         isRegistrationAvailable(event)
@@ -490,7 +520,7 @@ export default function EventDetailPage() {
                     </div>
 
                     {/* Registration Button (Mobile) */}
-                    {((event.registrationType === 'internal') || (event.registrationType === 'internal-free') || event.registrationLink) && (
+                    {((event.registrationType === 'internal') || (event.registrationType === 'internal-free') || (event.registrationType === 'hybrid') || event.registrationLink) && (
                       <div className="mt-6 pt-6 border-t border-gray-200">
                         {event.registrationType === 'internal' ? (
                           <button
@@ -512,6 +542,23 @@ export default function EventDetailPage() {
                         ) : event.registrationType === 'internal-free' ? (
                           <button
                             onClick={() => setIsFreeRegistrationFormOpen(true)}
+                            disabled={!isRegistrationAvailable(event)}
+                            className={`w-full font-semibold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+                              isRegistrationAvailable(event)
+                                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                                : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                            }`}
+                          >
+                            {getRegistrationButtonText(event)}
+                            {isRegistrationAvailable(event) && (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                            )}
+                          </button>
+                        ) : event.registrationType === 'hybrid' ? (
+                          <button
+                            onClick={() => setIsHybridRegistrationFormOpen(true)}
                             disabled={!isRegistrationAvailable(event)}
                             className={`w-full font-semibold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
                               isRegistrationAvailable(event)
@@ -593,6 +640,16 @@ export default function EventDetailPage() {
           isOpen={isFreeRegistrationFormOpen}
           onClose={() => setIsFreeRegistrationFormOpen(false)}
           onSuccess={handleFreeRegistrationSuccess}
+        />
+      )}
+
+      {/* Hybrid Event Registration Form */}
+      {event && (
+        <HybridEventRegistrationForm
+          event={event}
+          isOpen={isHybridRegistrationFormOpen}
+          onClose={() => setIsHybridRegistrationFormOpen(false)}
+          onSuccess={handleHybridRegistrationSuccess}
         />
       )}
     </div>

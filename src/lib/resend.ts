@@ -241,12 +241,244 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
 </html>
 `;
 
+export const ONLINE_EVENT_REGISTRATION_CONFIRMATION = (data: {
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
+  eventLocation?: string;
+  eventAddress?: string;
+  date: string;
+  email: string;
+  registrationInstructions?: string;
+  accessToken: string;
+  livestreamUrl: string;
+  finalPrice: number;
+  originalPrice?: number;
+  discountApplied?: boolean;
+  promoCode?: string;
+  promoCodeDiscount?: number;
+}) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Event Access Ready!</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+    .confirmation-banner { background-color: #10b981; color: white; padding: 20px; margin: 20px; border-radius: 12px; text-align: center; }
+    .confirmation-banner h2 { margin: 0 0 10px 0; font-size: 20px; }
+    .confirmation-banner p { margin: 0; font-size: 16px; }
+    .content { padding: 20px 30px; color: #374151; line-height: 1.6; }
+    .event-details { background-color: #f3f4f6; padding: 25px; margin: 20px 0; border-radius: 12px; border-left: 4px solid #8b5cf6; }
+    .event-details h3 { margin: 0 0 15px 0; color: #8b5cf6; font-size: 18px; }
+    .event-details .detail-row { margin: 8px 0; display: flex; }
+    .event-details .detail-label { font-weight: bold; width: 120px; color: #4b5563; }
+    .event-details .detail-value { color: #1f2937; }
+    .schedule-container { margin-top: 10px; }
+    .schedule-session { background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 8px 0; }
+    .schedule-session strong { color: #8b5cf6; font-size: 16px; }
+    .session-date { color: #4b5563; font-weight: 500; }
+    .session-time { color: #6b7280; font-size: 14px; }
+    .livestream-access { background-color: #ddd6fe; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .livestream-access h3 { margin: 0 0 15px 0; color: #5b21b6; }
+    .livestream-access .access-token { background-color: #f3f4f6; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; margin: 10px 0; border: 1px solid #d1d5db; }
+    .livestream-link { background-color: #8b5cf6; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin: 10px 0; }
+    .livestream-link:hover { background-color: #7c3aed; }
+    .pricing-summary { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .pricing-summary h3 { margin: 0 0 15px 0; color: #1f2937; }
+    .pricing-row { display: flex; justify-content: space-between; margin: 8px 0; }
+    .pricing-row.total { font-weight: bold; font-size: 16px; color: #8b5cf6; border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 15px; }
+    .pricing-row.discount { color: #059669; }
+    .pricing-row.original { color: #6b7280; text-decoration: line-through; }
+    .instructions { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .instructions h3 { margin: 0 0 15px 0; color: #92400e; }
+    .instructions p { margin: 10px 0; color: #78350f; }
+    .next-steps { margin: 20px 0; }
+    .next-steps h3 { color: #1f2937; margin-bottom: 15px; }
+    .next-steps ul { padding-left: 20px; margin: 0; }
+    .next-steps li { margin: 8px 0; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer h3 { margin: 0 0 10px 0; font-size: 18px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>605 Wells</h1>
+      <p>A Transformational Gathering Place</p>
+    </div>
+
+    <!-- Confirmation Banner -->
+    <div class="confirmation-banner">
+      <h2>🎥 Online Access Ready!</h2>
+      <p>Your livestream access for ${data.eventTitle} is confirmed</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p>Dear ${data.firstName},</p>
+      
+      <p>Thank you for registering for online access to <strong>${data.eventTitle}</strong>! You're all set to join us virtually.</p>
+
+      <!-- Event Details -->
+      <div class="event-details">
+        <h3>📅 Event Information</h3>
+        <div class="detail-row">
+          <span class="detail-label">Event:</span>
+          <span class="detail-value">${data.eventTitle}</span>
+        </div>
+        ${data.eventSchedule && data.eventSchedule.length > 1 ? `
+        <div class="detail-row">
+          <span class="detail-label">Schedule:</span>
+          <div class="schedule-container">
+            ${data.eventSchedule.map(session => `
+              <div class="schedule-session">
+                <strong>${session.sessionTitle || 'Session'}</strong><br>
+                <span class="session-date">${session.date}</span><br>
+                <span class="session-time">${session.time}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : `
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${data.eventDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.eventTime}</span>
+        </div>
+        `}
+        <div class="detail-row">
+          <span class="detail-label">Access:</span>
+          <span class="detail-value">Online Livestream</span>
+        </div>
+        ${data.eventLocation ? `
+        <div class="detail-row">
+          <span class="detail-label">Venue:</span>
+          <span class="detail-value">${data.eventLocation}</span>
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Livestream Access -->
+      <div class="livestream-access">
+        <h3>🔐 Your Livestream Access</h3>
+        <p>Use this secure link to access the livestream on event day:</p>
+        
+        <a href="${data.livestreamUrl}" class="livestream-link">
+          🎥 Join Livestream
+        </a>
+        
+        <p style="margin-top: 15px;"><strong>Access Token:</strong></p>
+        <div class="access-token">${data.accessToken}</div>
+        
+        <p style="font-size: 14px; color: #6b7280; margin-top: 10px;">
+          💡 <strong>Tip:</strong> Bookmark this email or save the link above. You'll need it to access the livestream on event day.
+        </p>
+      </div>
+
+      <!-- Pricing Summary -->
+      ${data.finalPrice > 0 ? `
+      <div class="pricing-summary">
+        <h3>💰 Registration Summary</h3>
+        ${data.discountApplied && data.originalPrice ? `
+        <div class="pricing-row original">
+          <span>Original Price:</span>
+          <span>$${data.originalPrice.toFixed(2)}</span>
+        </div>
+        <div class="pricing-row discount">
+          <span>Discount Applied (${data.promoCode}):</span>
+          <span>-$${(data.originalPrice - data.finalPrice).toFixed(2)}</span>
+        </div>
+        ` : ''}
+        <div class="pricing-row total">
+          <span>Total Paid:</span>
+          <span>$${data.finalPrice.toFixed(2)}</span>
+        </div>
+      </div>
+      ` : `
+      <div class="pricing-summary">
+        <h3>🎁 Free Online Access</h3>
+        <div class="pricing-row total">
+          <span>Total:</span>
+          <span>FREE</span>
+        </div>
+      </div>
+      `}
+
+      <!-- Special Instructions -->
+      ${data.registrationInstructions ? `
+      <div class="instructions">
+        <h3>📝 Important Information</h3>
+        <p>${data.registrationInstructions}</p>
+      </div>
+      ` : ''}
+
+      <!-- Next Steps -->
+      <div class="next-steps">
+        <h3>What's Next?</h3>
+        <ul>
+          <li><strong>Test your setup</strong> - Ensure you have a stable internet connection</li>
+          <li><strong>Join early</strong> - Access will be available 15 minutes before start time</li>
+          <li><strong>Engage with Q&A</strong> - Use the live chat to ask questions during the event</li>
+          <li><strong>Technical support</strong> - Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a> if you need help</li>
+        </ul>
+      </div>
+
+      <p>We're excited to have you join us online!</p>
+      
+      <p>Blessings,<br>
+      <strong>The 605 Wells Team</strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <h3>605 Wells</h3>
+      <p>A Transformational Gathering Place</p>
+      <p>Where the Waters Run Deep</p>
+      <br>
+      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <br>
+      <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
+      605 Wells • Jacksonville, FL</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
   firstName: string;
   lastName: string;
   eventTitle: string;
   eventDate: string;
   eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
   eventLocation?: string;
   eventAddress?: string;
   date: string;
@@ -274,6 +506,11 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
     .event-details .detail-row { margin: 8px 0; display: flex; }
     .event-details .detail-label { font-weight: bold; width: 120px; color: #4b5563; }
     .event-details .detail-value { color: #1f2937; }
+    .schedule-container { margin-top: 10px; }
+    .schedule-session { background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 8px 0; }
+    .schedule-session strong { color: #8b5cf6; font-size: 16px; }
+    .session-date { color: #4b5563; font-weight: 500; }
+    .session-time { color: #6b7280; font-size: 14px; }
     .free-badge { background-color: #10b981; color: white; padding: 15px; margin: 20px 0; border-radius: 12px; text-align: center; }
     .free-badge h3 { margin: 0 0 5px 0; font-size: 18px; }
     .free-badge p { margin: 0; font-size: 14px; opacity: 0.9; }
@@ -317,6 +554,20 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
           <span class="detail-label">Event:</span>
           <span class="detail-value">${data.eventTitle}</span>
         </div>
+        ${data.eventSchedule && data.eventSchedule.length > 1 ? `
+        <div class="detail-row">
+          <span class="detail-label">Schedule:</span>
+          <div class="schedule-container">
+            ${data.eventSchedule.map(session => `
+              <div class="schedule-session">
+                <strong>${session.sessionTitle || 'Session'}</strong><br>
+                <span class="session-date">${session.date}</span><br>
+                <span class="session-time">${session.time}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : `
         <div class="detail-row">
           <span class="detail-label">Date:</span>
           <span class="detail-value">${data.eventDate}</span>
@@ -325,6 +576,7 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
           <span class="detail-label">Time:</span>
           <span class="detail-value">${data.eventTime}</span>
         </div>
+        `}
         ${data.eventLocation ? `
         <div class="detail-row">
           <span class="detail-label">Location:</span>
@@ -392,6 +644,13 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
   eventTitle: string;
   eventDate: string;
   eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
   eventLocation?: string;
   eventAddress?: string;
   finalPrice: number;
@@ -426,6 +685,11 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
     .event-details .detail-row { margin: 8px 0; display: flex; }
     .event-details .detail-label { font-weight: bold; width: 120px; color: #4b5563; }
     .event-details .detail-value { color: #1f2937; }
+    .schedule-container { margin-top: 10px; }
+    .schedule-session { background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 8px 0; }
+    .schedule-session strong { color: #8b5cf6; font-size: 16px; }
+    .session-date { color: #4b5563; font-weight: 500; }
+    .session-time { color: #6b7280; font-size: 14px; }
     .price-section { background-color: #f9fafb; text-align: center; padding: 20px; margin: 20px 0; border-radius: 12px; }
     .price-section h3 { margin: 0 0 10px 0; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
     .price { font-size: 24px; font-weight: bold; color: #8b5cf6; margin: 0; }
@@ -475,6 +739,20 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
           <span class="detail-label">Event:</span>
           <span class="detail-value">${data.eventTitle}</span>
         </div>
+        ${data.eventSchedule && data.eventSchedule.length > 1 ? `
+        <div class="detail-row">
+          <span class="detail-label">Schedule:</span>
+          <div class="schedule-container">
+            ${data.eventSchedule.map(session => `
+              <div class="schedule-session">
+                <strong>${session.sessionTitle || 'Session'}</strong><br>
+                <span class="session-date">${session.date}</span><br>
+                <span class="session-time">${session.time}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : `
         <div class="detail-row">
           <span class="detail-label">Date:</span>
           <span class="detail-value">${data.eventDate}</span>
@@ -483,6 +761,7 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
           <span class="detail-label">Time:</span>
           <span class="detail-value">${data.eventTime}</span>
         </div>
+        `}
         ${data.eventLocation ? `
         <div class="detail-row">
           <span class="detail-label">Location:</span>
@@ -660,6 +939,61 @@ export async function sendOneTimeDonorThankYou(data: {
   }
 }
 
+export async function sendOnlineEventRegistrationConfirmation(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  eventTitle: string;
+  eventDate: string;
+  eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
+  eventLocation?: string;
+  eventAddress?: string;
+  registrationInstructions?: string;
+  accessToken: string;
+  livestreamUrl: string;
+  finalPrice: number;
+  originalPrice?: number;
+  discountApplied?: boolean;
+  promoCode?: string;
+  promoCodeDiscount?: number;
+}) {
+  try {
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells <noreply@605wells.com>',
+      to: [data.email],
+      subject: `🎥 Online Access Ready: ${data.eventTitle}`,
+      html: ONLINE_EVENT_REGISTRATION_CONFIRMATION({
+        ...data,
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }),
+    });
+
+    if (error) {
+      console.error('Failed to send online event registration confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Online event registration confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending online event registration confirmation email:', error);
+    throw error;
+  }
+}
+
 export async function sendFreeEventRegistrationConfirmation(data: {
   email: string;
   firstName: string;
@@ -667,6 +1001,13 @@ export async function sendFreeEventRegistrationConfirmation(data: {
   eventTitle: string;
   eventDate: string;
   eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
   eventLocation?: string;
   eventAddress?: string;
   registrationInstructions?: string;
@@ -708,6 +1049,13 @@ export async function sendEventRegistrationConfirmation(data: {
   eventTitle: string;
   eventDate: string;
   eventTime: string;
+  eventSchedule?: Array<{
+    sessionTitle?: string;
+    date: string;
+    time: string;
+    startTime: string;
+    endTime: string;
+  }>;
   eventLocation?: string;
   eventAddress?: string;
   finalPrice: number;

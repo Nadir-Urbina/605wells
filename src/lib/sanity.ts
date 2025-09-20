@@ -36,6 +36,7 @@ export const eventQueries = {
     location,
     registrationLink,
     price,
+    onlinePrice,
     category,
     featured,
     registrationType,
@@ -43,7 +44,9 @@ export const eventQueries = {
     registrationClosed,
     requiresKingdomBuilderDiscount,
     registrationDeadline,
-    registrationInstructions
+    registrationInstructions,
+    restreamEmbedCode,
+    livestreamEnabled
   }`,
 
   // Get featured events for homepage
@@ -57,13 +60,16 @@ export const eventQueries = {
     location,
     registrationLink,
     price,
+    onlinePrice,
     category,
     registrationType,
     registrationLimit,
     registrationClosed,
     requiresKingdomBuilderDiscount,
     registrationDeadline,
-    registrationInstructions
+    registrationInstructions,
+    restreamEmbedCode,
+    livestreamEnabled
   }`,
 
   // Get upcoming events (including TBD events)
@@ -77,6 +83,7 @@ export const eventQueries = {
     location,
     registrationLink,
     price,
+    onlinePrice,
     category,
     featured,
     registrationType,
@@ -84,7 +91,9 @@ export const eventQueries = {
     registrationClosed,
     requiresKingdomBuilderDiscount,
     registrationDeadline,
-    registrationInstructions
+    registrationInstructions,
+    restreamEmbedCode,
+    livestreamEnabled
   }`,
 
   // Get single event by slug
@@ -99,6 +108,7 @@ export const eventQueries = {
     location,
     registrationLink,
     price,
+    onlinePrice,
     capacity,
     category,
     registrationType,
@@ -106,7 +116,9 @@ export const eventQueries = {
     registrationClosed,
     requiresKingdomBuilderDiscount,
     registrationDeadline,
-    registrationInstructions
+    registrationInstructions,
+    restreamEmbedCode,
+    livestreamEnabled
   }`,
 }
 
@@ -146,12 +158,16 @@ export interface SanityEvent {
   capacity?: number
   category?: string
   featured?: boolean
-  registrationType?: 'internal' | 'internal-free' | 'external' | 'none'
+  registrationType?: 'internal' | 'internal-free' | 'hybrid' | 'external' | 'none'
   registrationLimit?: number
   registrationClosed?: boolean
   requiresKingdomBuilderDiscount?: boolean
   registrationDeadline?: string
   registrationInstructions?: string
+  // Livestream fields for hybrid events
+  onlinePrice?: number
+  restreamEmbedCode?: string
+  livestreamEnabled?: boolean
 }
 
 // Event Registration interfaces
@@ -179,7 +195,7 @@ export interface RegistrationPayment {
   originalPrice?: number
   discountApplied?: boolean
   discountAmount?: number
-  paymentMethod?: 'card' | 'free'
+  paymentMethod?: 'card' | 'free' | 'online'
   status?: 'completed' | 'pending' | 'failed' | 'refunded'
 }
 
@@ -200,6 +216,27 @@ export interface SanityEventRegistration {
     subject?: string
   }>
   notes?: string
+}
+
+// Livestream Access interface
+export interface SanityLivestreamAccess {
+  _type: 'livestreamAccess'
+  _id: string
+  event: {
+    _type: 'reference'
+    _ref: string
+  }
+  eventRegistration: {
+    _type: 'reference'
+    _ref: string
+  }
+  accessToken: string
+  attendeeEmail: string
+  attendeeName: string
+  isActive: boolean
+  createdAt: string
+  lastAccessed?: string
+  accessCount: number
 }
 
 // Event Registration functions

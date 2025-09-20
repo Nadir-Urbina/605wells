@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou, sendEventRegistrationConfirmation } from '@/lib/resend';
-import { createEventRegistration, type SanityEventRegistration } from '@/lib/sanity';
+import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou, sendEventRegistrationConfirmation, sendOnlineEventRegistrationConfirmation } from '@/lib/resend';
+import { createEventRegistration, type SanityEventRegistration, type SanityLivestreamAccess, client, writeClient, eventQueries } from '@/lib/sanity';
+import crypto from 'crypto';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
+  apiVersion: '2025-08-27.basil',
 });
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -205,17 +206,7 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
   }
 }
 
-interface EventScheduleData {
-  startTime?: string;
-  endTime?: string;
-  sessionTitle?: string;
-  notes?: string;
-}
-
-interface EventLocationData {
-  name?: string;
-  address?: string;
-}
+// Removed unused interfaces - using event data directly from Sanity
 
 async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentIntent) {
   console.log('Event registration payment succeeded:', paymentIntent.id);
@@ -223,10 +214,30 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
   try {
     const metadata = paymentIntent.metadata;
     
-    // Extract registration details from metadata
+    // Look up the event by slug to get the actual document ID and event details
+    let eventDocumentId = '';
+    let eventData: { _id: string; title: string; eventSchedule?: { startTime?: string; endTime?: string; sessionTitle?: string }[]; location?: { name?: string; address?: string } } | null = null;
+    try {
+      const eventSlug = metadata.eventId || '';
+      const event = await client.fetch(eventQueries.eventBySlug, { slug: eventSlug });
+      
+      if (!event || !event._id) {
+        console.error(`Event not found for slug: ${eventSlug}`);
+        return;
+      }
+      
+      eventDocumentId = event._id;
+      eventData = event;
+      console.log(`✅ Found event: ${event.title} (ID: ${eventDocumentId})`);
+    } catch (eventLookupError) {
+      console.error('❌ Failed to look up event:', eventLookupError);
+      return;
+    }
+    
+    // Extract registration details from metadata and event data
     const attendeeEmail = metadata.attendeeEmail || metadata.customerEmail;
     const attendeeName = metadata.attendeeName || metadata.customerName || 'Attendee';
-    const eventTitle = metadata.eventTitle;
+    const eventTitle = eventData?.title || metadata.eventTitle || 'Event';
     const finalPrice = parseFloat(metadata.finalPrice || '0');
     const isKingdomBuilder = metadata.isKingdomBuilder === 'true';
     const discountApplied = metadata.discountApplied === 'true';
@@ -238,40 +249,59 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
 
     console.log(`Event registration confirmed: ${attendeeName} for ${eventTitle}`);
     
-    // Parse event details for future email use
-    let eventSchedule: EventScheduleData = {};
-    let eventLocation: EventLocationData = {};
-    try {
-      eventSchedule = JSON.parse(metadata.eventSchedule || '{}');
-      eventLocation = JSON.parse(metadata.eventLocation || '{}');
-    } catch {
-      console.warn('Could not parse event details from metadata');
-    }
-
-    // Format event date and time for email
+    // Format event schedule data
     let eventDate = 'Date TBD';
     let eventTime = 'Time TBD';
+    let eventSchedule: Array<{
+      sessionTitle?: string;
+      date: string;
+      time: string;
+      startTime: string;
+      endTime: string;
+    }> = [];
     
-    if (eventSchedule && eventSchedule.startTime && eventSchedule.endTime) {
-      const startDate = new Date(eventSchedule.startTime);
-      const endDate = new Date(eventSchedule.endTime);
-      
-      eventDate = startDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+    if (eventData?.eventSchedule && eventData.eventSchedule.length > 0) {
+      // Process all sessions
+      eventSchedule = eventData.eventSchedule.map((session, index) => {
+        if (session.startTime) {
+          const startDate = new Date(session.startTime);
+          const endDate = new Date(session.endTime!);
+          
+          return {
+            sessionTitle: session.sessionTitle || `Session ${index + 1}`,
+            date: startDate.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+            time: `${startDate.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            })} - ${endDate.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            })}`,
+            startTime: session.startTime,
+            endTime: session.endTime!
+          };
+        }
+        return {
+          sessionTitle: `Session ${index + 1}`,
+          date: 'Date TBD',
+          time: 'Time TBD',
+          startTime: '',
+          endTime: ''
+        };
       });
-      
-      eventTime = `${startDate.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      })} - ${endDate.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      })}`;
+
+      // For backward compatibility, set first session as primary date/time
+      if (eventSchedule.length > 0 && eventSchedule[0].startTime) {
+        eventDate = eventSchedule[0].date;
+        eventTime = eventSchedule[0].time;
+      }
     }
 
     // Send event registration confirmation email
@@ -283,8 +313,9 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
         eventTitle,
         eventDate,
         eventTime,
-        eventLocation: eventLocation.name,
-        eventAddress: eventLocation.address,
+        eventSchedule,
+        eventLocation: eventData?.location?.name || 'Location TBD',
+        eventAddress: eventData?.location?.address || '',
         finalPrice,
         originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
         isKingdomBuilder,
@@ -318,7 +349,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
         _type: 'eventRegistration',
         event: {
           _type: 'reference',
-          _ref: metadata.eventId || '',
+          _ref: eventDocumentId,
         },
         attendee: {
           firstName: metadata.attendeeFirstName || attendeeName.split(' ')[0] || '',
@@ -342,7 +373,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
           originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
           discountApplied,
           discountAmount: discountApplied ? parseFloat(metadata.originalPrice || '0') - finalPrice : 0,
-          paymentMethod: 'card',
+          paymentMethod: 'card', // All webhook payments are card-based
           status: 'completed',
         },
         registrationDate: new Date().toISOString(),
@@ -354,8 +385,65 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
         }],
       };
 
-      await createEventRegistration(registrationData);
+      const savedRegistration = await createEventRegistration(registrationData);
       console.log('✅ Event registration saved to Sanity');
+
+      // If this is an online registration, create livestream access
+      if (metadata.attendanceType === 'online') {
+        try {
+          const accessToken = crypto.randomBytes(32).toString('hex');
+          
+          const livestreamAccess: Omit<SanityLivestreamAccess, '_id'> = {
+            _type: 'livestreamAccess',
+            event: {
+              _type: 'reference',
+              _ref: eventDocumentId,
+            },
+            eventRegistration: {
+              _type: 'reference',
+              _ref: savedRegistration._id,
+            },
+            accessToken,
+            attendeeEmail,
+            attendeeName,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            lastAccessed: undefined,
+            accessCount: 0,
+          };
+
+          await writeClient.create(livestreamAccess);
+          console.log('✅ Livestream access token created for online registration');
+
+          // Send online-specific confirmation email
+          await sendOnlineEventRegistrationConfirmation({
+            email: attendeeEmail,
+            firstName: metadata.attendeeFirstName || attendeeName.split(' ')[0] || '',
+            lastName: metadata.attendeeLastName || attendeeName.split(' ').slice(1).join(' ') || '',
+            eventTitle,
+            eventDate,
+            eventTime,
+            eventSchedule,
+            eventLocation: eventData?.location?.name || 'Location TBD',
+            eventAddress: eventData?.location?.address || '',
+            registrationInstructions: metadata.registrationInstructions,
+            accessToken,
+            livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/livestream/${metadata.eventId}?token=${accessToken}`,
+            finalPrice,
+            originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
+            discountApplied,
+            promoCode: metadata.promoCode || undefined,
+            promoCodeDiscount: metadata.promoCodeDiscount ? parseFloat(metadata.promoCodeDiscount) : undefined,
+          });
+          
+          console.log('✅ Online event registration confirmation email sent to:', attendeeEmail);
+          return; // Skip regular email since we sent the online-specific one
+        } catch (livestreamError) {
+          console.error('❌ Failed to create livestream access:', livestreamError);
+          // Continue with regular email flow as fallback
+        }
+      }
+      
     } catch (sanityError) {
       console.error('❌ Failed to save registration to Sanity:', sanityError);
       // Don't throw error - payment succeeded, database failure shouldn't break the flow

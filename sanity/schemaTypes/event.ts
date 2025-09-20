@@ -221,6 +221,7 @@ export default defineType({
         list: [
           {title: 'Internal Registration (Stripe)', value: 'internal'},
           {title: 'Internal Registration (Free)', value: 'internal-free'},
+          {title: 'Hybrid Event (In-Person + Online)', value: 'hybrid'},
           {title: 'External Registration Link', value: 'external'},
           {title: 'No Registration Required', value: 'none'},
         ],
@@ -265,6 +266,30 @@ export default defineType({
       rows: 3,
       description: 'Special instructions sent in confirmation email',
       hidden: ({document}) => document?.registrationType !== 'internal',
+    }),
+    // Livestream Settings for Hybrid Events
+    defineField({
+      name: 'onlinePrice',
+      title: 'Online Attendance Price',
+      type: 'number',
+      description: 'Price for online livestream attendance (for hybrid events)',
+      hidden: ({document}) => document?.registrationType !== 'hybrid',
+    }),
+    defineField({
+      name: 'restreamEmbedCode',
+      title: 'Restream Embed Code',
+      type: 'text',
+      rows: 4,
+      description: 'Embed code from Restream for livestreaming',
+      hidden: ({document}) => document?.registrationType !== 'hybrid',
+    }),
+    defineField({
+      name: 'livestreamEnabled',
+      title: 'Enable Livestream',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Enable livestreaming for this event',
+      hidden: ({document}) => document?.registrationType !== 'hybrid',
     }),
   ],
   preview: {

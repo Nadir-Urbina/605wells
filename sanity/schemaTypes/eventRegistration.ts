@@ -138,6 +138,7 @@ export default defineType({
             list: [
               {title: 'Credit Card', value: 'card'},
               {title: 'Free Registration', value: 'free'},
+              {title: 'Online Payment', value: 'online'},
             ],
           },
           initialValue: 'card',
