@@ -288,32 +288,35 @@ export default function HybridEventRegistrationForm({
     if (!event.eventSchedule || event.eventSchedule.length === 0) {
       return 'Date & Time TBD';
     }
-    
+
     const firstSession = event.eventSchedule[0];
     if (!firstSession.startTime) {
       return 'Date & Time TBD';
     }
-    
+
     const startDate = new Date(firstSession.startTime);
     const endDate = new Date(firstSession.endTime);
-    
+
     const dateStr = startDate.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'America/New_York',
     });
-    
-    const timeStr = `${startDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+
+    const timeStr = `${startDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
-    })} - ${endDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+      hour12: true,
+      timeZone: 'America/New_York'
+    })} - ${endDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
+      timeZone: 'America/New_York'
     })}`;
-    
+
     return { date: dateStr, time: timeStr };
   };
 
