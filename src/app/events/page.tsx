@@ -101,9 +101,22 @@ export default function EventsPage() {
     }
   };
 
-  const formatPrice = (price?: number) => {
-    if (!price || price === 0) return 'Free';
-    return `$${price}`;
+  const formatPrice = (event: SanityEvent) => {
+    const isHybrid = event.registrationType === 'hybrid';
+    const inPersonPrice = event.price;
+    const onlinePrice = event.onlinePrice;
+
+    if (isHybrid && inPersonPrice !== undefined && onlinePrice !== undefined) {
+      // Both prices exist for hybrid event
+      if (inPersonPrice === 0 && onlinePrice === 0) return 'Free';
+      if (inPersonPrice === 0) return `Free / $${onlinePrice}`;
+      if (onlinePrice === 0) return `$${inPersonPrice} / Free`;
+      return `$${inPersonPrice} / $${onlinePrice}`;
+    }
+
+    // Non-hybrid or only one price
+    if (!inPersonPrice || inPersonPrice === 0) return 'Free';
+    return `$${inPersonPrice}`;
   };
 
   const getCategoryLabel = (value: string) => {
@@ -263,9 +276,20 @@ export default function EventsPage() {
                         </div>
 
                         {/* Price Badge */}
-                        <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                          {formatPrice(event.price)}
-                        </div>
+                        {event.registrationType === 'hybrid' && event.price !== undefined && event.onlinePrice !== undefined ? (
+                          <div className="absolute top-4 right-4 flex flex-col gap-1">
+                            <div className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold text-center">
+                              In-Person: {event.price === 0 ? 'Free' : `$${event.price}`}
+                            </div>
+                            <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold text-center">
+                              Online: {event.onlinePrice === 0 ? 'Free' : `$${event.onlinePrice}`}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            {formatPrice(event)}
+                          </div>
+                        )}
 
                         {/* Category Badge */}
                         {event.category && (

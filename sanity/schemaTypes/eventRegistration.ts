@@ -160,6 +160,18 @@ export default defineType({
       ],
     }),
     defineField({
+      name: 'attendanceType',
+      title: 'Attendance Type',
+      type: 'string',
+      description: 'For hybrid events: in-person or online attendance',
+      options: {
+        list: [
+          {title: 'In-Person', value: 'in-person'},
+          {title: 'Online', value: 'online'},
+        ],
+      },
+    }),
+    defineField({
       name: 'registrationDate',
       title: 'Registration Date',
       type: 'datetime',

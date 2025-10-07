@@ -357,6 +357,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
           email: attendeeEmail,
           phone: metadata.attendeePhone,
         },
+        attendanceType: metadata.attendanceType as 'in-person' | 'online' | undefined,
         customer: metadata.customerEmail !== attendeeEmail ? {
           firstName: metadata.customerFirstName,
           lastName: metadata.customerLastName,

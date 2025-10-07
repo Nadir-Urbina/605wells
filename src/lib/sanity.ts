@@ -208,6 +208,7 @@ export interface SanityEventRegistration {
   attendee: RegistrationAttendee
   customer?: RegistrationCustomer
   payment?: RegistrationPayment // Optional for free events
+  attendanceType?: 'in-person' | 'online' // For hybrid events
   registrationDate: string
   status?: 'confirmed' | 'cancelled' | 'no-show' | 'checked-in'
   emailsSent?: Array<{

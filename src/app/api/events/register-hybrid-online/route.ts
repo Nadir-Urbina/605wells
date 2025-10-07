@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
         email: attendeeInfo.email,
         phone: attendeeInfo.phone || undefined,
       },
+      attendanceType: 'online',
       // For free online events, no payment info needed
       // For paid online events, we'd handle payment here
       ...(pricing.finalPrice > 0 && {

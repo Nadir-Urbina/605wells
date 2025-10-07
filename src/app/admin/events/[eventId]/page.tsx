@@ -43,6 +43,7 @@ interface Registration {
     discountAmount?: number
     status: string
   }
+  attendanceType?: 'in-person' | 'online'
   registrationDate: string
   status: string
   emailsSent?: Array<{
@@ -81,6 +82,7 @@ function EventRegistrationsContent() {
   const [editingRegistration, setEditingRegistration] = useState<string | null>(null)
   const [editStatus, setEditStatus] = useState('')
   const [editNotes, setEditNotes] = useState('')
+  const [attendanceFilter, setAttendanceFilter] = useState<'all' | 'in-person' | 'online'>('all')
 
   const fetchEventData = useCallback(async () => {
     try {
@@ -174,6 +176,28 @@ function EventRegistrationsContent() {
         return 'bg-gray-100 text-gray-800'
     }
   }
+
+  const getAttendanceTypeBadgeColor = (type?: string) => {
+    switch (type) {
+      case 'in-person':
+        return 'bg-purple-100 text-purple-800'
+      case 'online':
+        return 'bg-blue-100 text-blue-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  // Filter registrations by attendance type
+  const filteredRegistrations = data?.registrations.filter(reg => {
+    if (attendanceFilter === 'all') return true
+    return reg.attendanceType === attendanceFilter
+  }) || []
+
+  // Calculate stats for filtered registrations
+  const inPersonCount = data?.registrations.filter(r => r.attendanceType === 'in-person').length || 0
+  const onlineCount = data?.registrations.filter(r => r.attendanceType === 'online').length || 0
+  const isHybridEvent = data?.event.registrationType === 'hybrid'
 
   if (isLoading) {
     return (
@@ -271,13 +295,68 @@ function EventRegistrationsContent() {
           </div>
         </div>
 
+        {/* Hybrid Event Stats */}
+        {isHybridEvent && (inPersonCount > 0 || onlineCount > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-2xl font-semibold text-purple-600">{inPersonCount}</div>
+              <div className="text-sm text-gray-600">In-Person Registrations</div>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-2xl font-semibold text-blue-600">{onlineCount}</div>
+              <div className="text-sm text-gray-600">Online Registrations</div>
+            </div>
+          </div>
+        )}
+
         {/* Registrations Table */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Registrations</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Registrations</h2>
+
+              {/* Attendance Type Filter for Hybrid Events */}
+              {isHybridEvent && (inPersonCount > 0 || onlineCount > 0) && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Filter by:</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAttendanceFilter('all')}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        attendanceFilter === 'all'
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      All ({data.stats.totalRegistrations})
+                    </button>
+                    <button
+                      onClick={() => setAttendanceFilter('in-person')}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        attendanceFilter === 'in-person'
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      In-Person ({inPersonCount})
+                    </button>
+                    <button
+                      onClick={() => setAttendanceFilter('online')}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        attendanceFilter === 'online'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Online ({onlineCount})
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          
-          {data.registrations.length > 0 ? (
+
+          {filteredRegistrations.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -288,6 +367,11 @@ function EventRegistrationsContent() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contact
                     </th>
+                    {isHybridEvent && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                    )}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Registration Date
                     </th>
@@ -303,7 +387,7 @@ function EventRegistrationsContent() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.registrations.map((registration) => (
+                  {filteredRegistrations.map((registration) => (
                     <tr key={registration._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div>
@@ -323,6 +407,17 @@ function EventRegistrationsContent() {
                           <div className="text-sm text-gray-500">{registration.attendee.phone}</div>
                         )}
                       </td>
+                      {isHybridEvent && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {registration.attendanceType ? (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAttendanceTypeBadgeColor(registration.attendanceType)}`}>
+                              {registration.attendanceType === 'in-person' ? 'In-Person' : 'Online'}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-gray-400">—</span>
+                          )}
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(registration.registrationDate)}
                       </td>
@@ -400,7 +495,12 @@ function EventRegistrationsContent() {
             </div>
           ) : (
             <div className="px-6 py-12 text-center">
-              <p className="text-gray-500">No registrations yet</p>
+              <p className="text-gray-500">
+                {attendanceFilter !== 'all'
+                  ? `No ${attendanceFilter} registrations found`
+                  : 'No registrations yet'
+                }
+              </p>
             </div>
           )}
         </div>

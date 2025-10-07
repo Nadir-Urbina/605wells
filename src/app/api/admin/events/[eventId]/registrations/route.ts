@@ -48,6 +48,7 @@ export async function GET(request: NextRequest, { params }: Props) {
         attendee,
         customer,
         payment,
+        attendanceType,
         registrationDate,
         status,
         emailsSent,
