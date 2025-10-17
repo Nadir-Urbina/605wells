@@ -9,6 +9,7 @@ import Header from '@/components/Header';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import FreeEventRegistrationForm from '@/components/FreeEventRegistrationForm';
 import HybridEventRegistrationForm from '@/components/HybridEventRegistrationForm';
+import KingdomBuilderForm from '@/components/KingdomBuilderForm';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 import { PortableText } from '@portabletext/react';
 
@@ -21,6 +22,7 @@ export default function EventDetailPage() {
   const [isRegistrationFormOpen, setIsRegistrationFormOpen] = useState(false);
   const [isFreeRegistrationFormOpen, setIsFreeRegistrationFormOpen] = useState(false);
   const [isHybridRegistrationFormOpen, setIsHybridRegistrationFormOpen] = useState(false);
+  const [isDonateFormOpen, setIsDonateFormOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -197,7 +199,7 @@ export default function EventDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <Header onDonateClick={() => {}} />
+        <Header onDonateClick={() => setIsDonateFormOpen(true)} />
         <div className="pt-20 pb-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="animate-pulse">
@@ -219,7 +221,7 @@ export default function EventDetailPage() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <Header onDonateClick={() => {}} />
+        <Header onDonateClick={() => setIsDonateFormOpen(true)} />
         <div className="pt-20 pb-16 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Event Not Found</h1>
@@ -652,6 +654,13 @@ export default function EventDetailPage() {
           onSuccess={handleHybridRegistrationSuccess}
         />
       )}
+
+      {/* Kingdom Builder Donation Form */}
+      <KingdomBuilderForm
+        isOpen={isDonateFormOpen}
+        onClose={() => setIsDonateFormOpen(false)}
+        onPaymentSuccess={() => setIsDonateFormOpen(false)}
+      />
     </div>
   );
 } 

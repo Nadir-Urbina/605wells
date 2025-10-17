@@ -236,7 +236,11 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
     
     // Extract registration details from metadata and event data
     const attendeeEmail = metadata.attendeeEmail || metadata.customerEmail;
-    const attendeeName = metadata.attendeeName || metadata.customerName || 'Attendee';
+    const attendeeFirstName = metadata.attendeeFirstName || '';
+    const attendeeLastName = metadata.attendeeLastName || '';
+    const attendeeName = attendeeFirstName && attendeeLastName
+      ? `${attendeeFirstName} ${attendeeLastName}`
+      : metadata.attendeeName || metadata.customerName || 'Attendee';
     const eventTitle = eventData?.title || metadata.eventTitle || 'Event';
     const finalPrice = parseFloat(metadata.finalPrice || '0');
     const isKingdomBuilder = metadata.isKingdomBuilder === 'true';
@@ -308,8 +312,8 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
     try {
       await sendEventRegistrationConfirmation({
         email: attendeeEmail,
-        firstName: attendeeName.split(' ')[0] || '',
-        lastName: attendeeName.split(' ').slice(1).join(' ') || '',
+        firstName: attendeeFirstName || attendeeName.split(' ')[0] || '',
+        lastName: attendeeLastName || attendeeName.split(' ').slice(1).join(' ') || '',
         eventTitle,
         eventDate,
         eventTime,

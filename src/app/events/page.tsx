@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import KingdomBuilderForm from '@/components/KingdomBuilderForm';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 
 export default function EventsPage() {
@@ -13,6 +14,7 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDonateFormOpen, setIsDonateFormOpen] = useState(false);
 
   const categories = [
     { value: 'all', label: 'All Events' },
@@ -125,7 +127,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <Header onDonateClick={() => {}} />
+      <Header onDonateClick={() => setIsDonateFormOpen(true)} />
       
       <div className="pt-20 pb-16">
         {/* Hero Section */}
@@ -357,6 +359,12 @@ export default function EventsPage() {
           </div>
         </section>
       </div>
+
+      <KingdomBuilderForm
+        isOpen={isDonateFormOpen}
+        onClose={() => setIsDonateFormOpen(false)}
+        onPaymentSuccess={() => setIsDonateFormOpen(false)}
+      />
     </div>
   );
 } 

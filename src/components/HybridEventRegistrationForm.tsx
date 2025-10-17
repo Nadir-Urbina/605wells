@@ -782,48 +782,46 @@ export default function HybridEventRegistrationForm({
                       )}
                     </div>
 
-                    {/* Promo Code - Only show for in-person attendance */}
-                    {selectedAttendanceType === 'in-person' && (
-                      <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Promo Code (Optional)
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            {...register('promoCode')}
-                            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                            placeholder="Enter promo code"
-                          />
-                          <button
-                            type="button"
-                            onClick={validatePromoCode}
-                            disabled={!promoCode?.trim() || promoCodeStatus === 'checking'}
-                            className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {promoCodeStatus === 'checking' ? 'Checking...' : 'Apply'}
-                          </button>
-                        </div>
-                        
-                        {promoCodeStatus === 'valid' && (
-                          <p className="text-green-600 text-sm mt-1 flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Promo code applied! {pricing.promoCodeDiscount}% discount
-                          </p>
-                        )}
-                        
-                        {promoCodeStatus === 'invalid' && (
-                          <p className="text-red-500 text-sm mt-1 flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Invalid promo code
-                          </p>
-                        )}
+                    {/* Promo Code */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Promo Code (Optional)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          {...register('promoCode')}
+                          className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          placeholder="Enter promo code"
+                        />
+                        <button
+                          type="button"
+                          onClick={validatePromoCode}
+                          disabled={!promoCode?.trim() || promoCodeStatus === 'checking'}
+                          className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {promoCodeStatus === 'checking' ? 'Checking...' : 'Apply'}
+                        </button>
                       </div>
-                    )}
+
+                      {promoCodeStatus === 'valid' && (
+                        <p className="text-green-600 text-sm mt-1 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Promo code applied! {pricing.promoCodeDiscount}% discount
+                        </p>
+                      )}
+
+                      {promoCodeStatus === 'invalid' && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Invalid promo code
+                        </p>
+                      )}
+                    </div>
                   </motion.div>
                 )}
 

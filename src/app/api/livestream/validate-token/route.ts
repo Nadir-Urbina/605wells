@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity';
+import { client, writeClient } from '@/lib/sanity';
 
 export async function POST(request: NextRequest) {
   try {
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Update access count and last accessed time
     try {
-      await client
+      await writeClient
         .patch(livestreamAccess._id)
         .set({
           lastAccessed: new Date().toISOString(),
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return successful validation with user info
-    return NextResponse.json({
+    const response = {
       valid: true,
       attendeeName: livestreamAccess.attendeeName,
       attendeeEmail: livestreamAccess.attendeeEmail,
@@ -116,7 +116,14 @@ export async function POST(request: NextRequest) {
         accessCount: (livestreamAccess.accessCount || 0) + 1,
         firstAccess: !livestreamAccess.lastAccessed,
       }
+    };
+
+    console.log('Returning attendee info:', {
+      name: response.attendeeName,
+      email: response.attendeeEmail
     });
+
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Error validating livestream token:', error);

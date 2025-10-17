@@ -43,18 +43,25 @@ export default function LivestreamChat({
     const chatRef = ref(database, `livestream-chat/${eventSlug}`);
     const chatQuery = query(chatRef, orderByChild('timestamp'), limitToLast(100));
 
-    const unsubscribe = onValue(chatQuery, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const messagesList = Object.entries(data).map(([key, value]) => ({
-          ...(value as Omit<ChatMessage, 'id'>),
-          id: key,
-        }));
-        setMessages(messagesList);
-        setTimeout(scrollToBottom, 100);
+    const unsubscribe = onValue(
+      chatQuery,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const messagesList = Object.entries(data).map(([key, value]) => ({
+            ...(value as Omit<ChatMessage, 'id'>),
+            id: key,
+          }));
+          setMessages(messagesList);
+          setTimeout(scrollToBottom, 100);
+        }
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error('Firebase chat error:', error);
+        setIsLoading(false); // Stop loading even on error
       }
-      setIsLoading(false);
-    });
+    );
 
     return () => {
       unsubscribe();
