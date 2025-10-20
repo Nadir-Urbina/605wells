@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import AdminGuard from '@/components/AdminGuard'
+import * as XLSX from 'xlsx'
 
 interface EventDetails {
   _id: string
@@ -199,6 +200,74 @@ function EventRegistrationsContent() {
   const onlineCount = data?.registrations.filter(r => r.attendanceType === 'online').length || 0
   const isHybridEvent = data?.event.registrationType === 'hybrid'
 
+  const exportToCSV = () => {
+    if (!data) return
+
+    const exportData = filteredRegistrations.map(reg => ({
+      'First Name': reg.attendee.firstName,
+      'Last Name': reg.attendee.lastName,
+      'Email': reg.attendee.email,
+      'Phone': reg.attendee.phone || '',
+      'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+      'Registration Date': formatDate(reg.registrationDate),
+      'Amount Paid': reg.payment?.amount ? formatCurrency(reg.payment.amount) : 'Free',
+      'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
+      'Discount Amount': reg.payment?.discountAmount ? formatCurrency(reg.payment.discountAmount) : '',
+      'Original Price': reg.payment?.originalPrice ? formatCurrency(reg.payment.originalPrice) : '',
+      'Status': reg.status,
+      'Notes': reg.notes || '',
+      'Customer First Name': reg.customer?.firstName || '',
+      'Customer Last Name': reg.customer?.lastName || '',
+      'Customer Email': reg.customer?.email || '',
+      'Customer Phone': reg.customer?.phone || '',
+      'Customer Address': reg.customer?.address || '',
+      'Customer City': reg.customer?.city || '',
+      'Customer State': reg.customer?.state || '',
+      'Customer Zip': reg.customer?.zipCode || '',
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Registrations')
+
+    const fileName = `${data.event.title.replace(/[^a-z0-9]/gi, '_')}_registrations_${attendanceFilter}.csv`
+    XLSX.writeFile(wb, fileName, { bookType: 'csv' })
+  }
+
+  const exportToXLSX = () => {
+    if (!data) return
+
+    const exportData = filteredRegistrations.map(reg => ({
+      'First Name': reg.attendee.firstName,
+      'Last Name': reg.attendee.lastName,
+      'Email': reg.attendee.email,
+      'Phone': reg.attendee.phone || '',
+      'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+      'Registration Date': formatDate(reg.registrationDate),
+      'Amount Paid': reg.payment?.amount || 0,
+      'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
+      'Discount Amount': reg.payment?.discountAmount || 0,
+      'Original Price': reg.payment?.originalPrice || 0,
+      'Status': reg.status,
+      'Notes': reg.notes || '',
+      'Customer First Name': reg.customer?.firstName || '',
+      'Customer Last Name': reg.customer?.lastName || '',
+      'Customer Email': reg.customer?.email || '',
+      'Customer Phone': reg.customer?.phone || '',
+      'Customer Address': reg.customer?.address || '',
+      'Customer City': reg.customer?.city || '',
+      'Customer State': reg.customer?.state || '',
+      'Customer Zip': reg.customer?.zipCode || '',
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Registrations')
+
+    const fileName = `${data.event.title.replace(/[^a-z0-9]/gi, '_')}_registrations_${attendanceFilter}.xlsx`
+    XLSX.writeFile(wb, fileName)
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -312,47 +381,68 @@ function EventRegistrationsContent() {
         {/* Registrations Table */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <h2 className="text-lg font-medium text-gray-900">Registrations</h2>
 
-              {/* Attendance Type Filter for Hybrid Events */}
-              {isHybridEvent && (inPersonCount > 0 || onlineCount > 0) && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Filter by:</span>
-                  <div className="flex gap-2">
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Export Buttons */}
+                {filteredRegistrations.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Export:</span>
                     <button
-                      onClick={() => setAttendanceFilter('all')}
-                      className={`px-3 py-1 text-sm rounded-md ${
-                        attendanceFilter === 'all'
-                          ? 'bg-orange-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                      onClick={exportToCSV}
+                      className="px-3 py-1 text-sm rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors"
                     >
-                      All ({data.stats.totalRegistrations})
+                      CSV
                     </button>
                     <button
-                      onClick={() => setAttendanceFilter('in-person')}
-                      className={`px-3 py-1 text-sm rounded-md ${
-                        attendanceFilter === 'in-person'
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                      onClick={exportToXLSX}
+                      className="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                     >
-                      In-Person ({inPersonCount})
-                    </button>
-                    <button
-                      onClick={() => setAttendanceFilter('online')}
-                      className={`px-3 py-1 text-sm rounded-md ${
-                        attendanceFilter === 'online'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      Online ({onlineCount})
+                      XLSX
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Attendance Type Filter for Hybrid Events */}
+                {isHybridEvent && (inPersonCount > 0 || onlineCount > 0) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Filter by:</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setAttendanceFilter('all')}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          attendanceFilter === 'all'
+                            ? 'bg-orange-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        All ({data.stats.totalRegistrations})
+                      </button>
+                      <button
+                        onClick={() => setAttendanceFilter('in-person')}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          attendanceFilter === 'in-person'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        In-Person ({inPersonCount})
+                      </button>
+                      <button
+                        onClick={() => setAttendanceFilter('online')}
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          attendanceFilter === 'online'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        Online ({onlineCount})
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
