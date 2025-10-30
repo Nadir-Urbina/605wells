@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
+import RecaptchaProvider from "@/components/RecaptchaProvider";
 import "./globals.css";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -54,8 +55,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${montserrat.variable} antialiased font-sans`}>
-        {children}
-        <Analytics />
+        <RecaptchaProvider>
+          {children}
+          <Analytics />
+        </RecaptchaProvider>
       </body>
     </html>
   );

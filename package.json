@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "email:test": "tsx scripts/send-correction-email.ts test",
+    "email:send": "tsx scripts/send-correction-email.ts send"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",
@@ -25,6 +27,7 @@
     "react": "19.1.0",
     "react-big-calendar": "^1.19.4",
     "react-dom": "19.1.0",
+    "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.61.1",
     "resend": "^4.7.0",
     "sanity": "^4.2.0",
@@ -42,6 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

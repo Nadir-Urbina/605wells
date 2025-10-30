@@ -85,6 +85,8 @@ sanity/                   # Sanity CMS configuration
 - Firebase configuration variables
 - `ADMIN_SECRET`
 - `RESEND_API_KEY`
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` - Google reCAPTCHA v3 site key for bot protection
+- `RECAPTCHA_SECRET_KEY` - Google reCAPTCHA v3 secret key for server-side verification
 
 ### Development Notes
 
