@@ -137,12 +137,12 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
 `;
 
 // Verify reCAPTCHA token
-async function verifyRecaptcha(token: string): Promise<boolean> {
+async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number }> {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
 
   if (!secretKey) {
     console.error('RECAPTCHA_SECRET_KEY is not configured');
-    return false;
+    return { success: false };
   }
 
   try {
@@ -157,23 +157,73 @@ async function verifyRecaptcha(token: string): Promise<boolean> {
     const data = await response.json();
 
     // For reCAPTCHA v3, check score (0.0 to 1.0, higher is better)
-    // Scores below 0.5 are likely bots
-    return data.success && data.score >= 0.5;
+    // Increased threshold to 0.7 for stricter bot detection
+    const isHuman = data.success && data.score >= 0.7;
+
+    console.log('reCAPTCHA verification:', {
+      success: data.success,
+      score: data.score,
+      passed: isHuman
+    });
+
+    return { success: isHuman, score: data.score };
   } catch (error) {
     console.error('reCAPTCHA verification error:', error);
-    return false;
+    return { success: false };
   }
+}
+
+// Check if text is gibberish (high entropy, no real words)
+function isGibberish(text: string): boolean {
+  // Check for random character patterns
+  const hasMultipleConsecutiveCaps = /[A-Z]{4,}/.test(text);
+  const hasRandomMixedCase = /[a-z][A-Z][a-z][A-Z]/.test(text);
+  const lacksSpaces = text.length > 20 && !text.includes(' ');
+
+  // Check for reasonable vowel ratio (gibberish often lacks vowels)
+  const vowels = text.match(/[aeiouAEIOU]/g)?.length || 0;
+  const consonants = text.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g)?.length || 0;
+  const vowelRatio = vowels / (vowels + consonants || 1);
+  const hasUnusualVowelRatio = vowelRatio < 0.2 || vowelRatio > 0.7;
+
+  return hasMultipleConsecutiveCaps || hasRandomMixedCase || lacksSpaces || hasUnusualVowelRatio;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, message, recaptchaToken } = body;
+    const { name, email, phone, message, recaptchaToken, honeypot } = body;
+
+    // Honeypot check - if filled, it's a bot
+    if (honeypot) {
+      console.warn('Bot detected via honeypot:', { name, email });
+      return NextResponse.json(
+        { error: 'Invalid submission' },
+        { status: 403 }
+      );
+    }
 
     // Validate required fields
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: 'Name, email, and message are required' },
+        { status: 400 }
+      );
+    }
+
+    // Check for gibberish in name and message
+    if (isGibberish(name)) {
+      console.warn('Gibberish detected in name:', { name, email });
+      return NextResponse.json(
+        { error: 'Please provide a valid name' },
+        { status: 400 }
+      );
+    }
+
+    if (isGibberish(message)) {
+      console.warn('Gibberish detected in message:', { name, email, message });
+      return NextResponse.json(
+        { error: 'Please provide a valid message' },
         { status: 400 }
       );
     }
@@ -195,9 +245,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isHuman = await verifyRecaptcha(recaptchaToken);
-    if (!isHuman) {
-      console.warn('Potential bot submission blocked:', { name, email });
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+    if (!recaptchaResult.success) {
+      console.warn('Bot submission blocked by reCAPTCHA:', {
+        name,
+        email,
+        score: recaptchaResult.score
+      });
       return NextResponse.json(
         { error: 'reCAPTCHA verification failed. Please try again.' },
         { status: 403 }

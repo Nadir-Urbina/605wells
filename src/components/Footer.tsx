@@ -13,6 +13,7 @@ export default function Footer() {
     phone: '',
     message: ''
   });
+  const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -40,7 +41,8 @@ export default function Footer() {
         },
         body: JSON.stringify({
           ...formData,
-          recaptchaToken
+          recaptchaToken,
+          honeypot
         }),
       });
 
@@ -155,6 +157,18 @@ export default function Footer() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3">
+                {/* Honeypot field - hidden from users, bots will fill it */}
+                <input
+                  type="text"
+                  name="website"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="absolute opacity-0 pointer-events-none"
+                  aria-hidden="true"
+                />
+
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
