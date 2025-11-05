@@ -210,8 +210,8 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
               Support our Mission
             </h3>
             <p className="text-purple-700 text-sm sm:text-base mb-4 sm:mb-6">
-              Join 120 Kingdom Builders who are partnering with us to transform 605 Wells into a regional Kingdom Hub.
-              Your monthly support helps us continue producing powerful content like this and expanding our impact.
+            Join the Foundational Builders partnering with us to establish 605 Wells as a regional Kingdom Hub. 
+            Your monthly giving empowers our outreach efforts, expands our local impact, and helps us release transformational content.
             </p>
             <button
               onClick={() => setIsKingdomBuilderFormOpen(true)}
