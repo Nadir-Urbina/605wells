@@ -246,16 +246,51 @@ const livestreamAccessSchema = defineType({
   type: 'document',
   fields: [
     defineField({
+      name: 'contentType',
+      title: 'Content Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Live Event', value: 'event'},
+          {title: 'Past Event Recording', value: 'pastEvent'},
+        ],
+      },
+      initialValue: 'event',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'event',
       title: 'Event',
       type: 'reference',
       to: [{type: 'event'}],
+      hidden: ({document}) => document?.contentType === 'pastEvent',
+    }),
+    defineField({
+      name: 'pastEvent',
+      title: 'Past Event',
+      type: 'reference',
+      to: [{type: 'pastEvent'}],
+      hidden: ({document}) => document?.contentType === 'event',
     }),
     defineField({
       name: 'eventRegistration',
       title: 'Event Registration',
       type: 'reference',
       to: [{type: 'eventRegistration'}],
+    }),
+    defineField({
+      name: 'accessType',
+      title: 'Access Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Purchased', value: 'purchased'},
+          {title: 'Complimentary (In-Person Attendee)', value: 'complimentary'},
+          {title: 'Admin Generated', value: 'admin'},
+        ],
+      },
+      initialValue: 'purchased',
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'accessToken',
@@ -293,6 +328,164 @@ const livestreamAccessSchema = defineType({
       title: 'Access Count',
       type: 'number',
       initialValue: 0,
+    }),
+  ],
+})
+
+// Define past event schema
+const pastEventSchema = defineType({
+  name: 'pastEvent',
+  title: 'Past Event',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'Event Title',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'originalEvent',
+      title: 'Original Event',
+      type: 'reference',
+      to: [{type: 'event'}],
+      description: 'Link to the original event if it exists in the system',
+    }),
+    defineField({
+      name: 'thumbnail',
+      title: 'Thumbnail Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+      fields: [
+        {
+          name: 'alt',
+          type: 'string',
+          title: 'Alternative Text',
+        },
+      ],
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'description',
+      title: 'Description',
+      type: 'text',
+      rows: 4,
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'content',
+      title: 'Full Description',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+        },
+        {
+          type: 'image',
+          options: {hotspot: true},
+        },
+      ],
+    }),
+    defineField({
+      name: 'eventDate',
+      title: 'Original Event Date',
+      type: 'datetime',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'duration',
+      title: 'Video Duration',
+      type: 'string',
+      description: 'e.g., "2h 30m" or "90 minutes"',
+      placeholder: '2h 30m',
+    }),
+    defineField({
+      name: 'vimeoEmbedCode',
+      title: 'Vimeo Embed Code',
+      type: 'text',
+      rows: 4,
+      validation: (Rule) => Rule.required(),
+      description: 'Full embed code from Vimeo (or other video platform)',
+    }),
+    defineField({
+      name: 'price',
+      title: 'Price (USD)',
+      type: 'number',
+      validation: (Rule) => Rule.required().min(0),
+      description: 'Price to access this recording (use 0 for free)',
+      initialValue: 9.99,
+    }),
+    defineField({
+      name: 'category',
+      title: 'Event Category',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Worship Service', value: 'worship'},
+          {title: 'Teaching & Discipleship', value: 'teaching'},
+          {title: 'Prayer & Intercession', value: 'prayer'},
+          {title: 'Community Outreach', value: 'outreach'},
+          {title: 'Youth Ministry', value: 'youth'},
+          {title: 'Special Event', value: 'special'},
+          {title: 'Conference', value: 'conference'},
+          {title: 'Fellowship', value: 'fellowship'},
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'speakers',
+      title: 'Speakers/Teachers',
+      type: 'array',
+      of: [{type: 'string'}],
+      description: 'Names of speakers or teachers featured in this event',
+    }),
+    defineField({
+      name: 'tags',
+      title: 'Tags',
+      type: 'array',
+      of: [{type: 'string'}],
+      description: 'Keywords for searchability (e.g., "prophecy", "healing", "worship")',
+    }),
+    defineField({
+      name: 'featured',
+      title: 'Featured',
+      type: 'boolean',
+      description: 'Show this event prominently on the past events page',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'isActive',
+      title: 'Active for Purchase',
+      type: 'boolean',
+      description: 'Make this recording available for purchase',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'publishedAt',
+      title: 'Published Date',
+      type: 'datetime',
+      description: 'When this recording became available',
+      initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: 'relatedEvents',
+      title: 'Related Past Events',
+      type: 'array',
+      of: [{type: 'reference', to: [{type: 'pastEvent'}]}],
+      description: 'Other recordings viewers might be interested in',
     }),
   ],
 })
@@ -428,7 +621,7 @@ const config = defineConfig({
   plugins: [structureTool(), visionTool()],
   
   schema: {
-    types: [eventSchema, livestreamAccessSchema, eventRegistrationSchema],
+    types: [eventSchema, pastEventSchema, livestreamAccessSchema, eventRegistrationSchema],
   },
 })
 

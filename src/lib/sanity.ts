@@ -122,6 +122,85 @@ export const eventQueries = {
   }`,
 }
 
+// GROQ queries for past events
+export const pastEventQueries = {
+  // Get all active past events, ordered by publish date
+  allPastEvents: `*[_type == "pastEvent" && isActive == true] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    description,
+    thumbnail,
+    eventDate,
+    duration,
+    price,
+    category,
+    speakers,
+    tags,
+    featured,
+    publishedAt
+  }`,
+
+  // Get featured past events
+  featuredPastEvents: `*[_type == "pastEvent" && isActive == true && featured == true] | order(publishedAt desc) [0...6] {
+    _id,
+    title,
+    slug,
+    description,
+    thumbnail,
+    eventDate,
+    duration,
+    price,
+    category,
+    speakers,
+    featured,
+    publishedAt
+  }`,
+
+  // Get single past event by slug (full details including embed code)
+  pastEventBySlug: `*[_type == "pastEvent" && slug.current == $slug && isActive == true][0] {
+    _id,
+    title,
+    slug,
+    description,
+    content,
+    thumbnail,
+    eventDate,
+    duration,
+    vimeoEmbedCode,
+    price,
+    category,
+    speakers,
+    tags,
+    featured,
+    isActive,
+    publishedAt,
+    "relatedEvents": relatedEvents[]->{
+      _id,
+      title,
+      slug,
+      thumbnail,
+      price,
+      category
+    }
+  }`,
+
+  // Get past events by category
+  pastEventsByCategory: `*[_type == "pastEvent" && isActive == true && category == $category] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    description,
+    thumbnail,
+    eventDate,
+    duration,
+    price,
+    category,
+    speakers,
+    publishedAt
+  }`,
+}
+
 // TypeScript interfaces
 export interface EventSession {
   startTime: string // DateTime in ISO format
@@ -219,18 +298,67 @@ export interface SanityEventRegistration {
   notes?: string
 }
 
-// Livestream Access interface
+// Past Event interfaces
+export interface SanityPastEvent {
+  _id: string
+  title: string
+  slug: {
+    current: string
+  }
+  originalEvent?: {
+    _type: 'reference'
+    _ref: string
+  }
+  thumbnail: {
+    asset: {
+      _ref: string
+    }
+    alt?: string
+  }
+  description: string
+  content?: Array<{
+    _type: string;
+    _key: string;
+    [key: string]: unknown;
+  }>
+  eventDate: string
+  duration?: string
+  vimeoEmbedCode: string
+  price: number
+  category: string
+  speakers?: string[]
+  tags?: string[]
+  featured: boolean
+  isActive: boolean
+  publishedAt: string
+  relatedEvents?: Array<{
+    _id: string
+    title: string
+    slug: { current: string }
+    thumbnail: { asset: { _ref: string } }
+    price: number
+    category: string
+  }>
+}
+
+// Livestream Access interface (updated to support past events)
 export interface SanityLivestreamAccess {
   _type: 'livestreamAccess'
   _id: string
-  event: {
+  contentType: 'event' | 'pastEvent'
+  event?: {
     _type: 'reference'
     _ref: string
   }
-  eventRegistration: {
+  pastEvent?: {
     _type: 'reference'
     _ref: string
   }
+  eventRegistration?: {
+    _type: 'reference'
+    _ref: string
+  }
+  accessType: 'purchased' | 'complimentary' | 'admin'
   accessToken: string
   attendeeEmail: string
   attendeeName: string

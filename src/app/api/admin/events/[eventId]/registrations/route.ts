@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: Props) {
       )
     }
 
-    // Fetch all registrations for this event
+    // Fetch all registrations for this event with their past event access tokens
     const registrations = await client.fetch(`
       *[_type == "eventRegistration" && event._ref == $eventId] | order(registrationDate desc) {
         _id,
@@ -52,7 +52,14 @@ export async function GET(request: NextRequest, { params }: Props) {
         registrationDate,
         status,
         emailsSent,
-        notes
+        notes,
+        "pastEventAccess": *[_type == "livestreamAccess"
+          && contentType == "pastEvent"
+          && eventRegistration._ref == ^._id][0] {
+          accessToken,
+          "pastEventSlug": pastEvent->slug.current,
+          "pastEventTitle": pastEvent->title
+        }
       }
     `, { eventId })
 

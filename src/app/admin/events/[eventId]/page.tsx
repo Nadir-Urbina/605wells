@@ -53,6 +53,11 @@ interface Registration {
     subject?: string
   }>
   notes?: string
+  pastEventAccess?: {
+    accessToken: string
+    pastEventSlug: string
+    pastEventTitle: string
+  }
 }
 
 interface EventStats {
@@ -84,6 +89,13 @@ function EventRegistrationsContent() {
   const [editStatus, setEditStatus] = useState('')
   const [editNotes, setEditNotes] = useState('')
   const [attendanceFilter, setAttendanceFilter] = useState<'all' | 'in-person' | 'online'>('all')
+  const [pastEventSlug, setPastEventSlug] = useState('')
+  const [isGeneratingTokens, setIsGeneratingTokens] = useState(false)
+  const [tokenGenerationResult, setTokenGenerationResult] = useState<{
+    success: boolean
+    message: string
+    tokensCreated?: number
+  } | null>(null)
 
   const fetchEventData = useCallback(async () => {
     try {
@@ -145,6 +157,53 @@ function EventRegistrationsContent() {
     setEditNotes('')
   }
 
+  const handleGeneratePastEventAccess = async () => {
+    if (!pastEventSlug.trim()) {
+      alert('Please enter a past event slug')
+      return
+    }
+
+    setIsGeneratingTokens(true)
+    setTokenGenerationResult(null)
+
+    try {
+      const response = await fetch('/api/admin/generate-complimentary-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pastEventSlug: pastEventSlug.trim(),
+          originalEventId: eventId, // Pass the event ID directly
+          sendEmails: false, // Don't send emails, user will use Power Automate
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to generate tokens')
+      }
+
+      setTokenGenerationResult({
+        success: true,
+        message: result.message,
+        tokensCreated: result.tokensCreated,
+      })
+
+      // Refresh the page data to include tokens in export
+      await fetchEventData()
+    } catch (error) {
+      console.error('Error generating tokens:', error)
+      setTokenGenerationResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to generate tokens',
+      })
+    } finally {
+      setIsGeneratingTokens(false)
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
@@ -203,28 +262,38 @@ function EventRegistrationsContent() {
   const exportToCSV = () => {
     if (!data) return
 
-    const exportData = filteredRegistrations.map(reg => ({
-      'First Name': reg.attendee.firstName,
-      'Last Name': reg.attendee.lastName,
-      'Email': reg.attendee.email,
-      'Phone': reg.attendee.phone || '',
-      'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
-      'Registration Date': formatDate(reg.registrationDate),
-      'Amount Paid': reg.payment?.amount ? formatCurrency(reg.payment.amount) : 'Free',
-      'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
-      'Discount Amount': reg.payment?.discountAmount ? formatCurrency(reg.payment.discountAmount) : '',
-      'Original Price': reg.payment?.originalPrice ? formatCurrency(reg.payment.originalPrice) : '',
-      'Status': reg.status,
-      'Notes': reg.notes || '',
-      'Customer First Name': reg.customer?.firstName || '',
-      'Customer Last Name': reg.customer?.lastName || '',
-      'Customer Email': reg.customer?.email || '',
-      'Customer Phone': reg.customer?.phone || '',
-      'Customer Address': reg.customer?.address || '',
-      'Customer City': reg.customer?.city || '',
-      'Customer State': reg.customer?.state || '',
-      'Customer Zip': reg.customer?.zipCode || '',
-    }))
+    const baseUrl = window.location.origin
+    const exportData = filteredRegistrations.map(reg => {
+      const accessLink = reg.pastEventAccess
+        ? `${baseUrl}/past-events/${reg.pastEventAccess.pastEventSlug}/watch?token=${reg.pastEventAccess.accessToken}`
+        : ''
+
+      return {
+        'First Name': reg.attendee.firstName,
+        'Last Name': reg.attendee.lastName,
+        'Email': reg.attendee.email,
+        'Phone': reg.attendee.phone || '',
+        'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+        'Registration Date': formatDate(reg.registrationDate),
+        'Amount Paid': reg.payment?.amount ? formatCurrency(reg.payment.amount) : 'Free',
+        'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
+        'Discount Amount': reg.payment?.discountAmount ? formatCurrency(reg.payment.discountAmount) : '',
+        'Original Price': reg.payment?.originalPrice ? formatCurrency(reg.payment.originalPrice) : '',
+        'Status': reg.status,
+        'Notes': reg.notes || '',
+        'Past Event Title': reg.pastEventAccess?.pastEventTitle || '',
+        'Access Token': reg.pastEventAccess?.accessToken || '',
+        'Access Link': accessLink,
+        'Customer First Name': reg.customer?.firstName || '',
+        'Customer Last Name': reg.customer?.lastName || '',
+        'Customer Email': reg.customer?.email || '',
+        'Customer Phone': reg.customer?.phone || '',
+        'Customer Address': reg.customer?.address || '',
+        'Customer City': reg.customer?.city || '',
+        'Customer State': reg.customer?.state || '',
+        'Customer Zip': reg.customer?.zipCode || '',
+      }
+    })
 
     const ws = XLSX.utils.json_to_sheet(exportData)
     const wb = XLSX.utils.book_new()
@@ -237,28 +306,38 @@ function EventRegistrationsContent() {
   const exportToXLSX = () => {
     if (!data) return
 
-    const exportData = filteredRegistrations.map(reg => ({
-      'First Name': reg.attendee.firstName,
-      'Last Name': reg.attendee.lastName,
-      'Email': reg.attendee.email,
-      'Phone': reg.attendee.phone || '',
-      'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
-      'Registration Date': formatDate(reg.registrationDate),
-      'Amount Paid': reg.payment?.amount || 0,
-      'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
-      'Discount Amount': reg.payment?.discountAmount || 0,
-      'Original Price': reg.payment?.originalPrice || 0,
-      'Status': reg.status,
-      'Notes': reg.notes || '',
-      'Customer First Name': reg.customer?.firstName || '',
-      'Customer Last Name': reg.customer?.lastName || '',
-      'Customer Email': reg.customer?.email || '',
-      'Customer Phone': reg.customer?.phone || '',
-      'Customer Address': reg.customer?.address || '',
-      'Customer City': reg.customer?.city || '',
-      'Customer State': reg.customer?.state || '',
-      'Customer Zip': reg.customer?.zipCode || '',
-    }))
+    const baseUrl = window.location.origin
+    const exportData = filteredRegistrations.map(reg => {
+      const accessLink = reg.pastEventAccess
+        ? `${baseUrl}/past-events/${reg.pastEventAccess.pastEventSlug}/watch?token=${reg.pastEventAccess.accessToken}`
+        : ''
+
+      return {
+        'First Name': reg.attendee.firstName,
+        'Last Name': reg.attendee.lastName,
+        'Email': reg.attendee.email,
+        'Phone': reg.attendee.phone || '',
+        'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+        'Registration Date': formatDate(reg.registrationDate),
+        'Amount Paid': reg.payment?.amount || 0,
+        'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
+        'Discount Amount': reg.payment?.discountAmount || 0,
+        'Original Price': reg.payment?.originalPrice || 0,
+        'Status': reg.status,
+        'Notes': reg.notes || '',
+        'Past Event Title': reg.pastEventAccess?.pastEventTitle || '',
+        'Access Token': reg.pastEventAccess?.accessToken || '',
+        'Access Link': accessLink,
+        'Customer First Name': reg.customer?.firstName || '',
+        'Customer Last Name': reg.customer?.lastName || '',
+        'Customer Email': reg.customer?.email || '',
+        'Customer Phone': reg.customer?.phone || '',
+        'Customer Address': reg.customer?.address || '',
+        'Customer City': reg.customer?.city || '',
+        'Customer State': reg.customer?.state || '',
+        'Customer Zip': reg.customer?.zipCode || '',
+      }
+    })
 
     const ws = XLSX.utils.json_to_sheet(exportData)
     const wb = XLSX.utils.book_new()
@@ -377,6 +456,82 @@ function EventRegistrationsContent() {
             </div>
           </div>
         )}
+
+        {/* Generate Past Event Access */}
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Past Event Recording Access</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Generate unique access tokens for all attendees to watch the past event recording.
+            After generating tokens, you can export the data with access links to send via Power Automate.
+          </p>
+
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[300px]">
+              <label htmlFor="pastEventSlug" className="block text-sm font-medium text-gray-700 mb-2">
+                Past Event Slug
+              </label>
+              <input
+                id="pastEventSlug"
+                type="text"
+                value={pastEventSlug}
+                onChange={(e) => setPastEventSlug(e.target.value)}
+                placeholder="e.g., radical-roundtable-return-to-origins"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={isGeneratingTokens}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter the slug of the past event from Sanity CMS
+              </p>
+            </div>
+
+            <button
+              onClick={handleGeneratePastEventAccess}
+              disabled={isGeneratingTokens || !pastEventSlug.trim()}
+              className="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-semibold"
+            >
+              {isGeneratingTokens ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </span>
+              ) : (
+                'Generate Access Tokens'
+              )}
+            </button>
+          </div>
+
+          {tokenGenerationResult && (
+            <div className={`mt-4 p-4 rounded-md ${
+              tokenGenerationResult.success
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="flex items-start">
+                {tokenGenerationResult.success ? (
+                  <svg className="w-5 h-5 text-green-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                )}
+                <div className={tokenGenerationResult.success ? 'text-green-800' : 'text-red-800'}>
+                  <p className="font-medium">{tokenGenerationResult.message}</p>
+                  {tokenGenerationResult.tokensCreated !== undefined && (
+                    <p className="text-sm mt-1">
+                      {tokenGenerationResult.tokensCreated} unique access token{tokenGenerationResult.tokensCreated !== 1 ? 's' : ''} created.
+                      You can now export the data below to get the access links.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Registrations Table */}
         <div className="bg-white shadow rounded-lg">

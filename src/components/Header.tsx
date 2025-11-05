@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { track } from '@vercel/analytics';
 
 interface HeaderProps {
-  onDonateClick: () => void;
+  onDonateClick?: () => void;
 }
 
-export default function Header({ onDonateClick }: HeaderProps) {
+export default function Header({ onDonateClick = () => {} }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -49,6 +49,7 @@ export default function Header({ onDonateClick }: HeaderProps) {
   const navItems = [
     { name: 'About', id: 'about' },
     { name: 'Events', id: 'events' },
+    { name: 'Past Events', id: 'past-events' },
     { name: 'Calendar', id: 'calendar' },
     { name: 'News', id: 'news' },
     { name: 'Contact', id: 'contact' },

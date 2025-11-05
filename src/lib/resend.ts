@@ -1095,4 +1095,173 @@ export async function sendEventRegistrationConfirmation(data: {
     console.error('Error sending event registration confirmation email:', error);
     throw error;
   }
+}
+
+// Past Event Access Confirmation Email
+interface PastEventAccessEmailData {
+  toEmail: string;
+  attendeeName: string;
+  pastEventTitle: string;
+  pastEventSlug: string;
+  accessToken: string;
+  eventDate: string;
+  duration?: string;
+  speakers?: string[];
+  price: number;
+}
+
+export async function sendPastEventAccessConfirmation(data: PastEventAccessEmailData) {
+  try {
+    const watchUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/past-events/${data.pastEventSlug}/watch?token=${data.accessToken}`;
+
+    const eventDateFormatted = new Date(data.eventDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells <noreply@605wells.com>',
+      to: [data.toEmail],
+      subject: `🎥 Your Access is Ready: ${data.pastEventTitle}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Ready - ${data.pastEventTitle}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .confirmation-banner { background-color: #10b981; color: white; padding: 15px; text-align: center; font-weight: 600; }
+    .content { padding: 30px; color: #374151; line-height: 1.6; }
+    .event-title { font-size: 24px; font-weight: bold; color: #1f2937; margin: 0 0 20px 0; }
+    .watch-button { display: inline-block; background-color: #8b5cf6; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 20px 0; }
+    .watch-button:hover { background-color: #7c3aed; }
+    .info-box { background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .info-box h3 { margin: 0 0 10px 0; color: #1f2937; font-size: 16px; }
+    .info-item { margin: 8px 0; color: #4b5563; font-size: 14px; }
+    .token-box { background-color: #eff6ff; border: 2px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .token-box h3 { margin: 0 0 10px 0; color: #1e40af; font-size: 14px; }
+    .token { font-family: 'Courier New', monospace; background-color: white; padding: 12px; border-radius: 4px; word-break: break-all; font-size: 12px; color: #1f2937; }
+    .speakers-list { background-color: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 20px 0; }
+    .speakers-list h3 { margin: 0 0 10px 0; color: #92400e; font-size: 16px; }
+    .speakers-list ul { margin: 0; padding-left: 20px; }
+    .speakers-list li { color: #78350f; margin: 5px 0; }
+    .important-box { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .important-box h3 { margin: 0 0 10px 0; color: #92400e; }
+    .important-box ul { margin: 0; padding-left: 20px; }
+    .important-box li { color: #78350f; margin: 8px 0; }
+    .price-summary { background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .price-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 16px; }
+    .price-total { font-weight: bold; font-size: 20px; color: #8b5cf6; padding-top: 10px; border-top: 2px solid #e5e7eb; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer h3 { margin: 0 0 10px 0; font-size: 18px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>605 Wells</h1>
+    </div>
+
+    <div class="confirmation-banner">
+      ✅ Your Access is Ready!
+    </div>
+
+    <div class="content">
+      <h2 class="event-title">${data.pastEventTitle}</h2>
+
+      <p>Hello ${data.attendeeName},</p>
+
+      <p>Thank you for your purchase! Your access to this event recording is now active. You can start watching immediately.</p>
+
+      <div style="text-align: center;">
+        <a href="${watchUrl}" class="watch-button">
+          ▶️ Watch Now
+        </a>
+      </div>
+
+      <div class="info-box">
+        <h3>Event Details</h3>
+        <div class="info-item"><strong>Event:</strong> ${data.pastEventTitle}</div>
+        <div class="info-item"><strong>Original Date:</strong> ${eventDateFormatted}</div>
+        ${data.duration ? `<div class="info-item"><strong>Duration:</strong> ${data.duration}</div>` : ''}
+      </div>
+
+      ${data.speakers && data.speakers.length > 0 ? `
+      <div class="speakers-list">
+        <h3>Featured Speakers</h3>
+        <ul>
+          ${data.speakers.map(speaker => `<li>${speaker}</li>`).join('')}
+        </ul>
+      </div>
+      ` : ''}
+
+      ${data.price > 0 ? `
+      <div class="price-summary">
+        <div class="price-row price-total">
+          <span>Amount Paid:</span>
+          <span>$${data.price.toFixed(2)}</span>
+        </div>
+      </div>
+      ` : ''}
+
+      <div class="token-box">
+        <h3>🔑 Your Access Token</h3>
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #1e40af;">Save this token in case you need it later:</p>
+        <div class="token">${data.accessToken}</div>
+      </div>
+
+      <div class="important-box">
+        <h3>⭐ Important Information</h3>
+        <ul>
+          <li><strong>Unlimited Access:</strong> Watch this recording as many times as you'd like</li>
+          <li><strong>Bookmark This Page:</strong> Save the watch link for easy access anytime</li>
+          <li><strong>Keep This Email:</strong> Your access token is included above</li>
+          <li><strong>No Expiration:</strong> Your access never expires</li>
+        </ul>
+      </div>
+
+      <p>If you have any questions or need assistance, please don't hesitate to reach out to us.</p>
+
+      <p style="margin-top: 30px;">
+        Blessings,<br>
+        <strong>The 605 Wells Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <h3>605 Wells</h3>
+      <p>Jacksonville, FL</p>
+      <p>
+        Questions? Email us at
+        <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a>
+      </p>
+      <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+        This email was sent because you purchased access to ${data.pastEventTitle}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send past event access confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Past event access confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending past event access confirmation email:', error);
+    throw error;
+  }
 } 

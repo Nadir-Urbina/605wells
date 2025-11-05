@@ -59,6 +59,10 @@ export async function POST(request: NextRequest) {
         await handleOneTimePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
         break;
 
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -163,11 +167,17 @@ async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
 
 async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log('One-time payment succeeded:', paymentIntent.id);
-  
+
   try {
     // Check if this is an event registration
     if (paymentIntent.metadata.type === 'event_registration') {
       await handleEventRegistrationSuccess(paymentIntent);
+      return;
+    }
+
+    // Check if this is a past event purchase
+    if (paymentIntent.metadata.type === 'past_event_purchase') {
+      await handlePastEventPurchaseFromPaymentIntent(paymentIntent);
       return;
     }
 
@@ -190,7 +200,7 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
 
     if (email) {
       console.log('Sending one-time donation thank you email to:', email);
-      
+
       await sendThankYouEmail({
         email: email,
         name: customerName,
@@ -400,6 +410,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
           
           const livestreamAccess: Omit<SanityLivestreamAccess, '_id'> = {
             _type: 'livestreamAccess',
+            contentType: 'event',
             event: {
               _type: 'reference',
               _ref: eventDocumentId,
@@ -408,6 +419,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
               _type: 'reference',
               _ref: savedRegistration._id,
             },
+            accessType: 'purchased',
             accessToken,
             attendeeEmail,
             attendeeName,
@@ -504,6 +516,189 @@ async function sendThankYouEmail(data: {
   }
 }
 
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  console.log('Checkout session completed:', session.id);
+
+  try {
+    const metadata = session.metadata;
+
+    if (!metadata) {
+      console.log('No metadata found for checkout session');
+      return;
+    }
+
+    // Handle past event purchase
+    if (metadata.type === 'past_event_purchase') {
+      await handlePastEventPurchase(session);
+      return;
+    }
+
+    console.log('Unhandled checkout session type:', metadata.type);
+  } catch (error) {
+    console.error('Error handling checkout session:', error);
+  }
+}
+
+async function handlePastEventPurchase(session: Stripe.Checkout.Session) {
+  console.log('Past event purchase completed:', session.id);
+
+  try {
+    const metadata = session.metadata!;
+    const { pastEventId, pastEventSlug, firstName, lastName, email } = metadata;
+
+    if (!pastEventId || !pastEventSlug || !email) {
+      console.error('Missing required metadata for past event purchase');
+      return;
+    }
+
+    // Fetch past event details from Sanity
+    const pastEvent = await client.fetch(
+      `*[_type == "pastEvent" && _id == $pastEventId][0] {
+        _id,
+        title,
+        slug,
+        eventDate,
+        duration,
+        speakers,
+        price
+      }`,
+      { pastEventId }
+    );
+
+    if (!pastEvent) {
+      console.error('Past event not found:', pastEventId);
+      return;
+    }
+
+    // Generate access token
+    const accessToken = crypto.randomBytes(32).toString('hex');
+
+    // Create livestream access record
+    const accessRecord = {
+      _type: 'livestreamAccess' as const,
+      contentType: 'pastEvent' as const,
+      pastEvent: {
+        _type: 'reference' as const,
+        _ref: pastEventId,
+      },
+      accessType: 'purchased' as const,
+      accessToken,
+      attendeeEmail: email,
+      attendeeName: `${firstName} ${lastName}`,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      accessCount: 0,
+    };
+
+    const result = await writeClient.create(accessRecord);
+    console.log('✅ Created past event access token:', result._id);
+
+    // Send confirmation email
+    try {
+      const { sendPastEventAccessConfirmation } = await import('@/lib/resend');
+
+      await sendPastEventAccessConfirmation({
+        toEmail: email,
+        attendeeName: `${firstName} ${lastName}`,
+        pastEventTitle: pastEvent.title,
+        pastEventSlug: pastEvent.slug.current,
+        accessToken,
+        eventDate: pastEvent.eventDate,
+        duration: pastEvent.duration,
+        speakers: pastEvent.speakers,
+        price: pastEvent.price,
+      });
+
+      console.log('✅ Past event access confirmation email sent to:', email);
+    } catch (emailError) {
+      console.error('❌ Failed to send confirmation email:', emailError);
+      // Don't fail the request if email fails
+    }
+  } catch (error) {
+    console.error('Error handling past event purchase:', error);
+  }
+}
+
+async function handlePastEventPurchaseFromPaymentIntent(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Past event purchase from PaymentIntent completed:', paymentIntent.id);
+
+  try {
+    const metadata = paymentIntent.metadata;
+    const { pastEventId, pastEventSlug, firstName, lastName, email } = metadata;
+
+    if (!pastEventId || !pastEventSlug || !email) {
+      console.error('Missing required metadata for past event purchase');
+      return;
+    }
+
+    // Fetch past event details from Sanity
+    const pastEvent = await client.fetch(
+      `*[_type == "pastEvent" && _id == $pastEventId][0] {
+        _id,
+        title,
+        slug,
+        eventDate,
+        duration,
+        speakers,
+        price
+      }`,
+      { pastEventId }
+    );
+
+    if (!pastEvent) {
+      console.error('Past event not found:', pastEventId);
+      return;
+    }
+
+    // Generate access token
+    const accessToken = crypto.randomBytes(32).toString('hex');
+
+    // Create livestream access record
+    const accessRecord = {
+      _type: 'livestreamAccess' as const,
+      contentType: 'pastEvent' as const,
+      pastEvent: {
+        _type: 'reference' as const,
+        _ref: pastEventId,
+      },
+      accessType: 'purchased' as const,
+      accessToken,
+      attendeeEmail: email,
+      attendeeName: `${firstName} ${lastName}`,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      accessCount: 0,
+    };
+
+    const result = await writeClient.create(accessRecord);
+    console.log('✅ Created past event access token:', result._id);
+
+    // Send confirmation email
+    try {
+      const { sendPastEventAccessConfirmation } = await import('@/lib/resend');
+
+      await sendPastEventAccessConfirmation({
+        toEmail: email,
+        attendeeName: `${firstName} ${lastName}`,
+        pastEventTitle: pastEvent.title,
+        pastEventSlug: pastEvent.slug.current,
+        accessToken,
+        eventDate: pastEvent.eventDate,
+        duration: pastEvent.duration,
+        speakers: pastEvent.speakers,
+        price: pastEvent.price,
+      });
+
+      console.log('✅ Past event access confirmation email sent to:', email);
+    } catch (emailError) {
+      console.error('❌ Failed to send confirmation email:', emailError);
+      // Don't fail the request if email fails
+    }
+  } catch (error) {
+    console.error('Error handling past event purchase from PaymentIntent:', error);
+  }
+}
+
 async function sendPaymentFailedEmail(data: {
   email: string;
   name: string;
@@ -511,7 +706,7 @@ async function sendPaymentFailedEmail(data: {
   invoiceUrl: string;
 }) {
   console.log(`Sending payment failed email to ${data.email}`);
-  
+
   // TODO: Implement payment failed email template if needed
   // For now, just log the failure
   console.log('Payment failed email placeholder - implement if needed');

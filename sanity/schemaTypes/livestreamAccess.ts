@@ -6,18 +6,67 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
+      name: 'contentType',
+      title: 'Content Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Live Event', value: 'event'},
+          {title: 'Past Event Recording', value: 'pastEvent'},
+        ],
+      },
+      initialValue: 'event',
+      validation: (Rule) => Rule.required(),
+      description: 'Type of content this token provides access to',
+    }),
+    defineField({
       name: 'event',
       title: 'Event',
       type: 'reference',
       to: [{type: 'event'}],
-      validation: (Rule) => Rule.required(),
+      hidden: ({document}) => document?.contentType === 'pastEvent',
+      validation: (Rule) => Rule.custom((value, context) => {
+        const contentType = (context.document as any)?.contentType
+        if (contentType === 'event' && !value) {
+          return 'Event reference is required for live events'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'pastEvent',
+      title: 'Past Event',
+      type: 'reference',
+      to: [{type: 'pastEvent'}],
+      hidden: ({document}) => document?.contentType === 'event',
+      validation: (Rule) => Rule.custom((value, context) => {
+        const contentType = (context.document as any)?.contentType
+        if (contentType === 'pastEvent' && !value) {
+          return 'Past Event reference is required for recordings'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'eventRegistration',
       title: 'Event Registration',
       type: 'reference',
       to: [{type: 'eventRegistration'}],
+    }),
+    defineField({
+      name: 'accessType',
+      title: 'Access Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Purchased', value: 'purchased'},
+          {title: 'Complimentary (In-Person Attendee)', value: 'complimentary'},
+          {title: 'Admin Generated', value: 'admin'},
+        ],
+      },
+      initialValue: 'purchased',
       validation: (Rule) => Rule.required(),
+      description: 'How this access was granted',
     }),
     defineField({
       name: 'accessToken',
@@ -72,12 +121,18 @@ export default defineType({
       attendeeEmail: 'attendeeEmail',
       isActive: 'isActive',
       event: 'event.title',
+      pastEvent: 'pastEvent.title',
+      contentType: 'contentType',
+      accessType: 'accessType',
     },
     prepare(selection) {
-      const {attendeeName, attendeeEmail, isActive, event} = selection
+      const {attendeeName, attendeeEmail, isActive, event, pastEvent, contentType, accessType} = selection
+      const eventTitle = contentType === 'pastEvent' ? pastEvent : event
+      const accessBadge = accessType === 'complimentary' ? '🎁' : accessType === 'admin' ? '👨‍💼' : '💳'
+
       return {
         title: `${attendeeName} (${attendeeEmail})`,
-        subtitle: `${event} - ${isActive ? 'Active' : 'Inactive'}`,
+        subtitle: `${accessBadge} ${eventTitle || 'No event'} - ${isActive ? 'Active' : 'Inactive'}`,
         media: isActive ? '🟢' : '🔴',
       }
     },
