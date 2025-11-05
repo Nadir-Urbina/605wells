@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import KingdomBuilderForm from '@/components/KingdomBuilderForm'
 
 interface AttendeeInfo {
   attendeeName: string
@@ -30,6 +31,8 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
   const [isValidating, setIsValidating] = useState(true)
   const [attendeeInfo, setAttendeeInfo] = useState<AttendeeInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isKingdomBuilderFormOpen, setIsKingdomBuilderFormOpen] = useState(false)
+  const [isCtaDismissed, setIsCtaDismissed] = useState(false)
 
   const validateAccess = async () => {
     try {
@@ -136,22 +139,16 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
     day: 'numeric',
   })
 
-  const accessTypeLabels = {
-    purchased: 'Purchased Access',
-    complimentary: 'Complimentary Access',
-    admin: 'Admin Access',
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/past-events" className="text-purple-600 hover:text-purple-700 font-semibold">
+            <Link href="/past-events" className="text-purple-600 hover:text-purple-700 font-semibold text-sm sm:text-base">
               ← Back to Past Events
             </Link>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600">
               Welcome, {attendeeInfo.attendeeName.split(' ')[0]}
             </div>
           </div>
@@ -159,17 +156,17 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Welcome Banner */}
         {attendeeInfo.accessInfo.firstAccess && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex items-start">
-              <svg className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <div>
-                <h3 className="text-green-900 font-semibold mb-1">Welcome! Your access is active</h3>
-                <p className="text-green-700 text-sm">
+                <h3 className="text-green-900 font-semibold mb-1 text-sm sm:text-base">Welcome! Your access is active</h3>
+                <p className="text-green-700 text-xs sm:text-sm">
                   You now have unlimited access to this recording. Bookmark this page or save the link from your email to watch anytime.
                 </p>
               </div>
@@ -178,37 +175,55 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
         )}
 
         {/* Event Info */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             {attendeeInfo.pastEvent.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-4 text-gray-600">
-            <span>{eventDate}</span>
-            {attendeeInfo.pastEvent.duration && (
-              <>
-                <span>•</span>
-                <span>{attendeeInfo.pastEvent.duration}</span>
-              </>
-            )}
-            <span>•</span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-              {accessTypeLabels[attendeeInfo.accessType]}
-            </span>
+          <div className="text-sm sm:text-base text-gray-600">
+            {eventDate}
           </div>
 
           {/* Speakers */}
           {attendeeInfo.pastEvent.speakers && attendeeInfo.pastEvent.speakers.length > 0 && (
-            <div className="mt-4">
-              <span className="text-sm text-gray-600">Featured Speakers: </span>
-              <span className="text-sm text-gray-900 font-medium">
+            <div className="mt-3 sm:mt-4">
+              <span className="text-xs sm:text-sm text-gray-600">Featured Speakers: </span>
+              <span className="text-xs sm:text-sm text-gray-900 font-medium">
                 {attendeeInfo.pastEvent.speakers.join(', ')}
               </span>
             </div>
           )}
         </div>
 
+        {/* Kingdom Builder CTA - Dismissible */}
+        {!isCtaDismissed && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 relative">
+            <button
+              onClick={() => setIsCtaDismissed(true)}
+              className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-lg sm:text-xl font-bold text-purple-900 mb-3 sm:mb-4 pr-8">
+              Support our Mission
+            </h3>
+            <p className="text-purple-700 text-sm sm:text-base mb-4 sm:mb-6">
+              Join 120 Kingdom Builders who are partnering with us to transform 605 Wells into a regional Kingdom Hub.
+              Your monthly support helps us continue producing powerful content like this and expanding our impact.
+            </p>
+            <button
+              onClick={() => setIsKingdomBuilderFormOpen(true)}
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-3 px-6 sm:px-8 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
+            >
+              Become a Kingdom Builder
+            </button>
+          </div>
+        )}
+
         {/* Video Player */}
-        <div className="bg-black rounded-lg overflow-hidden shadow-lg mb-6">
+        <div className="bg-black rounded-lg overflow-hidden shadow-lg">
           {attendeeInfo.pastEvent.vimeoEmbedCode ? (
             <div className="relative aspect-video w-full">
               <div
@@ -233,25 +248,20 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
             </div>
           )}
         </div>
-
-        {/* Access Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <svg className="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-            <div className="flex-1">
-              <h3 className="text-blue-900 font-semibold mb-2">Your Access Details</h3>
-              <ul className="text-blue-700 text-sm space-y-1">
-                <li>• You have watched this {attendeeInfo.accessInfo.accessCount} {attendeeInfo.accessInfo.accessCount === 1 ? 'time' : 'times'}</li>
-                <li>• Unlimited views - watch as many times as you&apos;d like</li>
-                <li>• Save this link to access the recording anytime</li>
-                <li>• Registered email: {attendeeInfo.attendeeEmail}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Kingdom Builder Form Modal */}
+      <KingdomBuilderForm
+        isOpen={isKingdomBuilderFormOpen}
+        onClose={() => setIsKingdomBuilderFormOpen(false)}
+        onPaymentSuccess={(donationType) => {
+          setIsKingdomBuilderFormOpen(false)
+          const message = donationType === 'monthly'
+            ? 'Thank you for becoming a Kingdom Builder! You will receive a confirmation email shortly.'
+            : 'Thank you for your generous gift! You will receive a confirmation email shortly.'
+          alert(message)
+        }}
+      />
     </div>
   )
 }
