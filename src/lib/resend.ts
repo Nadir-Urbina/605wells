@@ -459,7 +459,7 @@ export const ONLINE_EVENT_REGISTRATION_CONFIRMATION = (data: {
       <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
-      605 Wells • Jacksonville, FL</p>
+      605 Wells • Orange Park, FL</p>
     </div>
   </div>
 </body>
@@ -631,7 +631,7 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
       <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
-      605 Wells • Jacksonville, FL</p>
+      605 Wells • Orange Park, FL</p>
     </div>
   </div>
 </body>
@@ -1238,7 +1238,7 @@ export async function sendPastEventAccessConfirmation(data: PastEventAccessEmail
 
     <div class="footer">
       <h3>605 Wells</h3>
-      <p>Jacksonville, FL</p>
+      <p>Orange Park, FL</p>
       <p>
         Questions? Email us at
         <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a>

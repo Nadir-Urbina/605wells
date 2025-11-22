@@ -128,7 +128,7 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep • Where People Are Healed, Built, and Sent</p>
       <br>
-      <p>605 Wells Road, Jacksonville, FL</p>
+      <p>605 Wells Road, Orange Park, FL</p>
       <p>Email: <a href="mailto:admin@eastgatejax.com" class="contact-link">admin@eastgatejax.com</a></p>
     </div>
   </div>
