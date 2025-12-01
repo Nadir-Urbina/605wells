@@ -119,7 +119,7 @@ export const KINGDOM_BUILDER_EMAIL = (data: {
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is a thank you message. Your official donation receipt will be sent separately by Stripe.<br>
       You can manage your subscription at any time by contacting us.<br>
-      605 Wells is a registered nonprofit organization.</p>
+      </p>
     </div>
   </div>
 </body>
@@ -234,7 +234,7 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
       <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is a thank you message. Your official donation receipt will be sent separately by Stripe.<br>
-      605 Wells is a registered nonprofit organization.</p>
+      </p>
     </div>
   </div>
 </body>
@@ -856,7 +856,7 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is your event registration confirmation. Keep this email for your records.<br>
       ${data.finalPrice > 0 ? 'Your payment receipt has been sent separately by Stripe.<br>' : ''}
-      605 Wells is a registered nonprofit organization.</p>
+      </p>
     </div>
   </div>
 </body>

@@ -77,30 +77,32 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaymentSucceeded(invoice: Stripe.Invoice & { 
+async function handlePaymentSucceeded(invoice: Stripe.Invoice & {
   subscription?: string;
   amount_paid?: number;
+  payment_intent?: string;
 }) {
   console.log('Payment succeeded for invoice:', invoice.id);
-  
+
   if (invoice.subscription) {
     // This is a subscription payment
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
     const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-    
+
     console.log('Monthly donation payment succeeded for:', customer.email);
-    
+
     // Here you would:
     // 1. Update your database with the successful payment
     // 2. Send a thank you email
     // 3. Update any analytics/reporting
-    
+
     await sendThankYouEmail({
       email: customer.email!,
       name: customer.name!,
       amount: (invoice.amount_paid || 0) / 100,
       type: 'monthly',
       subscriptionId: subscription.id,
+      paymentIntentId: invoice.payment_intent as string | undefined,
     });
   }
 }
@@ -169,6 +171,14 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
   console.log('One-time payment succeeded:', paymentIntent.id);
 
   try {
+    // Check if this payment intent is associated with an invoice/subscription
+    // If it is, skip sending one-time email - the subscription handler will send Kingdom Builder email
+    const paymentIntentWithInvoice = paymentIntent as Stripe.PaymentIntent & { invoice?: string | Stripe.Invoice };
+    if (paymentIntentWithInvoice.invoice) {
+      console.log('Payment intent is part of a subscription invoice, skipping one-time donor email');
+      return;
+    }
+
     // Check if this is an event registration
     if (paymentIntent.metadata.type === 'event_registration') {
       await handleEventRegistrationSuccess(paymentIntent);

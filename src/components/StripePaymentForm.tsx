@@ -7,6 +7,7 @@ import { getStripe } from '@/lib/stripe';
 interface PaymentFormProps {
   amount: number;
   donationType: string;
+  isCustomAmount?: boolean;
   customerInfo: {
     firstName: string;
     lastName: string;
@@ -34,14 +35,15 @@ interface PaymentFormProps {
   };
 }
 
-function PaymentForm({ 
-  amount, 
-  donationType, 
-  customerInfo, 
-  motivationMessage, 
-  onSuccess, 
-  onError, 
-  isProcessing, 
+function PaymentForm({
+  amount,
+  donationType,
+  isCustomAmount,
+  customerInfo,
+  motivationMessage,
+  onSuccess,
+  onError,
+  isProcessing,
   setIsProcessing,
   eventRegistrationData
 }: PaymentFormProps) {
@@ -86,6 +88,7 @@ function PaymentForm({
         donationType,
         customerInfo,
         motivationMessage,
+        isCustomAmount,
       };
       
       const response = await fetch(apiEndpoint, {

@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
   try {
     // Get Stripe instance with proper error handling
     const stripe = getStripeInstance();
-    
-    const { amount, donationType, customerInfo, motivationMessage } = await request.json();
+
+    const { amount, donationType, customerInfo, motivationMessage, isCustomAmount } = await request.json();
 
     // Validate amount
     const donationAmount = Math.round(amount * 100); // Convert to cents
@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
 
     if (donationType === 'monthly') {
       console.log('Creating monthly subscription for:', customerInfo.email);
-      
+      console.log('Is custom amount:', isCustomAmount);
+
       // Create customer
       const customer = await stripe.customers.create({
         email: customerInfo.email,
@@ -63,14 +64,21 @@ export async function POST(request: NextRequest) {
           project: '605Wells Kingdom Builder',
           donationType: donationType,
           amount: (donationAmount / 100).toString(),
+          customAmount: isCustomAmount ? 'true' : 'false',
         },
       });
-      
+
       console.log('Customer created:', customer.id);
 
-      // Get the appropriate price ID for this amount
+      // Handle custom amounts differently - create dynamic price
+      if (isCustomAmount) {
+        console.log('Creating custom monthly price for amount:', donationAmount / 100);
+        return createSubscriptionWithCustomAmount(stripe, customer.id, donationAmount);
+      }
+
+      // Get the appropriate price ID for standard amounts
       const priceId = getPriceIdForAmount(donationAmount / 100);
-      
+
       if (!priceId) {
         throw new Error(`No price configured for amount $${donationAmount / 100}. Please use one of: $60, $120, $180, $240`);
       }
@@ -132,6 +140,48 @@ function getPriceIdForAmount(amount: number): string | null {
   }
   
   return null;
+}
+
+// Helper function to create subscription with custom amount (dynamic pricing)
+async function createSubscriptionWithCustomAmount(stripe: Stripe, customerId: string, amountInCents: number) {
+  console.log('Creating custom subscription with dynamic price:', amountInCents / 100);
+
+  try {
+    // Create a custom product for this Kingdom Builder
+    const product = await stripe.products.create({
+      name: `Kingdom Builder - Custom $${amountInCents / 100}/month`,
+      metadata: {
+        project: '605Wells Kingdom Builder',
+        customAmount: 'true',
+      },
+    });
+
+    console.log('✅ Custom product created:', product.id);
+
+    // Create a price for this product
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: amountInCents,
+      currency: 'usd',
+      recurring: {
+        interval: 'month',
+      },
+      metadata: {
+        project: '605Wells Kingdom Builder',
+        customAmount: 'true',
+        amount: (amountInCents / 100).toString(),
+      },
+    });
+
+    console.log('✅ Custom price created:', price.id);
+
+    // Now create the subscription with this custom price
+    return createSubscriptionWithPrice(stripe, customerId, price.id);
+
+  } catch (error) {
+    console.error('❌ Custom subscription creation failed:', error);
+    throw error;
+  }
 }
 
 // 🔥 COMPLETELY REWRITTEN - Handles the payment intent detection properly

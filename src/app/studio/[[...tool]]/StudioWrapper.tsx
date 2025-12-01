@@ -611,17 +611,54 @@ const eventRegistrationSchema = defineType({
   ],
 })
 
+// Define ministry category schema
+const ministryCategorySchema = defineType({
+  name: 'ministryCategory',
+  title: 'Ministry Category',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'name',
+      title: 'Ministry Name',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+      description: 'Name of the ministry (e.g., "Deliverance", "Inner Healing", "Prophetic Ministry")',
+    }),
+    defineField({
+      name: 'description',
+      title: 'Description',
+      type: 'text',
+      rows: 3,
+      description: 'Brief description of this ministry type (optional)',
+    }),
+    defineField({
+      name: 'active',
+      title: 'Active',
+      type: 'boolean',
+      description: 'Show this ministry category in the form dropdown',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'order',
+      title: 'Display Order',
+      type: 'number',
+      description: 'Order in which this ministry appears in the dropdown (lower numbers first)',
+      initialValue: 0,
+    }),
+  ],
+})
+
 const config = defineConfig({
   name: 'default',
   title: '605 Wells Ministry Hub',
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'ypbczt01',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   basePath: '/studio',
-  
+
   plugins: [structureTool(), visionTool()],
-  
+
   schema: {
-    types: [eventSchema, pastEventSchema, livestreamAccessSchema, eventRegistrationSchema],
+    types: [eventSchema, pastEventSchema, livestreamAccessSchema, eventRegistrationSchema, ministryCategorySchema],
   },
 })
 
