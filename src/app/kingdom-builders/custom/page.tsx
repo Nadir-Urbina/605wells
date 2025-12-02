@@ -43,9 +43,6 @@ export default function CustomKingdomBuilderPage() {
             <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-4">
               Custom Kingdom Builder Commitment
             </h1>
-            <p className="text-xl text-yellow-100">
-              For generous donors who want to commit at a custom monthly amount
-            </p>
           </div>
         </div>
       </div>

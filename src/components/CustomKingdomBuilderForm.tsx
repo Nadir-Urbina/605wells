@@ -84,9 +84,60 @@ export default function CustomKingdomBuilderForm({ onPaymentSuccess }: CustomKin
           >
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Your Custom Kingdom Builder Commitment</h3>
 
+            {/* Custom Amount Input */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Enter Your Monthly Commitment Amount
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl font-bold">$</span>
+                <input
+                  type="number"
+                  min="500"
+                  step="50"
+                  placeholder="500"
+                  {...register('amount', { valueAsNumber: true })}
+                  className="w-full pl-12 pr-4 py-5 text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                />
+              </div>
+              {errors.amount && (
+                <p className="text-red-500 text-sm mt-2">{errors.amount.message}</p>
+              )}
+              <div className="mt-3 space-y-1">
+                <p className="text-sm text-gray-600">
+                  <strong>Minimum commitment: $500/month</strong>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Suggested amounts: $500, $750, $1,000, $2,500, $5,000+
+                </p>
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            <button
+              type="button"
+              onClick={nextStep}
+              disabled={!watch('amount') || watch('amount') < 500}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-5 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg mb-8"
+            >
+              Continue to Personal Information
+            </button>
+
+            {/* Impact Statement */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className="text-sm text-yellow-800">
+                  Your ${watch('amount') || 500}/month commitment over 12 months = <strong>${((watch('amount') || 500) * 12).toLocaleString()}</strong> total impact toward renovating 605 Wells into a Kingdom Hub serving Jacksonville and beyond.
+                </p>
+              </div>
+            </div>
+
             {/* Mission Statement */}
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
-              <h4 className="font-semibold text-purple-800 mb-3 text-lg">Join  Kingdom Builders</h4>
+              <h4 className="font-semibold text-purple-800 mb-3 text-lg">Join Kingdom Builders</h4>
               <p className="text-purple-700">
                 As a custom Kingdom Builder, you&apos;re making an extraordinary commitment to transform 605 Wells
                 into a regional Kingdom Hub. Your generous monthly partnership accelerates our mission and makes
@@ -135,56 +186,6 @@ export default function CustomKingdomBuilderForm({ onPaymentSuccess }: CustomKin
                 </li>
               </ul>
             </div>
-
-            {/* Custom Amount Input */}
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Enter Your Monthly Commitment Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl font-bold">$</span>
-                <input
-                  type="number"
-                  min="500"
-                  step="50"
-                  placeholder="500"
-                  {...register('amount', { valueAsNumber: true })}
-                  className="w-full pl-12 pr-4 py-5 text-2xl font-bold border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                />
-              </div>
-              {errors.amount && (
-                <p className="text-red-500 text-sm mt-2">{errors.amount.message}</p>
-              )}
-              <div className="mt-3 space-y-1">
-                <p className="text-sm text-gray-600">
-                  <strong>Minimum commitment: $500/month</strong>
-                </p>
-                <p className="text-sm text-gray-500">
-                  Suggested amounts: $500, $750, $1,000, $2,500, $5,000+
-                </p>
-              </div>
-            </div>
-
-            {/* Impact Statement */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-              <div className="flex items-start">
-                <svg className="w-5 h-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <p className="text-sm text-yellow-800">
-                  Your ${watch('amount') || 500}/month commitment over 12 months = <strong>${((watch('amount') || 500) * 12).toLocaleString()}</strong> total impact toward renovating 605 Wells into a Kingdom Hub serving Jacksonville and beyond.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={nextStep}
-              disabled={!watch('amount') || watch('amount') < 500}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold py-5 px-6 rounded-lg hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              Continue to Personal Information
-            </button>
           </motion.div>
         )}
 
