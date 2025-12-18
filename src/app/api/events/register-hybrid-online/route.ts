@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client, eventQueries, createEventRegistration, type SanityEvent, type SanityEventRegistration } from '@/lib/sanity';
+import { client, eventQueries, createEventRegistration, type SanityEvent, type SanityEventRegistration, type EventSession } from '@/lib/sanity';
 import { sendOnlineEventRegistrationConfirmation } from '@/lib/resend';
 import crypto from 'crypto';
 
@@ -69,34 +69,67 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Format event date and time for email
+    // Format event date and time for email (always in Eastern Time)
     let eventDate = 'Date TBD';
     let eventTime = 'Time TBD';
-    
+
     if (event.eventSchedule && event.eventSchedule.length > 0) {
       const firstSession = event.eventSchedule[0];
       if (firstSession.startTime && firstSession.endTime) {
         const startDate = new Date(firstSession.startTime);
         const endDate = new Date(firstSession.endTime);
-        
+
         eventDate = startDate.toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric',
+          timeZone: 'America/New_York',
         });
-        
-        eventTime = `${startDate.toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
+
+        eventTime = `${startDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
           minute: '2-digit',
-          hour12: true 
-        })} - ${endDate.toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
+          hour12: true,
+          timeZone: 'America/New_York',
+        })} - ${endDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
           minute: '2-digit',
-          hour12: true 
-        })}`;
+          hour12: true,
+          timeZone: 'America/New_York',
+        })} EST`;
       }
     }
+
+    // Format the full event schedule for email (always in Eastern Time)
+    const formattedEventSchedule = event.eventSchedule?.map((session: EventSession) => {
+      const sessionStartDate = new Date(session.startTime);
+      const sessionEndDate = new Date(session.endTime);
+
+      return {
+        sessionTitle: session.sessionTitle,
+        date: sessionStartDate.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          timeZone: 'America/New_York',
+        }),
+        time: `${sessionStartDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'America/New_York',
+        })} - ${sessionEndDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'America/New_York',
+        })} EST`,
+        startTime: session.startTime,
+        endTime: session.endTime,
+      };
+    });
 
     // Generate unique access token for livestream
     const accessToken = crypto.randomBytes(32).toString('hex');
@@ -171,6 +204,7 @@ export async function POST(request: NextRequest) {
         eventTitle: event.title,
         eventDate,
         eventTime,
+        eventSchedule: formattedEventSchedule,
         eventLocation: event.location?.name,
         eventAddress: event.location?.address,
         registrationInstructions: event.registrationInstructions,

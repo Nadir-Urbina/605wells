@@ -273,7 +273,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
 
     console.log(`Event registration confirmed: ${attendeeName} for ${eventTitle}`);
     
-    // Format event schedule data
+    // Format event schedule data (always in Eastern Time)
     let eventDate = 'Date TBD';
     let eventTime = 'Time TBD';
     let eventSchedule: Array<{
@@ -283,14 +283,14 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
       startTime: string;
       endTime: string;
     }> = [];
-    
+
     if (eventData?.eventSchedule && eventData.eventSchedule.length > 0) {
       // Process all sessions
       eventSchedule = eventData.eventSchedule.map((session, index) => {
         if (session.startTime) {
           const startDate = new Date(session.startTime);
           const endDate = new Date(session.endTime!);
-          
+
           return {
             sessionTitle: session.sessionTitle || `Session ${index + 1}`,
             date: startDate.toLocaleDateString('en-US', {
@@ -298,16 +298,19 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
               year: 'numeric',
               month: 'long',
               day: 'numeric',
+              timeZone: 'America/New_York',
             }),
-            time: `${startDate.toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
+            time: `${startDate.toLocaleTimeString('en-US', {
+              hour: 'numeric',
               minute: '2-digit',
-              hour12: true 
-            })} - ${endDate.toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
+              hour12: true,
+              timeZone: 'America/New_York',
+            })} - ${endDate.toLocaleTimeString('en-US', {
+              hour: 'numeric',
               minute: '2-digit',
-              hour12: true 
-            })}`,
+              hour12: true,
+              timeZone: 'America/New_York',
+            })} EST`,
             startTime: session.startTime,
             endTime: session.endTime!
           };
