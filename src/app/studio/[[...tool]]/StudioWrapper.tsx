@@ -681,82 +681,100 @@ const volunteerSchema = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'ministryAreas',
-      title: 'Ministry Areas',
+      name: 'ministryAvailabilities',
+      title: 'Ministry Availabilities',
       type: 'array',
-      of: [{type: 'string'}],
-      options: {
-        list: [
-          {title: 'Cleaning', value: 'cleaning'},
-          {title: 'Cooking', value: 'cooking'},
-          {title: 'Prayer Meetings', value: 'prayer-meetings'},
-          {title: 'Preaching', value: 'preaching'},
-          {title: 'Teaching', value: 'teaching'},
-          {title: 'Lawn Care', value: 'lawn-care'},
-          {title: 'Building Maintenance', value: 'building-maintenance'},
-          {title: 'Media', value: 'media'},
-          {title: 'Worship Team', value: 'worship-team'},
-          {title: 'Deliverance and Inner Healing', value: 'deliverance-inner-healing'},
-          {title: 'Events Coordination', value: 'events-coordination'},
-          {title: 'Decoration', value: 'decoration'},
-          {title: 'Child Care', value: 'child-care'},
-        ],
-      },
-      validation: (Rule) => Rule.required().min(1).error('Please select at least one ministry area'),
-    }),
-    defineField({
-      name: 'availability',
-      title: 'Availability',
-      type: 'object',
-      fields: [
+      of: [
         {
-          name: 'daysOfWeek',
-          title: 'Days of Week',
-          type: 'array',
-          of: [{type: 'string'}],
-          options: {
-            list: [
-              {title: 'Monday', value: 'monday'},
-              {title: 'Tuesday', value: 'tuesday'},
-              {title: 'Wednesday', value: 'wednesday'},
-              {title: 'Thursday', value: 'thursday'},
-              {title: 'Friday', value: 'friday'},
-              {title: 'Saturday', value: 'saturday'},
-              {title: 'Sunday', value: 'sunday'},
-            ],
+          type: 'object',
+          fields: [
+            {
+              name: 'ministryArea',
+              title: 'Ministry Area',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Cleaning', value: 'cleaning'},
+                  {title: 'Child Care', value: 'child-care'},
+                  {title: 'Cooking/Kitchen', value: 'cooking'},
+                  {title: 'Prayer/Intercession', value: 'prayer-meetings'},
+                  {title: 'Preaching/Teaching', value: 'preaching-teaching'},
+                  {title: 'Lawn Care', value: 'lawn-care'},
+                  {title: 'Building Maintenance', value: 'building-maintenance'},
+                  {title: 'Media', value: 'media'},
+                  {title: 'Worship Team', value: 'worship-team'},
+                  {title: 'Deliverance and Inner Healing', value: 'deliverance-inner-healing'},
+                  {title: 'Events Coordination', value: 'events-coordination'},
+                  {title: 'Decoration', value: 'decoration'},
+                ],
+              },
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'daysOfWeek',
+              title: 'Days of Week',
+              type: 'array',
+              of: [{type: 'string'}],
+              options: {
+                list: [
+                  {title: 'Monday', value: 'monday'},
+                  {title: 'Tuesday', value: 'tuesday'},
+                  {title: 'Wednesday', value: 'wednesday'},
+                  {title: 'Thursday', value: 'thursday'},
+                  {title: 'Friday', value: 'friday'},
+                  {title: 'Saturday', value: 'saturday'},
+                  {title: 'Sunday', value: 'sunday'},
+                ],
+              },
+              validation: (Rule) => Rule.required().min(1).error('Please select at least one day'),
+            },
+            {
+              name: 'frequency',
+              title: 'Frequency',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Every Week', value: 'weekly'},
+                  {title: 'Every Two Weeks', value: 'bi-weekly'},
+                  {title: 'Once a Month', value: 'monthly'},
+                  {title: 'Occasionally', value: 'occasionally'},
+                ],
+              },
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: 'timePreferences',
+              title: 'Time Preferences',
+              type: 'array',
+              of: [{type: 'string'}],
+              options: {
+                list: [
+                  {title: 'Morning (6am - 12pm)', value: 'morning'},
+                  {title: 'Afternoon (12pm - 6pm)', value: 'afternoon'},
+                  {title: 'Evening (6pm - 10pm)', value: 'evening'},
+                ],
+              },
+              validation: (Rule) => Rule.required().min(1).error('Please select at least one time preference'),
+            },
+          ],
+          preview: {
+            select: {
+              ministryArea: 'ministryArea',
+              daysOfWeek: 'daysOfWeek',
+              frequency: 'frequency',
+            },
+            prepare(selection) {
+              const {ministryArea, daysOfWeek, frequency} = selection
+              const days = daysOfWeek ? `${daysOfWeek.length} day(s)` : 'No days'
+              return {
+                title: ministryArea || 'Ministry Area',
+                subtitle: `${days} • ${frequency || 'No frequency'}`,
+              }
+            },
           },
-          validation: (Rule) => Rule.required().min(1).error('Please select at least one day'),
-        },
-        {
-          name: 'frequency',
-          title: 'Frequency',
-          type: 'string',
-          options: {
-            list: [
-              {title: 'Every Week', value: 'weekly'},
-              {title: 'Every Two Weeks', value: 'bi-weekly'},
-              {title: 'Once a Month', value: 'monthly'},
-              {title: 'Occasionally', value: 'occasionally'},
-            ],
-          },
-          validation: (Rule) => Rule.required(),
-        },
-        {
-          name: 'timePreferences',
-          title: 'Time Preferences',
-          type: 'array',
-          of: [{type: 'string'}],
-          options: {
-            list: [
-              {title: 'Morning (6am - 12pm)', value: 'morning'},
-              {title: 'Afternoon (12pm - 6pm)', value: 'afternoon'},
-              {title: 'Evening (6pm - 10pm)', value: 'evening'},
-            ],
-          },
-          validation: (Rule) => Rule.required().min(1).error('Please select at least one time preference'),
         },
       ],
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().min(1).error('Please configure at least one ministry area'),
     }),
     defineField({
       name: 'submissionDate',

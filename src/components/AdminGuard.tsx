@@ -32,6 +32,13 @@ export default function AdminGuard({ children, fallback }: AdminGuardProps) {
     verifyAuthentication()
   }, [])
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      window.location.href = '/admin/login'
+    }
+  }, [isAuthenticated])
+
   // Show loading state
   if (isLoading) {
     return (

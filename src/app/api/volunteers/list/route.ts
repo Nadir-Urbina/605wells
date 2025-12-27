@@ -18,8 +18,7 @@ export async function GET(request: NextRequest) {
       *[_type == "volunteer"] | order(submissionDate desc) {
         _id,
         personalInfo,
-        ministryAreas,
-        availability,
+        ministryAvailabilities,
         submissionDate,
         status,
         notes,

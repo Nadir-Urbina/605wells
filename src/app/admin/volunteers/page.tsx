@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminGuard, { useAdminUser } from '@/components/AdminGuard';
 
+interface MinistryAvailability {
+  ministryArea: string;
+  daysOfWeek: string[];
+  frequency: string;
+  timePreferences: string[];
+}
+
 interface Volunteer {
   _id: string;
   personalInfo: {
@@ -11,12 +18,7 @@ interface Volunteer {
     email: string;
     phone: string;
   };
-  ministryAreas: string[];
-  availability: {
-    daysOfWeek: string[];
-    frequency: string;
-    timePreferences: string[];
-  };
+  ministryAvailabilities: MinistryAvailability[];
   submissionDate: string;
   status: string;
   notes?: string;
@@ -29,8 +31,10 @@ interface VolunteersData {
 
 const MINISTRY_AREA_LABELS: Record<string, string> = {
   'cleaning': 'Cleaning',
-  'cooking': 'Cooking',
-  'prayer-meetings': 'Prayer Meetings',
+  'child-care': 'Child Care',
+  'cooking': 'Cooking/Kitchen',
+  'prayer-meetings': 'Prayer/Intercession',
+  'preaching-teaching': 'Preaching/Teaching',
   'preaching': 'Preaching',
   'teaching': 'Teaching',
   'lawn-care': 'Lawn Care',
@@ -40,7 +44,6 @@ const MINISTRY_AREA_LABELS: Record<string, string> = {
   'deliverance-inner-healing': 'Deliverance & Inner Healing',
   'events-coordination': 'Events Coordination',
   'decoration': 'Decoration',
-  'child-care': 'Child Care',
 };
 
 const FREQUENCY_LABELS: Record<string, string> = {
@@ -115,8 +118,8 @@ function AdminVolunteersContent() {
     const matchesSearch = searchQuery === '' ||
       volunteer.personalInfo.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       volunteer.personalInfo.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      volunteer.ministryAreas.some(area =>
-        MINISTRY_AREA_LABELS[area]?.toLowerCase().includes(searchQuery.toLowerCase())
+      volunteer.ministryAvailabilities.some(ma =>
+        MINISTRY_AREA_LABELS[ma.ministryArea]?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     return matchesStatus && matchesSearch;
   }) || [];
@@ -312,17 +315,17 @@ function AdminVolunteersContent() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {volunteer.ministryAreas.slice(0, 3).map((area) => (
+                          {volunteer.ministryAvailabilities.slice(0, 3).map((ma, idx) => (
                             <span
-                              key={area}
+                              key={idx}
                               className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                             >
-                              {MINISTRY_AREA_LABELS[area] || area}
+                              {MINISTRY_AREA_LABELS[ma.ministryArea] || ma.ministryArea}
                             </span>
                           ))}
-                          {volunteer.ministryAreas.length > 3 && (
+                          {volunteer.ministryAvailabilities.length > 3 && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              +{volunteer.ministryAreas.length - 3} more
+                              +{volunteer.ministryAvailabilities.length - 3} more
                             </span>
                           )}
                         </div>
@@ -330,13 +333,10 @@ function AdminVolunteersContent() {
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           <div className="font-medium">
-                            {FREQUENCY_LABELS[volunteer.availability.frequency]}
+                            {volunteer.ministryAvailabilities.length} ministry area{volunteer.ministryAvailabilities.length !== 1 ? 's' : ''}
                           </div>
-                          <div className="text-gray-500">
-                            {volunteer.availability.daysOfWeek.length} day{volunteer.availability.daysOfWeek.length !== 1 ? 's' : ''}
-                          </div>
-                          <div className="text-gray-500">
-                            {volunteer.availability.timePreferences.join(', ')}
+                          <div className="text-gray-500 text-xs">
+                            Click to view details
                           </div>
                         </div>
                       </td>
@@ -435,57 +435,52 @@ function AdminVolunteersContent() {
                 </div>
               </div>
 
-              {/* Ministry Areas */}
+              {/* Ministry Availabilities */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Ministry Areas</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedVolunteer.ministryAreas.map((area) => (
-                    <span
-                      key={area}
-                      className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-100 text-purple-800"
-                    >
-                      {MINISTRY_AREA_LABELS[area] || area}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Ministry Areas & Availability</h3>
+                <div className="space-y-4">
+                  {selectedVolunteer.ministryAvailabilities.map((ma, idx) => (
+                    <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="font-semibold text-gray-900 text-lg">
+                          {MINISTRY_AREA_LABELS[ma.ministryArea] || ma.ministryArea}
+                        </h4>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          {FREQUENCY_LABELS[ma.frequency]}
+                        </span>
+                      </div>
 
-              {/* Availability */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Availability</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <div>
-                    <span className="font-medium text-gray-700">Frequency:</span>
-                    <span className="ml-2 text-gray-900">
-                      {FREQUENCY_LABELS[selectedVolunteer.availability.frequency]}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Days:</span>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedVolunteer.availability.daysOfWeek.map((day) => (
-                        <span
-                          key={day}
-                          className="inline-flex items-center px-2.5 py-1 rounded-md text-sm bg-blue-100 text-blue-800"
-                        >
-                          {capitalizeFirst(day)}
-                        </span>
-                      ))}
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Days:</span>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {ma.daysOfWeek.map((day) => (
+                              <span
+                                key={day}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800"
+                              >
+                                {capitalizeFirst(day)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Time Preferences:</span>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {ma.timePreferences.map((time) => (
+                              <span
+                                key={time}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-100 text-green-800"
+                              >
+                                {capitalizeFirst(time)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Time Preferences:</span>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {selectedVolunteer.availability.timePreferences.map((time) => (
-                        <span
-                          key={time}
-                          className="inline-flex items-center px-2.5 py-1 rounded-md text-sm bg-green-100 text-green-800"
-                        >
-                          {capitalizeFirst(time)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 

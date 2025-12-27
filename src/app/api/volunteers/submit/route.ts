@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeClient } from '@/lib/sanity';
 
+// Define the ministry availability type
+interface MinistryAvailability {
+  ministryArea: string;
+  daysOfWeek: string[];
+  frequency: string;
+  timePreferences: string[];
+}
+
 // Define the volunteer submission type
 interface VolunteerSubmission {
   fullName: string;
   email: string;
   phone: string;
-  ministryAreas: string[];
-  daysOfWeek: string[];
-  frequency: string;
-  timePreferences: string[];
+  ministryAvailabilities: MinistryAvailability[];
 }
 
 export async function POST(request: NextRequest) {
@@ -24,33 +29,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate arrays
-    if (!data.ministryAreas || data.ministryAreas.length === 0) {
+    // Validate ministry availabilities
+    if (!data.ministryAvailabilities || data.ministryAvailabilities.length === 0) {
       return NextResponse.json(
-        { error: 'Please select at least one ministry area' },
+        { error: 'Please configure at least one ministry area with availability' },
         { status: 400 }
       );
     }
 
-    if (!data.daysOfWeek || data.daysOfWeek.length === 0) {
-      return NextResponse.json(
-        { error: 'Please select at least one day of the week' },
-        { status: 400 }
-      );
-    }
-
-    if (!data.frequency) {
-      return NextResponse.json(
-        { error: 'Please select how often you can volunteer' },
-        { status: 400 }
-      );
-    }
-
-    if (!data.timePreferences || data.timePreferences.length === 0) {
-      return NextResponse.json(
-        { error: 'Please select at least one time preference' },
-        { status: 400 }
-      );
+    // Validate each ministry availability
+    for (const ministry of data.ministryAvailabilities) {
+      if (!ministry.ministryArea) {
+        return NextResponse.json(
+          { error: 'Each ministry must have an area specified' },
+          { status: 400 }
+        );
+      }
+      if (!ministry.daysOfWeek || ministry.daysOfWeek.length === 0) {
+        return NextResponse.json(
+          { error: `Please select at least one day for ${ministry.ministryArea}` },
+          { status: 400 }
+        );
+      }
+      if (!ministry.frequency) {
+        return NextResponse.json(
+          { error: `Please select frequency for ${ministry.ministryArea}` },
+          { status: 400 }
+        );
+      }
+      if (!ministry.timePreferences || ministry.timePreferences.length === 0) {
+        return NextResponse.json(
+          { error: `Please select at least one time preference for ${ministry.ministryArea}` },
+          { status: 400 }
+        );
+      }
     }
 
     // Create volunteer document in Sanity
@@ -61,12 +73,7 @@ export async function POST(request: NextRequest) {
         email: data.email,
         phone: data.phone,
       },
-      ministryAreas: data.ministryAreas,
-      availability: {
-        daysOfWeek: data.daysOfWeek,
-        frequency: data.frequency,
-        timePreferences: data.timePreferences,
-      },
+      ministryAvailabilities: data.ministryAvailabilities,
       submissionDate: new Date().toISOString(),
       status: 'new',
     };
