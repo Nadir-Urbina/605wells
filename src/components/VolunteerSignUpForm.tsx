@@ -31,7 +31,6 @@ const MINISTRY_AREAS = [
   { value: 'child-care', label: 'Child Care', icon: '👶' },
   { value: 'cooking', label: 'Cooking/Kitchen', icon: '👨‍🍳' },
   { value: 'prayer-meetings', label: 'Prayer/Intercession', icon: '🙏' },
-  { value: 'preaching-teaching', label: 'Preaching/Teaching', icon: '📖' },
   { value: 'lawn-care', label: 'Lawn Care', icon: '🌱' },
   { value: 'building-maintenance', label: 'Building Maintenance', icon: '🔧' },
   { value: 'media', label: 'Media', icon: '🎥' },

@@ -698,7 +698,6 @@ const volunteerSchema = defineType({
                   {title: 'Child Care', value: 'child-care'},
                   {title: 'Cooking/Kitchen', value: 'cooking'},
                   {title: 'Prayer/Intercession', value: 'prayer-meetings'},
-                  {title: 'Preaching/Teaching', value: 'preaching-teaching'},
                   {title: 'Lawn Care', value: 'lawn-care'},
                   {title: 'Building Maintenance', value: 'building-maintenance'},
                   {title: 'Media', value: 'media'},
