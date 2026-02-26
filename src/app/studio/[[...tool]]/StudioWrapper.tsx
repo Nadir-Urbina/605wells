@@ -176,6 +176,21 @@ const eventSchema = defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'visibility',
+      title: 'Visibility',
+      type: 'string',
+      description: 'Control where this event appears on the website',
+      options: {
+        list: [
+          {title: 'Events Page & Calendar', value: 'both'},
+          {title: 'Calendar Only', value: 'calendar-only'},
+          {title: 'Events Page Only', value: 'events-page-only'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'both',
+    }),
+    defineField({
       name: 'registrationType',
       title: 'Registration Type',
       type: 'string',
@@ -890,6 +905,150 @@ const volunteerSchema = defineType({
   ],
 })
 
+// Ministry Session Request Schema
+const ministrySessionRequestSchema = defineType({
+  name: 'ministrySessionRequest',
+  title: 'Ministry Session Request',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'personalInfo',
+      title: 'Personal Information',
+      type: 'object',
+      fields: [
+        {
+          name: 'fullName',
+          title: 'Full Name',
+          type: 'string',
+          validation: (Rule) => Rule.required(),
+        },
+        {
+          name: 'email',
+          title: 'Email',
+          type: 'string',
+          validation: (Rule) => Rule.required().email(),
+        },
+        {
+          name: 'phone',
+          title: 'Phone',
+          type: 'string',
+          validation: (Rule) => Rule.required(),
+        },
+      ],
+    }),
+    defineField({
+      name: 'ministryRequested',
+      title: 'Ministry Requested',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'salvationExperience',
+      title: 'Salvation Experience',
+      type: 'text',
+      rows: 4,
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'localChurch',
+      title: 'Local Church',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'baptizedInHolySpirit',
+      title: 'Baptized in Holy Spirit',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Yes', value: 'Yes'},
+          {title: 'No', value: 'No'},
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'reasonForMinistry',
+      title: 'Reason for Ministry',
+      type: 'text',
+      rows: 4,
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'availability',
+      title: 'Availability',
+      type: 'object',
+      fields: [
+        {
+          name: 'availableDays',
+          title: 'Available Days',
+          type: 'array',
+          of: [{type: 'string'}],
+          validation: (Rule) => Rule.required().min(1),
+        },
+        {
+          name: 'availableTimes',
+          title: 'Available Times',
+          type: 'array',
+          of: [{type: 'string'}],
+          validation: (Rule) => Rule.required().min(1),
+        },
+      ],
+    }),
+    defineField({
+      name: 'submissionDate',
+      title: 'Submission Date',
+      type: 'datetime',
+      validation: (Rule) => Rule.required(),
+      initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: 'status',
+      title: 'Status',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Pending Scheduling', value: 'pending'},
+          {title: 'Scheduled', value: 'scheduled'},
+          {title: 'Completed', value: 'completed'},
+          {title: 'Cancelled', value: 'cancelled'},
+        ],
+      },
+      initialValue: 'pending',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'scheduledDate',
+      title: 'Scheduled Session Date',
+      type: 'datetime',
+      description: 'When the ministry session is scheduled for',
+    }),
+    defineField({
+      name: 'notes',
+      title: 'Admin Notes',
+      type: 'text',
+      rows: 4,
+      description: 'Internal notes about this session request',
+    }),
+  ],
+  preview: {
+    select: {
+      fullName: 'personalInfo.fullName',
+      ministry: 'ministryRequested',
+      status: 'status',
+      submissionDate: 'submissionDate',
+    },
+    prepare(selection) {
+      const {fullName, ministry, status, submissionDate} = selection
+      const date = submissionDate ? new Date(submissionDate).toLocaleDateString() : 'No date'
+      return {
+        title: fullName || 'No name',
+        subtitle: `${ministry || 'No ministry'} • ${status || 'pending'} • ${date}`,
+      }
+    },
+  },
+})
+
 const config = defineConfig({
   name: 'default',
   title: '605 Wells Ministry Hub',
@@ -900,7 +1059,7 @@ const config = defineConfig({
   plugins: [structureTool(), visionTool()],
 
   schema: {
-    types: [eventSchema, pastEventSchema, livestreamAccessSchema, eventRegistrationSchema, ministryCategorySchema, volunteerSchema],
+    types: [eventSchema, pastEventSchema, livestreamAccessSchema, eventRegistrationSchema, ministryCategorySchema, volunteerSchema, ministrySessionRequestSchema],
   },
 })
 

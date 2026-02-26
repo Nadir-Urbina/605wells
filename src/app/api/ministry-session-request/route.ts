@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { client } from '@/lib/sanity';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -13,6 +14,8 @@ const MINISTRY_SESSION_REQUEST_EMAIL = (data: {
   localChurch: string;
   baptizedInHolySpirit: string;
   reasonForMinistry: string;
+  availableDays: string[];
+  availableTimes: string[];
   timestamp: string;
 }) => `
 <!DOCTYPE html>
@@ -83,6 +86,17 @@ const MINISTRY_SESSION_REQUEST_EMAIL = (data: {
       <div class="field">
         <span class="label">Why do you feel you need this ministry time?</span>
         <div class="textarea-value">${data.reasonForMinistry}</div>
+      </div>
+
+      <div class="highlight">
+        <div class="field" style="margin-bottom: 15px;">
+          <span class="label">Available Days</span>
+          <div class="value" style="background-color: white;">${data.availableDays.join(', ')}</div>
+        </div>
+        <div class="field" style="margin-bottom: 0;">
+          <span class="label">Time Preferences</span>
+          <div class="value" style="background-color: white;">${data.availableTimes.join(', ')}</div>
+        </div>
       </div>
 
       <div class="field">
@@ -224,6 +238,8 @@ export async function POST(request: NextRequest) {
       localChurch,
       baptizedInHolySpirit,
       reasonForMinistry,
+      availableDays,
+      availableTimes,
       recaptchaToken,
       honeypot
     } = body;
@@ -239,7 +255,9 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!fullName || !email || !phone || !ministryRequested || !salvationExperience ||
-        !localChurch || !baptizedInHolySpirit || !reasonForMinistry) {
+        !localChurch || !baptizedInHolySpirit || !reasonForMinistry ||
+        !availableDays || !Array.isArray(availableDays) || availableDays.length === 0 ||
+        !availableTimes || !Array.isArray(availableTimes) || availableTimes.length === 0) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -315,6 +333,8 @@ export async function POST(request: NextRequest) {
         localChurch,
         baptizedInHolySpirit,
         reasonForMinistry,
+        availableDays,
+        availableTimes,
         timestamp
       }),
     });
@@ -340,6 +360,34 @@ export async function POST(request: NextRequest) {
     console.log('✅ Ministry session request emails sent successfully');
     console.log('Admin notification ID:', adminEmailResult.data?.id);
     console.log('User confirmation ID:', userEmailResult.data?.id);
+
+    // Save to Sanity CMS
+    try {
+      const sessionRequest = await client.create({
+        _type: 'ministrySessionRequest',
+        personalInfo: {
+          fullName,
+          email,
+          phone,
+        },
+        ministryRequested,
+        salvationExperience,
+        localChurch,
+        baptizedInHolySpirit,
+        reasonForMinistry,
+        availability: {
+          availableDays,
+          availableTimes,
+        },
+        submissionDate: new Date().toISOString(),
+        status: 'pending',
+      });
+
+      console.log('✅ Ministry session request saved to Sanity:', sessionRequest._id);
+    } catch (sanityError) {
+      console.error('Failed to save to Sanity (non-critical):', sanityError);
+      // Don't throw - emails are more critical than CMS storage
+    }
 
     return NextResponse.json({
       message: 'Ministry session request submitted successfully',

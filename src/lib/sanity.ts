@@ -25,8 +25,8 @@ export function urlFor(source: string | object) {
 
 // GROQ queries for events
 export const eventQueries = {
-  // Get all published events, ordered by date
-  allEvents: `*[_type == "event" && published == true] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
+  // Get all published events visible on the calendar, ordered by date
+  allEvents: `*[_type == "event" && published == true && (visibility != "events-page-only" || !defined(visibility))] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
     _id,
     title,
     slug,
@@ -46,11 +46,12 @@ export const eventQueries = {
     registrationDeadline,
     registrationInstructions,
     restreamEmbedCode,
-    livestreamEnabled
+    livestreamEnabled,
+    visibility
   }`,
 
-  // Get featured events for homepage
-  featuredEvents: `*[_type == "event" && published == true && featured == true] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) [0...3] {
+  // Get featured events for homepage (visible on events page, today or future)
+  featuredEvents: `*[_type == "event" && published == true && featured == true && (visibility != "calendar-only" || !defined(visibility)) && (count(eventSchedule[endTime >= now()]) > 0 || !defined(eventSchedule[0].startTime))] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) [0...3] {
     _id,
     title,
     slug,
@@ -69,11 +70,12 @@ export const eventQueries = {
     registrationDeadline,
     registrationInstructions,
     restreamEmbedCode,
-    livestreamEnabled
+    livestreamEnabled,
+    visibility
   }`,
 
-  // Get upcoming events (including TBD events)
-  upcomingEvents: `*[_type == "event" && published == true && (eventSchedule[0].startTime >= now() || !defined(eventSchedule[0].startTime))] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
+  // Get upcoming events visible on events page (today or future, including TBD events)
+  upcomingEvents: `*[_type == "event" && published == true && (visibility != "calendar-only" || !defined(visibility)) && (count(eventSchedule[endTime >= now()]) > 0 || !defined(eventSchedule[0].startTime))] | order(coalesce(eventSchedule[0].startTime, "9999-12-31T00:00:00Z") asc) {
     _id,
     title,
     slug,
@@ -93,7 +95,8 @@ export const eventQueries = {
     registrationDeadline,
     registrationInstructions,
     restreamEmbedCode,
-    livestreamEnabled
+    livestreamEnabled,
+    visibility
   }`,
 
   // Get single event by slug
@@ -118,7 +121,8 @@ export const eventQueries = {
     registrationDeadline,
     registrationInstructions,
     restreamEmbedCode,
-    livestreamEnabled
+    livestreamEnabled,
+    visibility
   }`,
 }
 
@@ -247,6 +251,8 @@ export interface SanityEvent {
   onlinePrice?: number
   restreamEmbedCode?: string
   livestreamEnabled?: boolean
+  // Visibility control
+  visibility?: 'both' | 'calendar-only' | 'events-page-only'
 }
 
 // Event Registration interfaces

@@ -30,6 +30,8 @@ interface FormData {
   localChurch: string;
   baptizedInHolySpirit: string;
   reasonForMinistry: string;
+  availableDays: string[];
+  availableTimes: string[];
 }
 
 interface FormErrors {
@@ -41,6 +43,8 @@ interface FormErrors {
   localChurch?: string;
   baptizedInHolySpirit?: string;
   reasonForMinistry?: string;
+  availableDays?: string;
+  availableTimes?: string;
 }
 
 export default function MinistrySessionRequest() {
@@ -60,6 +64,8 @@ export default function MinistrySessionRequest() {
     localChurch: '',
     baptizedInHolySpirit: '',
     reasonForMinistry: '',
+    availableDays: [],
+    availableTimes: [],
   });
 
   const openKingdomBuilderForm = () => {
@@ -144,6 +150,16 @@ export default function MinistrySessionRequest() {
       newErrors.reasonForMinistry = 'Please share why you need this ministry time';
     }
 
+    // Available Days validation
+    if (formData.availableDays.length === 0) {
+      newErrors.availableDays = 'Please select at least one available day';
+    }
+
+    // Available Times validation
+    if (formData.availableTimes.length === 0) {
+      newErrors.availableTimes = 'Please select at least one time preference';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -161,6 +177,38 @@ export default function MinistrySessionRequest() {
       setErrors((prev) => ({
         ...prev,
         [name]: undefined,
+      }));
+    }
+  };
+
+  const handleDayToggle = (day: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      availableDays: prev.availableDays.includes(day)
+        ? prev.availableDays.filter((d) => d !== day)
+        : [...prev.availableDays, day],
+    }));
+    // Clear error when user selects at least one day
+    if (errors.availableDays) {
+      setErrors((prev) => ({
+        ...prev,
+        availableDays: undefined,
+      }));
+    }
+  };
+
+  const handleTimeToggle = (time: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      availableTimes: prev.availableTimes.includes(time)
+        ? prev.availableTimes.filter((t) => t !== time)
+        : [...prev.availableTimes, time],
+    }));
+    // Clear error when user selects at least one time
+    if (errors.availableTimes) {
+      setErrors((prev) => ({
+        ...prev,
+        availableTimes: undefined,
       }));
     }
   };
@@ -473,6 +521,72 @@ export default function MinistrySessionRequest() {
                   {errors.reasonForMinistry && (
                     <p className="mt-1 text-sm text-red-500">{errors.reasonForMinistry}</p>
                   )}
+                </div>
+
+                {/* Availability Section */}
+                <div className="border-t-2 border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    When are you available for ministry sessions?
+                  </h3>
+
+                  {/* Available Days */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Available Days <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-600 mb-3">Select all days that work for you</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => handleDayToggle(day)}
+                          className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                            formData.availableDays.includes(day)
+                              ? 'bg-purple-600 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.availableDays && (
+                      <p className="mt-2 text-sm text-red-500">{errors.availableDays}</p>
+                    )}
+                  </div>
+
+                  {/* Available Times */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Time Preferences <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-600 mb-3">Select all time slots that work for you</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        { value: 'Morning', time: '6am - 12pm' },
+                        { value: 'Afternoon', time: '12pm - 6pm' },
+                        { value: 'Evening', time: '6pm - 10pm' },
+                      ].map((timeSlot) => (
+                        <button
+                          key={timeSlot.value}
+                          type="button"
+                          onClick={() => handleTimeToggle(timeSlot.value)}
+                          className={`px-4 py-4 rounded-lg font-medium transition-all text-left ${
+                            formData.availableTimes.includes(timeSlot.value)
+                              ? 'bg-purple-600 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          <div className="font-semibold">{timeSlot.value}</div>
+                          <div className="text-sm opacity-90">{timeSlot.time}</div>
+                        </button>
+                      ))}
+                    </div>
+                    {errors.availableTimes && (
+                      <p className="mt-2 text-sm text-red-500">{errors.availableTimes}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Honeypot field - hidden from users */}

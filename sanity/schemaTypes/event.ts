@@ -214,6 +214,21 @@ export default defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'visibility',
+      title: 'Visibility',
+      type: 'string',
+      description: 'Control where this event appears on the website',
+      options: {
+        list: [
+          {title: 'Events Page & Calendar', value: 'both'},
+          {title: 'Calendar Only', value: 'calendar-only'},
+          {title: 'Events Page Only', value: 'events-page-only'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'both',
+    }),
+    defineField({
       name: 'registrationType',
       title: 'Registration Type',
       type: 'string',
