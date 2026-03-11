@@ -105,6 +105,7 @@ export const eventQueries = {
     title,
     slug,
     description,
+    valueVideo,
     content,
     featuredImage,
     eventSchedule,
@@ -220,6 +221,7 @@ export interface SanityEvent {
     current: string
   }
   description: string
+  valueVideo?: string
   content?: Array<{
     _type: string;
     _key: string;

@@ -1264,4 +1264,432 @@ export async function sendPastEventAccessConfirmation(data: PastEventAccessEmail
     console.error('Error sending past event access confirmation email:', error);
     throw error;
   }
-} 
+}
+
+// =======================
+// VIRTUAL HUB EMAIL TEMPLATES
+// =======================
+
+/**
+ * Ministry Session Booking Confirmation Email
+ * Sent after successful payment for a paid ministry session
+ */
+export async function sendMinistrySessionConfirmation(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  ministryTypeTitle: string;
+  teamMemberName: string;
+  scheduledDate: string; // YYYY-MM-DD
+  scheduledTime: string; // "10:00 AM EST"
+  duration: number;
+  amount: number;
+  meetingLink: string;
+  bookingId: string;
+  intakeFormLink?: string;
+}) {
+  try {
+    const formattedDate = new Date(data.scheduledDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      to: [data.email],
+      subject: `✅ Your ${data.ministryTypeTitle} Session is Confirmed!`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ministry Session Confirmed</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .success-icon { font-size: 48px; margin: 0 0 10px 0; }
+    .content { padding: 30px; color: #374151; line-height: 1.6; }
+    .session-details { background-color: #f9fafb; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .session-details h3 { margin: 0 0 15px 0; color: #1f2937; }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #6b7280; font-weight: 500; }
+    .detail-value { color: #1f2937; font-weight: 600; text-align: right; }
+    .meeting-link-box { background-color: #dbeafe; border: 2px solid #3b82f6; padding: 25px; margin: 20px 0; border-radius: 12px; text-align: center; }
+    .meeting-link-box h3 { margin: 0 0 10px 0; color: #1e40af; }
+    .meeting-button { display: inline-block; background-color: #3b82f6; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 10px 0; }
+    .meeting-button:hover { background-color: #2563eb; }
+    .recording-notice { background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .recording-notice p { margin: 0; font-size: 14px; color: #1e40af; }
+    .next-steps { background-color: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .next-steps h3 { margin: 0 0 15px 0; color: #6b21a8; }
+    .next-steps ol { margin: 0; padding-left: 20px; }
+    .next-steps li { margin: 10px 0; color: #581c87; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="success-icon">✅</div>
+      <h1>Session Confirmed!</h1>
+      <p>Your ministry session has been successfully scheduled</p>
+    </div>
+
+    <div class="content">
+      <p>Dear ${data.firstName} ${data.lastName},</p>
+
+      <p>Great news! Your <strong>${data.ministryTypeTitle}</strong> session with <strong>${data.teamMemberName}</strong> has been confirmed and paid.</p>
+
+      <div class="session-details">
+        <h3>📅 Session Details</h3>
+        <div class="detail-row">
+          <span class="detail-label">Ministry Type:</span>
+          <span class="detail-value">${data.ministryTypeTitle}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Team Member:</span>
+          <span class="detail-value">${data.teamMemberName}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${formattedDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.scheduledTime}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Duration:</span>
+          <span class="detail-value">${data.duration} minutes</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Amount Paid:</span>
+          <span class="detail-value">$${data.amount.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div class="meeting-link-box">
+        <h3>🎥 Your Video Meeting Link</h3>
+        <p style="margin: 10px 0; color: #1e40af;">Join your session at the scheduled time:</p>
+        <a href="${data.meetingLink}" class="meeting-button">Join Video Meeting</a>
+        <p style="margin: 10px 0; font-size: 14px; color: #3b82f6;">💡 No app required! Works in any browser.</p>
+      </div>
+
+      <div class="recording-notice">
+        <p><strong>🎙️ Recording Notice:</strong> This session will be automatically recorded for quality assurance and accountability purposes. The recording will be securely stored and accessible only to you and your team member.</p>
+      </div>
+
+      <div class="next-steps">
+        <h3>What Happens Next?</h3>
+        <ol>
+          <li><strong>Complete the Intake Form:</strong> Help your team member prepare by filling out the intake form${data.intakeFormLink ? ` at <a href="${data.intakeFormLink}" style="color: #6b21a8;">this link</a>` : ''}.</li>
+          <li><strong>Prepare for Your Session:</strong> Take time to reflect and prepare any questions you'd like to discuss.</li>
+          <li><strong>Join at Your Scheduled Time:</strong> Use the video meeting link above to join your session.</li>
+          <li><strong>Recording Access:</strong> After your session, you'll receive access to the recording for future reference.</li>
+        </ol>
+      </div>
+
+      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@605wells.com" style="color: #8b5cf6;">support@605wells.com</a></p>
+
+      <p style="margin-top: 30px;">
+        We're looking forward to your session!<br>
+        <strong>The 605 Wells Virtual Hub Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p>Booking ID: ${data.bookingId}</p>
+      <p style="margin-top: 15px;">
+        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send ministry session confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Ministry session confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending ministry session confirmation email:', error);
+    throw error;
+  }
+}
+
+/**
+ * Queue Confirmation Email
+ * Sent when someone joins the free ministry session queue
+ */
+export async function sendQueueConfirmation(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  ministryTypeTitle: string;
+  queuePosition?: number;
+}) {
+  try {
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      to: [data.email],
+      subject: `You've Joined the ${data.ministryTypeTitle} Queue!`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queue Confirmation</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #10b981; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+    .content { padding: 30px; color: #374151; line-height: 1.6; }
+    .queue-info { background-color: #d1fae5; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; text-align: center; }
+    .queue-info h3 { margin: 0 0 10px 0; color: #065f46; }
+    .queue-info p { margin: 0; font-size: 18px; color: #047857; font-weight: 600; }
+    .what-next { background-color: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .what-next h3 { margin: 0 0 15px 0; color: #6b21a8; }
+    .what-next ol { margin: 0; padding-left: 20px; }
+    .what-next li { margin: 10px 0; color: #581c87; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #10b981; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🙋 You're in the Queue!</h1>
+      <p>We'll match you with a team member soon</p>
+    </div>
+
+    <div class="content">
+      <p>Dear ${data.firstName} ${data.lastName},</p>
+
+      <p>Thank you for requesting a <strong>${data.ministryTypeTitle}</strong> session! You've been added to our queue and will be matched with an available team member as soon as possible.</p>
+
+      ${data.queuePosition ? `
+      <div class="queue-info">
+        <h3>Your Queue Position</h3>
+        <p>#${data.queuePosition}</p>
+      </div>
+      ` : ''}
+
+      <div class="what-next">
+        <h3>What Happens Next?</h3>
+        <ol>
+          <li><strong>We'll Match You:</strong> Our team will assign you to an available team member based on your requested ministry type.</li>
+          <li><strong>You'll Receive a Notification:</strong> We'll email you as soon as your session has been scheduled with all the details.</li>
+          <li><strong>Complete Your Intake Form:</strong> We'll send you a link to complete an intake form to help your team member prepare.</li>
+          <li><strong>Join Your Session:</strong> You'll receive a video meeting link to join at your scheduled time.</li>
+        </ol>
+      </div>
+
+      <p><strong>Important:</strong> Free sessions are assigned on a first-come, first-served basis. We appreciate your patience as we work to match you with the right team member!</p>
+
+      <p style="margin-top: 30px;">
+        Blessings,<br>
+        <strong>The 605 Wells Virtual Hub Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p style="margin-top: 15px;">
+        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send queue confirmation email:', error);
+      throw error;
+    }
+
+    console.log('✅ Queue confirmation email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending queue confirmation email:', error);
+    throw error;
+  }
+}
+
+/**
+ * Queue Assignment Notification Email
+ * Sent when admin assigns a queue entry to a session slot
+ */
+export async function sendQueueAssignmentNotification(data: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  ministryTypeTitle: string;
+  teamMemberName: string;
+  scheduledDate: string; // YYYY-MM-DD
+  scheduledTime: string; // "10:00 AM EST"
+  duration: number;
+  meetingLink: string;
+  bookingId: string;
+  intakeFormLink?: string;
+}) {
+  try {
+    const formattedDate = new Date(data.scheduledDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      to: [data.email],
+      subject: `🎉 You've Been Matched! Your ${data.ministryTypeTitle} Session is Scheduled`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You've Been Matched!</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #10b981; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header .icon { font-size: 48px; margin: 0 0 10px 0; }
+    .content { padding: 30px; color: #374151; line-height: 1.6; }
+    .session-details { background-color: #f9fafb; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .session-details h3 { margin: 0 0 15px 0; color: #1f2937; }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #6b7280; font-weight: 500; }
+    .detail-value { color: #1f2937; font-weight: 600; text-align: right; }
+    .meeting-link-box { background-color: #dbeafe; border: 2px solid #3b82f6; padding: 25px; margin: 20px 0; border-radius: 12px; text-align: center; }
+    .meeting-link-box h3 { margin: 0 0 10px 0; color: #1e40af; }
+    .meeting-button { display: inline-block; background-color: #3b82f6; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 10px 0; }
+    .recording-notice { background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .recording-notice p { margin: 0; font-size: 14px; color: #1e40af; }
+    .next-steps { background-color: #f3e8ff; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .next-steps h3 { margin: 0 0 15px 0; color: #6b21a8; }
+    .next-steps ol { margin: 0; padding-left: 20px; }
+    .next-steps li { margin: 10px 0; color: #581c87; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #10b981; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="icon">🎉</div>
+      <h1>You've Been Matched!</h1>
+      <p>Your session has been scheduled</p>
+    </div>
+
+    <div class="content">
+      <p>Dear ${data.firstName} ${data.lastName},</p>
+
+      <p>Great news! We've matched you with <strong>${data.teamMemberName}</strong> for your <strong>${data.ministryTypeTitle}</strong> session!</p>
+
+      <div class="session-details">
+        <h3>📅 Session Details</h3>
+        <div class="detail-row">
+          <span class="detail-label">Ministry Type:</span>
+          <span class="detail-value">${data.ministryTypeTitle}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Team Member:</span>
+          <span class="detail-value">${data.teamMemberName}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${formattedDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.scheduledTime}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Duration:</span>
+          <span class="detail-value">${data.duration} minutes</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Cost:</span>
+          <span class="detail-value" style="color: #10b981; font-weight: bold;">FREE</span>
+        </div>
+      </div>
+
+      <div class="meeting-link-box">
+        <h3>🎥 Your Video Meeting Link</h3>
+        <p style="margin: 10px 0; color: #1e40af;">Join your session at the scheduled time:</p>
+        <a href="${data.meetingLink}" class="meeting-button">Join Video Meeting</a>
+        <p style="margin: 10px 0; font-size: 14px; color: #3b82f6;">💡 No app required! Works in any browser.</p>
+      </div>
+
+      <div class="recording-notice">
+        <p><strong>🎙️ Recording Notice:</strong> This session will be automatically recorded for quality assurance and accountability purposes. The recording will be securely stored and accessible only to you and your team member.</p>
+      </div>
+
+      <div class="next-steps">
+        <h3>What Happens Next?</h3>
+        <ol>
+          <li><strong>Complete the Intake Form:</strong> Help your team member prepare by filling out the intake form${data.intakeFormLink ? ` at <a href="${data.intakeFormLink}" style="color: #6b21a8;">this link</a>` : ''}.</li>
+          <li><strong>Prepare for Your Session:</strong> Take time to reflect and prepare any questions you'd like to discuss.</li>
+          <li><strong>Join at Your Scheduled Time:</strong> Use the video meeting link above to join your session.</li>
+          <li><strong>Recording Access:</strong> After your session, you'll receive access to the recording for future reference.</li>
+        </ol>
+      </div>
+
+      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@605wells.com" style="color: #10b981;">support@605wells.com</a></p>
+
+      <p style="margin-top: 30px;">
+        We're looking forward to your session!<br>
+        <strong>The 605 Wells Virtual Hub Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p>Booking ID: ${data.bookingId}</p>
+      <p style="margin-top: 15px;">
+        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send queue assignment notification email:', error);
+      throw error;
+    }
+
+    console.log('✅ Queue assignment notification email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending queue assignment notification email:', error);
+    throw error;
+  }
+}

@@ -44,6 +44,12 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'valueVideo',
+      title: 'Value Video',
+      type: 'url',
+      description: 'Optional video URL (YouTube, Vimeo, or direct video link) to display before event title',
+    }),
+    defineField({
       name: 'content',
       title: 'Content',
       type: 'array',

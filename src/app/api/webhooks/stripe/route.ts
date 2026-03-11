@@ -5,7 +5,7 @@ import { createEventRegistration, type SanityEventRegistration, type SanityLives
 import crypto from 'crypto';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
+  apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
 });
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -185,6 +185,12 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
       return;
     }
 
+    // Check if this is a ministry session booking
+    if (paymentIntent.metadata.ministryTypeId) {
+      await handleMinistrySessionBookingSuccess(paymentIntent);
+      return;
+    }
+
     // Check if this is a past event purchase
     if (paymentIntent.metadata.type === 'past_event_purchase') {
       await handlePastEventPurchaseFromPaymentIntent(paymentIntent);
@@ -227,6 +233,167 @@ async function handleOneTimePaymentSucceeded(paymentIntent: Stripe.PaymentIntent
 }
 
 // Removed unused interfaces - using event data directly from Sanity
+
+async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.PaymentIntent) {
+  console.log('Ministry session booking payment succeeded:', paymentIntent.id);
+
+  try {
+    const metadata = paymentIntent.metadata;
+    const {
+      ministryTypeId,
+      ministryTypeTitle,
+      teamMemberId,
+      scheduledDate,
+      scheduledTime,
+      attendeeFirstName,
+      attendeeLastName,
+      attendeeEmail,
+      attendeePhone,
+      duration,
+    } = metadata;
+
+    if (!ministryTypeId || !teamMemberId || !scheduledDate || !scheduledTime || !attendeeEmail) {
+      console.error('Missing required metadata for ministry session booking:', paymentIntent.id);
+      return;
+    }
+
+    // Fetch team member name from Sanity
+    let teamMemberName = 'Team Member';
+    try {
+      const teamMember = await client.fetch(
+        `*[_type == "teamMember" && _id == $teamMemberId][0] {
+          firstName,
+          lastName
+        }`,
+        { teamMemberId }
+      );
+      if (teamMember) {
+        teamMemberName = `${teamMember.firstName} ${teamMember.lastName}`;
+      }
+    } catch (sanityError) {
+      console.error('⚠️ Failed to fetch team member name from Sanity:', sanityError);
+      // Continue with default name
+    }
+
+    // Import Firestore utilities (using admin SDK for server-side operations)
+    const { createBooking, bookTimeSlot } = await import('@/lib/firestore-admin');
+
+    // Create booking in Firestore
+    const bookingData = {
+      ministryType: ministryTypeId,
+      ministryTypeTitle: ministryTypeTitle || 'Ministry Session',
+      teamMemberId,
+      teamMemberName,
+      attendeeInfo: {
+        firstName: attendeeFirstName,
+        lastName: attendeeLastName,
+        email: attendeeEmail,
+        phone: attendeePhone || undefined,
+      },
+      scheduledDate,
+      scheduledTime,
+      duration: parseInt(duration),
+      status: 'scheduled' as const,
+      attendanceType: 'paid' as const,
+      payment: {
+        stripePaymentIntentId: paymentIntent.id,
+        amount: paymentIntent.amount / 100,
+        status: 'completed' as const,
+      },
+      rescheduleCount: 0,
+      rescheduleHistory: [],
+    };
+
+    const bookingId = await createBooking(bookingData);
+    console.log('✅ Ministry session booking created in Firestore:', bookingId);
+
+    // Update availability slot to mark as booked
+    try {
+      await bookTimeSlot(teamMemberId, scheduledDate, scheduledTime, bookingId);
+      console.log('✅ Availability slot marked as booked');
+    } catch (availabilityError) {
+      console.error('⚠️ Failed to update availability slot:', availabilityError);
+      // Don't fail the entire process if availability update fails
+    }
+
+    // Create Daily.co video meeting room
+    let dailyMeetingData = null;
+    try {
+      const { createDailyRoom, formatMeetingForFirestore } = await import('@/lib/daily');
+
+      // Parse scheduled date and time to create startTime Date object
+      const [year, month, day] = scheduledDate.split('-').map(Number);
+      const [time, period] = scheduledTime.split(' ');
+      const [hours, minutes] = time.split(':').map(Number);
+      let hour24 = hours;
+      if (period === 'PM' && hours !== 12) hour24 += 12;
+      if (period === 'AM' && hours === 12) hour24 = 0;
+
+      const startTime = new Date(year, month - 1, day, hour24, minutes);
+
+      const dailyRoom = await createDailyRoom({
+        sessionName: `${ministryTypeTitle} - ${teamMemberName} & ${attendeeFirstName} ${attendeeLastName}`,
+        startTime,
+        duration: parseInt(duration),
+        attendeeName: `${attendeeFirstName} ${attendeeLastName}`,
+        teamMemberName,
+      });
+
+      dailyMeetingData = formatMeetingForFirestore(dailyRoom);
+      console.log('✅ Daily.co meeting room created:', dailyRoom.url);
+
+      // Update booking with meeting information
+      const { updateBooking } = await import('@/lib/firestore-admin');
+      await updateBooking(bookingId, {
+        videoMeeting: dailyMeetingData,
+      });
+      console.log('✅ Booking updated with Daily.co meeting details');
+    } catch (dailyError) {
+      console.error('⚠️ Failed to create Daily.co meeting:', dailyError);
+      // Don't fail the entire process if Daily.co fails
+    }
+
+    // Send confirmation email with booking details and Daily.co meeting link
+    if (dailyMeetingData?.joinUrl) {
+      try {
+        const { sendMinistrySessionConfirmation } = await import('@/lib/resend');
+
+        await sendMinistrySessionConfirmation({
+          email: attendeeEmail,
+          firstName: attendeeFirstName,
+          lastName: attendeeLastName,
+          ministryTypeTitle: ministryTypeTitle || 'Ministry Session',
+          teamMemberName,
+          scheduledDate,
+          scheduledTime,
+          duration: parseInt(duration),
+          amount: paymentIntent.amount / 100,
+          meetingLink: dailyMeetingData.joinUrl,
+          bookingId,
+          intakeFormLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/virtual-hub/intake/${bookingId}`,
+        });
+
+        console.log('✅ Confirmation email sent to:', attendeeEmail);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send confirmation email:', emailError);
+        // Don't fail the entire process if email fails
+      }
+    }
+
+    console.log('Ministry session booking completed:', {
+      bookingId,
+      ministryType: ministryTypeTitle,
+      teamMember: teamMemberName,
+      attendee: `${attendeeFirstName} ${attendeeLastName}`,
+      email: attendeeEmail,
+      scheduledDate,
+      scheduledTime,
+      meetingUrl: dailyMeetingData?.joinUrl || 'Not created',
+    });
+  } catch (error) {
+    console.error('Error handling ministry session booking success:', error);
+  }
+}
 
 async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentIntent) {
   console.log('Event registration payment succeeded:', paymentIntent.id);

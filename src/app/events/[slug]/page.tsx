@@ -10,6 +10,7 @@ import EventRegistrationForm from '@/components/EventRegistrationForm';
 import FreeEventRegistrationForm from '@/components/FreeEventRegistrationForm';
 import HybridEventRegistrationForm from '@/components/HybridEventRegistrationForm';
 import KingdomBuilderForm from '@/components/KingdomBuilderForm';
+import VideoEmbed from '@/components/VideoEmbed';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
 import { PortableText } from '@portabletext/react';
 
@@ -289,6 +290,13 @@ export default function EventDetailPage() {
                   <span className="inline-block bg-purple-600/90 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
                     {getCategoryLabel(event.category)}
                   </span>
+                </div>
+              )}
+
+              {/* Value Video - Overlaid on Hero */}
+              {event.valueVideo && (
+                <div className="mb-8 w-full sm:max-w-4xl mx-auto">
+                  <VideoEmbed url={event.valueVideo} />
                 </div>
               )}
 
