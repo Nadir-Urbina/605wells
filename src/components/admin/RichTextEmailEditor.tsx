@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 interface RichTextEmailEditorProps {
   value: string
@@ -45,6 +45,24 @@ export default function RichTextEmailEditor({
   disabled = false,
 }: RichTextEmailEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
+  // Track the last value we set ourselves so we don't clobber user input
+  const lastSetValue = useRef(value)
+
+  useEffect(() => {
+    // Only update innerHTML when the value changed from *outside* (e.g. reset after send)
+    if (editorRef.current && value !== lastSetValue.current) {
+      editorRef.current.innerHTML = value
+      lastSetValue.current = value
+    }
+  }, [value])
+
+  // Set initial content on mount
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = value
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const execFormat = useCallback((command: FormatCommand) => {
     document.execCommand(command, false)
@@ -56,7 +74,9 @@ export default function RichTextEmailEditor({
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML)
+      const html = editorRef.current.innerHTML
+      lastSetValue.current = html // mark as internal change so the effect doesn't overwrite
+      onChange(html)
     }
   }, [onChange])
 
@@ -134,12 +154,8 @@ export default function RichTextEmailEditor({
         suppressContentEditableWarning
         onInput={handleInput}
         onPaste={handlePaste}
-        dangerouslySetInnerHTML={{ __html: value }}
         className="min-h-[220px] p-4 focus:outline-none text-gray-800 text-sm leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-orange-600 [&_a]:underline"
         data-placeholder="Write your message here…"
-        style={{
-          // Show placeholder when empty via CSS
-        }}
       />
 
       <style>{`
