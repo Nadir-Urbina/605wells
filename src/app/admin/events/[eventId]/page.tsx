@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import AdminGuard from '@/components/AdminGuard'
 import * as XLSX from 'xlsx'
+import RichTextEmailEditor from '@/components/admin/RichTextEmailEditor'
 
 interface EventDetails {
   _id: string
@@ -95,6 +96,18 @@ function EventRegistrationsContent() {
     success: boolean
     message: string
     tokensCreated?: number
+  } | null>(null)
+
+  // Email blast state
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailHtmlContent, setEmailHtmlContent] = useState('')
+  const [emailAttendanceFilter, setEmailAttendanceFilter] = useState<'all' | 'in-person' | 'online'>('all')
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailSendResult, setEmailSendResult] = useState<{
+    success: boolean
+    message: string
+    sent?: number
+    failed?: number
   } | null>(null)
 
   const fetchEventData = useCallback(async () => {
@@ -201,6 +214,66 @@ function EventRegistrationsContent() {
       })
     } finally {
       setIsGeneratingTokens(false)
+    }
+  }
+
+  const handleSendEmail = async () => {
+    if (!emailSubject.trim() || !emailHtmlContent.trim()) {
+      alert('Please fill in the subject and message body.')
+      return
+    }
+
+    const recipientCount =
+      emailAttendanceFilter === 'all'
+        ? data?.stats.totalRegistrations
+        : emailAttendanceFilter === 'in-person'
+        ? inPersonCount
+        : onlineCount
+
+    if (
+      !window.confirm(
+        `Send "${emailSubject}" to ${recipientCount} registrant${recipientCount !== 1 ? 's' : ''}?`
+      )
+    ) {
+      return
+    }
+
+    setIsSendingEmail(true)
+    setEmailSendResult(null)
+
+    try {
+      const response = await fetch(`/api/admin/events/${eventId}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: emailSubject,
+          htmlContent: emailHtmlContent,
+          attendanceTypeFilter: emailAttendanceFilter,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send emails')
+      }
+
+      setEmailSendResult({
+        success: result.failed === 0,
+        message:
+          result.failed === 0
+            ? `Email sent successfully to ${result.sent} recipient${result.sent !== 1 ? 's' : ''}.`
+            : `Sent to ${result.sent}, failed for ${result.failed}.`,
+        sent: result.sent,
+        failed: result.failed,
+      })
+    } catch (error) {
+      setEmailSendResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to send emails',
+      })
+    } finally {
+      setIsSendingEmail(false)
     }
   }
 
@@ -531,6 +604,120 @@ function EventRegistrationsContent() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Email Registrants */}
+        <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-1">Email Registrants</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Compose and send an email to all active (non-cancelled) registrants of this event.
+            Use <code className="bg-gray-100 px-1 rounded text-xs">{'{{firstName}}'}</code> anywhere in the body to personalize.
+          </p>
+
+          <div className="space-y-4">
+            {/* Subject */}
+            <div>
+              <label htmlFor="emailSubject" className="block text-sm font-medium text-gray-700 mb-1">
+                Subject
+              </label>
+              <input
+                id="emailSubject"
+                type="text"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+                placeholder="e.g., Important update about your registration"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                disabled={isSendingEmail}
+              />
+            </div>
+
+            {/* Attendance filter — only shown for hybrid events */}
+            {isHybridEvent && (inPersonCount > 0 || onlineCount > 0) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Send to</label>
+                <div className="flex gap-2">
+                  {(['all', 'in-person', 'online'] as const).map((opt) => {
+                    const labels: Record<typeof opt, string> = {
+                      all: `All (${data?.stats.totalRegistrations ?? 0})`,
+                      'in-person': `In-Person (${inPersonCount})`,
+                      online: `Online (${onlineCount})`,
+                    }
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setEmailAttendanceFilter(opt)}
+                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          emailAttendanceFilter === opt
+                            ? 'bg-orange-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        disabled={isSendingEmail}
+                      >
+                        {labels[opt]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Body */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+              <RichTextEmailEditor
+                value={emailHtmlContent}
+                onChange={setEmailHtmlContent}
+                disabled={isSendingEmail}
+              />
+            </div>
+
+            {/* Send button */}
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={handleSendEmail}
+                disabled={isSendingEmail || !emailSubject.trim() || !emailHtmlContent.trim()}
+                className="px-6 py-2 bg-orange-600 text-white text-sm font-semibold rounded-md hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {isSendingEmail ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Send Email
+                  </>
+                )}
+              </button>
+
+              {emailSendResult && (
+                <div
+                  className={`flex items-center gap-2 text-sm ${
+                    emailSendResult.success ? 'text-green-700' : 'text-red-700'
+                  }`}
+                >
+                  {emailSendResult.success ? (
+                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                  {emailSendResult.message}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Registrations Table */}
