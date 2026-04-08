@@ -229,6 +229,7 @@ export default defineType({
           {title: 'Events Page & Calendar', value: 'both'},
           {title: 'Calendar Only', value: 'calendar-only'},
           {title: 'Events Page Only', value: 'events-page-only'},
+          {title: 'Link Only (not listed anywhere)', value: 'link-only'},
         ],
         layout: 'radio',
       },
