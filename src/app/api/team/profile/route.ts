@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyTeamMemberSession } from '@/lib/auth';
+import { verifyTeamMemberSession, TEAM_MEMBER_COOKIE_OPTIONS } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { client } from '@/lib/sanity';
 
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('team_member_session')?.value;
+    const sessionToken = cookieStore.get(TEAM_MEMBER_COOKIE_OPTIONS.name)?.value;
 
     if (!sessionToken) {
       return NextResponse.json(

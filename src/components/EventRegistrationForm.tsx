@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,6 +42,7 @@ interface EventRegistrationFormProps {
 }
 
 export default function EventRegistrationForm({ event, isOpen, onClose, onSuccess }: EventRegistrationFormProps) {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -242,13 +244,7 @@ export default function EventRegistrationForm({ event, isOpen, onClose, onSucces
     setPricing(null);
     setPaymentError(null);
     setPromoCodeStatus('idle');
-    
-    if (onSuccess) {
-      onSuccess();
-    } else {
-      alert('Registration successful! You will receive a confirmation email shortly.');
-      onClose();
-    }
+    router.push('/paid-thank-you');
   };
 
   const handlePaymentError = (error: string) => {

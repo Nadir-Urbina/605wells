@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,9 +28,10 @@ interface FreeEventRegistrationFormProps {
 export default function FreeEventRegistrationForm({ 
   event, 
   isOpen, 
-  onClose, 
-  onSuccess 
+  onClose,
+  onSuccess
 }: FreeEventRegistrationFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -98,16 +100,7 @@ export default function FreeEventRegistrationForm({
         throw new Error(result.error || 'Registration failed');
       }
 
-      // Show success state
-      setIsSuccess(true);
-      
-      // Auto close after 3 seconds
-      setTimeout(() => {
-        handleClose();
-        if (onSuccess) {
-          onSuccess();
-        }
-      }, 3000);
+      router.push('/free-thank-you');
 
     } catch (error) {
       console.error('Free registration error:', error);

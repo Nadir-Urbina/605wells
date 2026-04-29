@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
     const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: 'usd',
+      description: `Event Registration - ${event.title}`,
       metadata: {
         type: 'event_registration',
         eventId: event._id,

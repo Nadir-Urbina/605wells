@@ -69,7 +69,6 @@ export async function createDailyRoom(
           enable_prejoin_ui: true,
           // Automatic cloud recording for accountability
           enable_recording: 'cloud',
-          start_cloud_recording: true,
         },
       }),
     });

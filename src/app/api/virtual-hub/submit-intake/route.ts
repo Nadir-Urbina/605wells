@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateBooking } from '@/lib/firestore-admin';
+import { updateBooking, getBooking, getBookingByPaymentIntent } from '@/lib/firestore-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +13,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Resolve the actual Firestore document ID — the caller may pass either a
+    // Stripe payment intent ID (from the confirmation page URL) or the real doc ID.
+    let firestoreDocId = bookingId;
+    const bookingByPaymentIntent = await getBookingByPaymentIntent(bookingId);
+    if (bookingByPaymentIntent) {
+      firestoreDocId = bookingByPaymentIntent.id;
+    } else {
+      const bookingByDocId = await getBooking(bookingId);
+      if (!bookingByDocId) {
+        return NextResponse.json(
+          { error: 'Booking not found' },
+          { status: 404 }
+        );
+      }
+      firestoreDocId = bookingByDocId.id;
+    }
+
     // Update booking with intake form responses
-    await updateBooking(bookingId, {
+    await updateBooking(firestoreDocId, {
       intakeForm: {
         submittedAt: new Date().toISOString(),
         responses,

@@ -257,21 +257,26 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
       return;
     }
 
-    // Fetch team member name from Sanity
+    // Fetch team member details from Sanity
     let teamMemberName = 'Team Member';
+    let teamMemberEmail: string | null = null;
+    let teamMemberFirstName = 'Team Member';
     try {
       const teamMember = await client.fetch(
         `*[_type == "teamMember" && _id == $teamMemberId][0] {
           firstName,
-          lastName
+          lastName,
+          email
         }`,
         { teamMemberId }
       );
       if (teamMember) {
+        teamMemberFirstName = teamMember.firstName;
         teamMemberName = `${teamMember.firstName} ${teamMember.lastName}`;
+        teamMemberEmail = teamMember.email || null;
       }
     } catch (sanityError) {
-      console.error('⚠️ Failed to fetch team member name from Sanity:', sanityError);
+      console.error('⚠️ Failed to fetch team member details from Sanity:', sanityError);
       // Continue with default name
     }
 
@@ -378,6 +383,34 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
         console.error('⚠️ Failed to send confirmation email:', emailError);
         // Don't fail the entire process if email fails
       }
+
+      // Send notification email to the team member
+      if (teamMemberEmail) {
+        try {
+          const { sendTeamMemberBookingNotification } = await import('@/lib/resend');
+
+          await sendTeamMemberBookingNotification({
+            teamMemberEmail,
+            teamMemberFirstName,
+            ministryTypeTitle: ministryTypeTitle || 'Ministry Session',
+            attendeeFirstName,
+            attendeeLastName,
+            attendeeEmail,
+            attendeePhone: attendeePhone || undefined,
+            scheduledDate,
+            scheduledTime,
+            duration: parseInt(duration),
+            meetingLink: dailyMeetingData.joinUrl,
+            bookingId,
+            dashboardLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/team/dashboard`,
+          });
+
+          console.log('✅ Team member notification email sent to:', teamMemberEmail);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send team member notification email:', emailError);
+          // Don't fail the entire process if email fails
+        }
+      }
     }
 
     console.log('Ministry session booking completed:', {
@@ -405,7 +438,8 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
     let eventDocumentId = '';
     let eventData: { _id: string; title: string; eventSchedule?: { startTime?: string; endTime?: string; sessionTitle?: string }[]; location?: { name?: string; address?: string } } | null = null;
     try {
-      const eventSlug = metadata.eventId || '';
+      // Standard route stores slug in metadata.eventSlug; hybrid routes store it in metadata.eventId
+      const eventSlug = metadata.eventSlug || metadata.eventId || '';
       const event = await client.fetch(eventQueries.eventBySlug, { slug: eventSlug });
       
       if (!event || !event._id) {

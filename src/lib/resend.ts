@@ -835,8 +835,7 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
           <li>Save this confirmation email for your records</li>
           <li>Add the event to your calendar using the date and time above</li>
           <li>Arrive 15 minutes early for check-in</li>
-          <li>Bring a valid photo ID if required</li>
-          ${data.eventLocation ? `<li>Plan your route to ${data.eventLocation}</li>` : ''}
+          <li>Location: 605 Wells Rd, Orange Park, FL 32073</li>
         </ul>
       </div>
 
@@ -1690,6 +1689,151 @@ export async function sendQueueAssignmentNotification(data: {
     return { success: true, id: emailData?.id };
   } catch (error) {
     console.error('Error sending queue assignment notification email:', error);
+    throw error;
+  }
+}
+
+/**
+ * Team Member New Booking Notification Email
+ * Sent to the team member when a paid session is booked with them
+ */
+export async function sendTeamMemberBookingNotification(data: {
+  teamMemberEmail: string;
+  teamMemberFirstName: string;
+  ministryTypeTitle: string;
+  attendeeFirstName: string;
+  attendeeLastName: string;
+  attendeeEmail: string;
+  attendeePhone?: string;
+  scheduledDate: string; // YYYY-MM-DD
+  scheduledTime: string;
+  duration: number;
+  meetingLink: string;
+  bookingId: string;
+  dashboardLink: string;
+}) {
+  try {
+    const formattedDate = new Date(data.scheduledDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      to: [data.teamMemberEmail],
+      subject: `📅 New Session Booked: ${data.ministryTypeTitle} with ${data.attendeeFirstName} ${data.attendeeLastName}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Session Booked</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+    .header { background-color: #8b5cf6; color: white; text-align: center; padding: 40px 20px; }
+    .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+    .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+    .content { padding: 30px; color: #374151; line-height: 1.6; }
+    .session-details { background-color: #f9fafb; border-left: 4px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .session-details h3 { margin: 0 0 15px 0; color: #1f2937; }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #6b7280; font-weight: 500; }
+    .detail-value { color: #1f2937; font-weight: 600; text-align: right; }
+    .attendee-card { background-color: #ede9fe; border-left: 4px solid #7c3aed; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    .attendee-card h3 { margin: 0 0 10px 0; color: #4c1d95; }
+    .meeting-link-box { background-color: #dbeafe; border: 2px solid #3b82f6; padding: 25px; margin: 20px 0; border-radius: 12px; text-align: center; }
+    .meeting-link-box h3 { margin: 0 0 10px 0; color: #1e40af; }
+    .meeting-button { display: inline-block; background-color: #3b82f6; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 10px 0; }
+    .dashboard-button { display: inline-block; background-color: #8b5cf6; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; margin: 10px 0; }
+    .footer { background-color: #1f2937; color: white; text-align: center; padding: 30px; }
+    .footer p { margin: 5px 0; opacity: 0.8; font-size: 14px; }
+    .contact-link { color: #8b5cf6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📅 New Session Booked</h1>
+      <p>Someone has scheduled a session with you</p>
+    </div>
+
+    <div class="content">
+      <p>Hi ${data.teamMemberFirstName},</p>
+
+      <p>A new <strong>${data.ministryTypeTitle}</strong> session has been booked and paid. Here are the details:</p>
+
+      <div class="session-details">
+        <h3>📅 Session Details</h3>
+        <div class="detail-row">
+          <span class="detail-label">Ministry Type:</span>
+          <span class="detail-value">${data.ministryTypeTitle}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">${formattedDate}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Time:</span>
+          <span class="detail-value">${data.scheduledTime}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Duration:</span>
+          <span class="detail-value">${data.duration} minutes</span>
+        </div>
+      </div>
+
+      <div class="attendee-card">
+        <h3>👤 Attendee Information</h3>
+        <p style="margin: 5px 0;"><strong>Name:</strong> ${data.attendeeFirstName} ${data.attendeeLastName}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${data.attendeeEmail}" style="color: #6d28d9;">${data.attendeeEmail}</a></p>
+        ${data.attendeePhone ? `<p style="margin: 5px 0;"><strong>Phone:</strong> ${data.attendeePhone}</p>` : ''}
+      </div>
+
+      <div class="meeting-link-box">
+        <h3>🎥 Video Meeting Link</h3>
+        <p style="margin: 10px 0; color: #1e40af;">Join your session at the scheduled time:</p>
+        <a href="${data.meetingLink}" class="meeting-button">Join Video Meeting</a>
+        <p style="font-size: 13px; color: #3b82f6; margin: 8px 0 0 0;">This link is the same one your attendee received.</p>
+      </div>
+
+      <p>You can view the full booking details and the attendee's intake form responses (once submitted) in your dashboard:</p>
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="${data.dashboardLink}" class="dashboard-button">View in Dashboard</a>
+      </div>
+
+      <p style="margin-top: 30px;">
+        Blessings,<br>
+        <strong>The 605 Wells Virtual Hub Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p>Booking ID: ${data.bookingId}</p>
+      <p style="margin-top: 15px;">
+        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    });
+
+    if (error) {
+      console.error('Failed to send team member booking notification email:', error);
+      throw error;
+    }
+
+    console.log('✅ Team member booking notification email sent:', emailData?.id);
+    return { success: true, id: emailData?.id };
+  } catch (error) {
+    console.error('Error sending team member booking notification email:', error);
     throw error;
   }
 }
