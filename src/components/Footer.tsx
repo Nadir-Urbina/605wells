@@ -157,17 +157,17 @@ export default function Footer() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3">
-                {/* Honeypot field - hidden from users, bots will fill it */}
-                <input
-                  type="text"
-                  name="website"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
-                  tabIndex={-1}
-                  autoComplete="off"
-                  className="absolute opacity-0 pointer-events-none"
-                  aria-hidden="true"
-                />
+                {/* Honeypot — off-screen, never autofilled */}
+                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="hp_trap"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="nope"
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <input

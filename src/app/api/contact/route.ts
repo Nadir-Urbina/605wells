@@ -138,6 +138,12 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
 
 // Verify reCAPTCHA token
 async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number }> {
+  // Skip verification in development — reCAPTCHA rejects localhost
+  if (process.env.NODE_ENV === 'development') {
+    console.log('reCAPTCHA skipped in development mode');
+    return { success: true, score: 1.0 };
+  }
+
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
 
   if (!secretKey) {
@@ -175,18 +181,21 @@ async function verifyRecaptcha(token: string): Promise<{ success: boolean; score
 
 // Check if text is gibberish (high entropy, no real words)
 function isGibberish(text: string): boolean {
-  // Check for random character patterns
-  const hasMultipleConsecutiveCaps = /[A-Z]{4,}/.test(text);
+  // Only flag very long runs of consecutive caps (real words/acronyms are usually shorter)
+  const hasExcessiveCaps = /[A-Z]{10,}/.test(text);
   const hasRandomMixedCase = /[a-z][A-Z][a-z][A-Z]/.test(text);
-  const lacksSpaces = text.length > 20 && !text.includes(' ');
+  // Only flag long strings with no spaces
+  const lacksSpaces = text.length > 30 && !text.includes(' ');
 
-  // Check for reasonable vowel ratio (gibberish often lacks vowels)
-  const vowels = text.match(/[aeiouAEIOU]/g)?.length || 0;
-  const consonants = text.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g)?.length || 0;
+  // Only check vowel ratio on longer strings where ratio is meaningful
+  const letters = text.replace(/[^a-zA-Z]/g, '');
+  if (letters.length < 8) return hasExcessiveCaps || hasRandomMixedCase || lacksSpaces;
+  const vowels = letters.match(/[aeiouAEIOU]/g)?.length || 0;
+  const consonants = letters.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g)?.length || 0;
   const vowelRatio = vowels / (vowels + consonants || 1);
-  const hasUnusualVowelRatio = vowelRatio < 0.2 || vowelRatio > 0.7;
+  const hasUnusualVowelRatio = vowelRatio < 0.15 || vowelRatio > 0.8;
 
-  return hasMultipleConsecutiveCaps || hasRandomMixedCase || lacksSpaces || hasUnusualVowelRatio;
+  return hasExcessiveCaps || hasRandomMixedCase || lacksSpaces || hasUnusualVowelRatio;
 }
 
 export async function POST(request: NextRequest) {
@@ -272,7 +281,7 @@ export async function POST(request: NextRequest) {
       from: '605 Wells Contact Form <noreply@605wells.com>',
       to: ['admin@eastgatejax.com'],
       replyTo: email,
-      subject: `New Contact Form Submission from ${name}`,
+      subject: `New message from 605 Wells Contact Page`,
       html: ADMIN_NOTIFICATION_EMAIL({
         name,
         email,
