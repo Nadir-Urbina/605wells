@@ -6,5 +6,6 @@ import ministryCategory from './ministryCategory'
 import volunteer from './volunteer'
 import ministryType from './ministryType'
 import teamMember from './teamMember'
+import consentForm from './consentForm'
 
-export const schemaTypes = [event, eventRegistration, livestreamAccess, pastEvent, ministryCategory, volunteer, ministryType, teamMember]
+export const schemaTypes = [event, eventRegistration, livestreamAccess, pastEvent, ministryCategory, volunteer, ministryType, teamMember, consentForm]
