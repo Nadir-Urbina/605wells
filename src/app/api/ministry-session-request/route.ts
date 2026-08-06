@@ -10,6 +10,8 @@ const MINISTRY_SESSION_REQUEST_EMAIL = (data: {
   email: string;
   phone: string;
   ministryRequested: string;
+  connectedMinistry: string;
+  referralSource: string;
   salvationExperience: string;
   localChurch: string;
   baptizedInHolySpirit: string;
@@ -66,6 +68,16 @@ const MINISTRY_SESSION_REQUEST_EMAIL = (data: {
           <span class="label">Ministry Requested</span>
           <div class="value" style="background-color: white; font-size: 16px; font-weight: 600; color: #5b21b6;">${data.ministryRequested}</div>
         </div>
+      </div>
+
+      <div class="field">
+        <span class="label">Ministry Connected To</span>
+        <div class="value">${data.connectedMinistry}</div>
+      </div>
+
+      <div class="field">
+        <span class="label">How They Heard About Us / Referral</span>
+        <div class="value">${data.referralSource}</div>
       </div>
 
       <div class="field">
@@ -234,6 +246,8 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       ministryRequested,
+      connectedMinistry,
+      referralSource,
       salvationExperience,
       localChurch,
       baptizedInHolySpirit,
@@ -254,7 +268,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate required fields
-    if (!fullName || !email || !phone || !ministryRequested || !salvationExperience ||
+    if (!fullName || !email || !phone || !ministryRequested || !connectedMinistry ||
+        !referralSource || !salvationExperience ||
         !localChurch || !baptizedInHolySpirit || !reasonForMinistry ||
         !availableDays || !Array.isArray(availableDays) || availableDays.length === 0 ||
         !availableTimes || !Array.isArray(availableTimes) || availableTimes.length === 0) {
@@ -329,6 +344,8 @@ export async function POST(request: NextRequest) {
         email,
         phone,
         ministryRequested,
+        connectedMinistry,
+        referralSource,
         salvationExperience,
         localChurch,
         baptizedInHolySpirit,
@@ -371,6 +388,8 @@ export async function POST(request: NextRequest) {
           phone,
         },
         ministryRequested,
+        connectedMinistry,
+        referralSource,
         salvationExperience,
         localChurch,
         baptizedInHolySpirit,

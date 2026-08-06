@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
         _id,
         personalInfo,
         ministryRequested,
+        connectedMinistry,
+        referralSource,
         salvationExperience,
         localChurch,
         baptizedInHolySpirit,

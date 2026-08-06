@@ -26,6 +26,8 @@ interface FormData {
   email: string;
   phone: string;
   ministryRequested: string;
+  connectedMinistry: string;
+  referralSource: string;
   salvationExperience: string;
   localChurch: string;
   baptizedInHolySpirit: string;
@@ -39,6 +41,8 @@ interface FormErrors {
   email?: string;
   phone?: string;
   ministryRequested?: string;
+  connectedMinistry?: string;
+  referralSource?: string;
   salvationExperience?: string;
   localChurch?: string;
   baptizedInHolySpirit?: string;
@@ -60,6 +64,8 @@ export default function MinistrySessionRequest() {
     email: '',
     phone: '',
     ministryRequested: '',
+    connectedMinistry: '',
+    referralSource: '',
     salvationExperience: '',
     localChurch: '',
     baptizedInHolySpirit: '',
@@ -128,6 +134,16 @@ export default function MinistrySessionRequest() {
     // Ministry Requested validation
     if (!formData.ministryRequested) {
       newErrors.ministryRequested = 'Please select a ministry';
+    }
+
+    // Connected Ministry validation
+    if (!formData.connectedMinistry.trim()) {
+      newErrors.connectedMinistry = 'Please share which ministry you are connected to';
+    }
+
+    // Referral Source validation
+    if (!formData.referralSource.trim()) {
+      newErrors.referralSource = 'Please let us know how you heard about us';
     }
 
     // Salvation Experience validation
@@ -425,6 +441,54 @@ export default function MinistrySessionRequest() {
                   </select>
                   {errors.ministryRequested && (
                     <p className="mt-1 text-sm text-red-500">{errors.ministryRequested}</p>
+                  )}
+                </div>
+
+                {/* Ministry Connected To */}
+                <div>
+                  <label
+                    htmlFor="connectedMinistry"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    What ministry are you connected to? <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="connectedMinistry"
+                    name="connectedMinistry"
+                    value={formData.connectedMinistry}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.connectedMinistry ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all`}
+                    placeholder="e.g. a small group, connect group, or ministry team at 605 Wells"
+                  />
+                  {errors.connectedMinistry && (
+                    <p className="mt-1 text-sm text-red-500">{errors.connectedMinistry}</p>
+                  )}
+                </div>
+
+                {/* How did you hear about us / referral */}
+                <div>
+                  <label
+                    htmlFor="referralSource"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Who recommended you or how did you hear about us? <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="referralSource"
+                    name="referralSource"
+                    value={formData.referralSource}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.referralSource ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all`}
+                    placeholder="e.g. a friend's name, social media, church service..."
+                  />
+                  {errors.referralSource && (
+                    <p className="mt-1 text-sm text-red-500">{errors.referralSource}</p>
                   )}
                 </div>
 

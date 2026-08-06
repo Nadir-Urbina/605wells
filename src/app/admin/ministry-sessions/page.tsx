@@ -12,6 +12,8 @@ interface SessionRequest {
     phone: string;
   };
   ministryRequested: string;
+  connectedMinistry?: string;
+  referralSource?: string;
   salvationExperience: string;
   localChurch: string;
   baptizedInHolySpirit: string;
@@ -352,6 +354,14 @@ function AdminMinistrySessionsContent() {
                     <div>
                       <p className="text-sm text-gray-600">Ministry Requested</p>
                       <p className="text-sm font-medium">{selectedRequest.ministryRequested}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Ministry Connected To</p>
+                      <p className="text-sm font-medium">{selectedRequest.connectedMinistry || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">How They Heard About Us / Referral</p>
+                      <p className="text-sm font-medium">{selectedRequest.referralSource || '—'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Baptized in Holy Spirit</p>
