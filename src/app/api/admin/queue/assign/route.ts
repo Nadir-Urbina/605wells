@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     // Create Daily.co video meeting room
     let dailyMeetingData = null;
     try {
-      const { createDailyRoom, formatMeetingForFirestore } = await import('@/lib/daily');
+      const { createDailyRoom, createMeetingToken, formatMeetingForFirestore } = await import('@/lib/daily');
       const { updateBooking } = await import('@/lib/firestore-admin');
 
       // Parse scheduled date and time to create startTime Date object
@@ -140,7 +140,21 @@ export async function POST(request: NextRequest) {
         teamMemberName,
       });
 
-      dailyMeetingData = formatMeetingForFirestore(dailyRoom);
+      // The room is private, so the team member needs an owner token to get in
+      // and admit the attendee from the lobby. Match the room's own expiry, with
+      // the same fallback the room uses in case Daily omits it from the response.
+      const tokenExpiry =
+        dailyRoom.config.exp ??
+        Math.floor(startTime.getTime() / 1000) + (ministryType.averageDuration + 1440) * 60;
+
+      const ownerToken = await createMeetingToken({
+        roomName: dailyRoom.name,
+        userName: teamMemberName,
+        isOwner: true,
+        expiresAt: tokenExpiry,
+      });
+
+      dailyMeetingData = formatMeetingForFirestore(dailyRoom, ownerToken);
       console.log('✅ Daily.co meeting room created:', dailyRoom.url);
 
       // Update booking with meeting information

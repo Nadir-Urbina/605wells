@@ -52,13 +52,22 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     });
 
-    // TODO: Send confirmation email
-    // await sendQueueConfirmationEmail({
-    //   email: data.attendeeInfo.email,
-    //   firstName: data.attendeeInfo.firstName,
-    //   lastName: data.attendeeInfo.lastName,
-    //   ministryType: data.ministryTypeTitle,
-    // });
+    // Send confirmation email
+    try {
+      const { sendQueueConfirmation } = await import('@/lib/resend');
+
+      await sendQueueConfirmation({
+        email: data.attendeeInfo.email,
+        firstName: data.attendeeInfo.firstName,
+        lastName: data.attendeeInfo.lastName,
+        ministryTypeTitle: data.ministryTypeTitle,
+      });
+
+      console.log('✅ Queue confirmation email sent to:', data.attendeeInfo.email);
+    } catch (emailError) {
+      console.error('⚠️ Failed to send queue confirmation email:', emailError);
+      // Don't fail the entire process if email fails - the queue entry is created
+    }
 
     return NextResponse.json({
       success: true,

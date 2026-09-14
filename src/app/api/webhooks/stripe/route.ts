@@ -324,7 +324,7 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
     // Create Daily.co video meeting room
     let dailyMeetingData = null;
     try {
-      const { createDailyRoom, formatMeetingForFirestore } = await import('@/lib/daily');
+      const { createDailyRoom, createMeetingToken, formatMeetingForFirestore } = await import('@/lib/daily');
 
       // Parse scheduled date and time to create startTime Date object
       const [year, month, day] = scheduledDate.split('-').map(Number);
@@ -344,7 +344,21 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
         teamMemberName,
       });
 
-      dailyMeetingData = formatMeetingForFirestore(dailyRoom);
+      // The room is private, so the team member needs an owner token to get in
+      // and admit the attendee from the lobby. Match the room's own expiry, with
+      // the same fallback the room uses in case Daily omits it from the response.
+      const tokenExpiry =
+        dailyRoom.config.exp ??
+        Math.floor(startTime.getTime() / 1000) + (parseInt(duration) + 1440) * 60;
+
+      const ownerToken = await createMeetingToken({
+        roomName: dailyRoom.name,
+        userName: teamMemberName,
+        isOwner: true,
+        expiresAt: tokenExpiry,
+      });
+
+      dailyMeetingData = formatMeetingForFirestore(dailyRoom, ownerToken);
       console.log('✅ Daily.co meeting room created:', dailyRoom.url);
 
       // Update booking with meeting information
@@ -388,6 +402,7 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
       if (teamMemberEmail) {
         try {
           const { sendTeamMemberBookingNotification } = await import('@/lib/resend');
+          const { withMeetingToken } = await import('@/lib/daily');
 
           await sendTeamMemberBookingNotification({
             teamMemberEmail,
@@ -400,7 +415,8 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
             scheduledDate,
             scheduledTime,
             duration: parseInt(duration),
-            meetingLink: dailyMeetingData.joinUrl,
+            // Team member joins as owner so they can admit the attendee
+            meetingLink: withMeetingToken(dailyMeetingData.joinUrl, dailyMeetingData.ownerToken),
             bookingId,
             dashboardLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/team/dashboard`,
           });
