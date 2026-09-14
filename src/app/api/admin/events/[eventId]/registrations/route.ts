@@ -30,7 +30,8 @@ export async function GET(request: NextRequest, { params }: Props) {
         location,
         registrationType,
         registrationLimit,
-        registrationClosed
+        registrationClosed,
+        inPersonRegistrationClosed
       }
     `, { eventId })
 

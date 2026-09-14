@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
       },
       tags: donationType === 'monthly' ? [
         'kingdom builders',
-        '605 Wells givers'
+        'East Gate Jax givers'
       ] : [
         'one-time givers',
-        '605 Wells givers'
+        'East Gate Jax givers'
       ]
     };
 

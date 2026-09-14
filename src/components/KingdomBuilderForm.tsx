@@ -143,7 +143,7 @@ export default function KingdomBuilderForm({ isOpen, onClose, onPaymentSuccess }
                   Become a Kingdom Builder
                 </h2>
                 <p className="text-yellow-100 mt-1 sm:mt-2 text-sm sm:text-base leading-tight">
-                  Join us in building God&apos;s Kingdom at 605 Wells
+                  Join us in building God&apos;s Kingdom at East Gate Revival Hub
                 </p>
               </div>
               <button 
@@ -187,7 +187,7 @@ export default function KingdomBuilderForm({ isOpen, onClose, onPaymentSuccess }
                      <h4 className="font-semibold text-purple-800 mb-2">Our Goal: 120 Kingdom Builders</h4>
                      <p className="text-purple-700 text-sm">
                        We&apos;re seeking 120 committed Kingdom Builders to partner with us monthly at $120 each 
-                       for the next 12 months to transform 605 Wells into a regional Kingdom Hub.
+                       for the next 12 months to transform our building at 605 Wells Rd into a regional Kingdom Hub.
                      </p>
                    </div>
                  </div>
@@ -198,7 +198,7 @@ export default function KingdomBuilderForm({ isOpen, onClose, onPaymentSuccess }
                    <div className="relative z-10">
                      <h4 className="font-semibold text-blue-800 mb-3">Kingdom Builder Benefits</h4>
                      <ul className="text-blue-700 text-sm space-y-1">
-                       <li>• 50% off all registration fees within 605 Wells</li>
+                       <li>• 50% off all registration fees within East Gate Revival Hub</li>
                        <li>• Waived application fees for trips</li>
                        <li>• Waived admission fee into Kingdom Champions College</li>
                      </ul>

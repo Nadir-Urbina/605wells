@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         eventAddress: event.location?.address,
         registrationInstructions: event.registrationInstructions,
         accessToken,
-        livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/livestream/${event.slug.current}?token=${accessToken}`,
+        livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/livestream/${event.slug.current}?token=${accessToken}`,
         finalPrice: pricing.finalPrice,
         originalPrice: pricing.originalPrice,
         discountApplied: pricing.discountApplied,

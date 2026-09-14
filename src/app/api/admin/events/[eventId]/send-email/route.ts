@@ -41,10 +41,14 @@ export async function POST(request: NextRequest, { params }: Props) {
     return NextResponse.json({ error: 'Event not found' }, { status: 404 })
   }
 
+  // Registrations with no attendance type predate the event becoming hybrid
+  // and were in-person, so "in-person" includes them
   const filterClause =
-    attendanceTypeFilter !== 'all'
-      ? `&& attendanceType == $attendanceType`
-      : ''
+    attendanceTypeFilter === 'in-person'
+      ? `&& (attendanceType == "in-person" || !defined(attendanceType))`
+      : attendanceTypeFilter !== 'all'
+        ? `&& attendanceType == $attendanceType`
+        : ''
 
   const registrations: Array<{ attendee: { firstName: string; email: string } }> =
     await client.fetch(
@@ -62,7 +66,7 @@ export async function POST(request: NextRequest, { params }: Props) {
   }
 
   const emails = registrations.map((reg) => ({
-    from: '605 Wells Revival Hub <noreply@605wells.com>',
+    from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
     to: reg.attendee.email,
     subject: subject.trim(),
     html: buildEmailHtml(event.title, htmlContent, reg.attendee.firstName),
@@ -118,15 +122,15 @@ function buildEmailHtml(eventTitle: string, body: string, firstName: string): st
 <body>
   <div class="container">
     <div class="header">
-      <h1>605 Wells Revival Hub</h1>
-      <p>A Transformational Gathering Place · Jacksonville, FL</p>
+      <h1>East Gate Revival Hub</h1>
+      <p>A Transformational Gathering Place · Orange Park, FL</p>
     </div>
     <div class="event-banner">📅 ${eventTitle}</div>
     <div class="content">${personalizedBody}</div>
     <div class="divider"></div>
     <div class="footer">
-      <p class="org">605 Wells Revival Hub</p>
-      <p>Jacksonville, FL</p>
+      <p class="org">East Gate Revival Hub</p>
+      <p>605 Wells Rd, Orange Park, FL 32073</p>
       <p style="margin-top:10px;">You are receiving this message because you registered for one of our events.</p>
     </div>
   </div>

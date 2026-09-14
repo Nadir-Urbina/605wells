@@ -44,7 +44,7 @@ const MINISTRY_SESSION_REQUEST_EMAIL = (data: {
   <div class="container">
     <div class="header">
       <h1>🙏 New Ministry Session Request</h1>
-      <p style="margin: 5px 0 0 0; opacity: 0.9;">605 Wells Ministry</p>
+      <p style="margin: 5px 0 0 0; opacity: 0.9;">East Gate Revival Hub</p>
     </div>
 
     <div class="content">
@@ -152,7 +152,7 @@ const USER_CONFIRMATION_EMAIL = (fullName: string, ministryRequested: string) =>
 <body>
   <div class="container">
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
@@ -164,7 +164,7 @@ const USER_CONFIRMATION_EMAIL = (fullName: string, ministryRequested: string) =>
 
       <p>Dear ${fullName},</p>
 
-      <p>Thank you for reaching out to 605 Wells for ministry. We're honored that you trust us to walk alongside you in this season.</p>
+      <p>Thank you for reaching out to East Gate Revival Hub for ministry. We're honored that you trust us to walk alongside you in this season.</p>
 
       <div class="ministry-box">
         <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280;">Ministry Requested</p>
@@ -186,15 +186,15 @@ const USER_CONFIRMATION_EMAIL = (fullName: string, ministryRequested: string) =>
       <p>If you have any urgent questions, please don't hesitate to contact us.</p>
 
       <p>Blessings and peace,<br>
-      <strong>The 605 Wells Ministry Team</strong></p>
+      <strong>The East Gate Revival Hub Ministry Team</strong></p>
     </div>
 
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep • Where People Are Healed, Built, and Sent</p>
       <br>
-      <p>605 Wells Road, Orange Park, FL</p>
+      <p>605 Wells Rd, Orange Park, FL 32073</p>
       <p>Email: <a href="mailto:admin@eastgatejax.com" class="contact-link">admin@eastgatejax.com</a></p>
     </div>
   </div>
@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
 
     // Send notification email to ministry team
     const adminEmailResult = await resend.emails.send({
-      from: '605 Wells Ministry Request <ministry-form@605wells.com>',
+      from: 'East Gate Ministry Request <ministry-form@eastgatejax.com>',
       to: ['nurbinabr@eastgatejax.com', 'drjoshuatodd@eastgatejax.com', 'wrighte8383@gmail.com'],
       replyTo: email,
       subject: `New Ministry Session Request: ${ministryRequested} - ${fullName}`,
@@ -363,9 +363,9 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email to user
     const userEmailResult = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [email],
-      subject: 'Your Ministry Session Request - 605 Wells',
+      subject: 'Your Ministry Session Request - East Gate Revival Hub',
       html: USER_CONFIRMATION_EMAIL(fullName, ministryRequested),
     });
 

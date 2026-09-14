@@ -28,7 +28,7 @@ export default function About() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-gray-900 mb-8 font-montserrat">
-              About 605 Wells
+              About East Gate Revival Hub
             </h1>
             
             <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-gray-200">
@@ -48,7 +48,7 @@ export default function About() {
                 </h2>
                 
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-                  We&apos;re crafting something beautiful to share the heart and vision behind 605 Wells. 
+                  We&apos;re crafting something beautiful to share the heart and vision behind East Gate Revival Hub. 
                   This transformational gathering place will soon reveal its full story of Kingdom impact, 
                   healing, and community transformation.
                 </p>

@@ -48,7 +48,7 @@ export default function News() {
                 </h2>
                 
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-                  Stay tuned for the latest updates, stories of transformation, and Kingdom news from 605 Wells. 
+                  Stay tuned for the latest updates, stories of transformation, and Kingdom news from East Gate Revival Hub. 
                   This space will soon be filled with inspiring testimonies, project updates, and insights from 
                   Dr. Joshua Todd and the ministry team.
                 </p>

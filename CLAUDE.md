@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a **Next.js 15** application for 605 Wells, a ministry organization in Jacksonville, FL. The app covers event management, registrations, donations, content delivery, a virtual ministry hub, and a team member portal.
+This is a **Next.js 15** application for East Gate Revival Hub (formerly "605 Wells"), a ministry organization at 605 Wells Rd, Orange Park, FL 32073. The site and all email addresses use the `eastgatejax.com` domain. Brand assets live in `public/brand/` (`eastgate-logo-light.png` is for dark backgrounds). The app covers event management, registrations, donations, content delivery, a virtual ministry hub, and a team member portal.
 
 ### Tech Stack
 - **Framework**: Next.js 15 (App Router) with TypeScript

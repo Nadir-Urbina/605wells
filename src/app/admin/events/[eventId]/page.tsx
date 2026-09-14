@@ -6,6 +6,7 @@ import Link from 'next/link'
 import AdminGuard from '@/components/AdminGuard'
 import * as XLSX from 'xlsx'
 import RichTextEmailEditor from '@/components/admin/RichTextEmailEditor'
+import { isInPersonRegistration } from '@/lib/hybrid-capacity'
 
 interface EventDetails {
   _id: string
@@ -17,6 +18,7 @@ interface EventDetails {
   registrationType?: string
   registrationLimit?: number
   registrationClosed?: boolean
+  inPersonRegistrationClosed?: boolean
 }
 
 interface Registration {
@@ -321,16 +323,29 @@ function EventRegistrationsContent() {
     }
   }
 
+  const isHybridEvent = data?.event.registrationType === 'hybrid'
+
+  // On hybrid events, registrations with no attendance type were made while the
+  // event was in-person only, so they count as in-person
+  const getAttendanceType = (reg: Registration) =>
+    isHybridEvent ? (isInPersonRegistration(reg) ? 'in-person' : 'online') : reg.attendanceType
+
+  const attendanceTypeLabel = (reg: Registration) => {
+    const type = getAttendanceType(reg)
+    return type ? (type === 'in-person' ? 'In-Person' : 'Online') : ''
+  }
+
   // Filter registrations by attendance type
   const filteredRegistrations = data?.registrations.filter(reg => {
     if (attendanceFilter === 'all') return true
-    return reg.attendanceType === attendanceFilter
+    return getAttendanceType(reg) === attendanceFilter
   }) || []
 
   // Calculate stats for filtered registrations
-  const inPersonCount = data?.registrations.filter(r => r.attendanceType === 'in-person').length || 0
-  const onlineCount = data?.registrations.filter(r => r.attendanceType === 'online').length || 0
-  const isHybridEvent = data?.event.registrationType === 'hybrid'
+  const inPersonCount = data?.registrations.filter(r => getAttendanceType(r) === 'in-person').length || 0
+  const onlineCount = data?.registrations.filter(r => getAttendanceType(r) === 'online').length || 0
+  // Seats held in the room: the same rule the registration API enforces
+  const inPersonSeatsTaken = data?.registrations.filter(r => r.status !== 'cancelled' && isInPersonRegistration(r)).length || 0
 
   const exportToCSV = () => {
     if (!data) return
@@ -346,7 +361,7 @@ function EventRegistrationsContent() {
         'Last Name': reg.attendee.lastName,
         'Email': reg.attendee.email,
         'Phone': reg.attendee.phone || '',
-        'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+        'Attendance Type': attendanceTypeLabel(reg),
         'Registration Date': formatDate(reg.registrationDate),
         'Amount Paid': reg.payment?.amount ? formatCurrency(reg.payment.amount) : 'Free',
         'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
@@ -390,7 +405,7 @@ function EventRegistrationsContent() {
         'Last Name': reg.attendee.lastName,
         'Email': reg.attendee.email,
         'Phone': reg.attendee.phone || '',
-        'Attendance Type': reg.attendanceType ? (reg.attendanceType === 'in-person' ? 'In-Person' : 'Online') : '',
+        'Attendance Type': attendanceTypeLabel(reg),
         'Registration Date': formatDate(reg.registrationDate),
         'Amount Paid': reg.payment?.amount || 0,
         'Discount Applied': reg.payment?.discountApplied ? 'Yes' : 'No',
@@ -522,6 +537,16 @@ function EventRegistrationsContent() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-2xl font-semibold text-purple-600">{inPersonCount}</div>
               <div className="text-sm text-gray-600">In-Person Registrations</div>
+              {(data.event.registrationLimit || data.event.inPersonRegistrationClosed) && (
+                <div className="text-xs text-gray-500 mt-2">
+                  {data.event.registrationLimit
+                    ? `${inPersonSeatsTaken} of ${data.event.registrationLimit} seats taken (excludes cancelled)`
+                    : null}
+                  {data.event.inPersonRegistrationClosed && (
+                    <span className="block text-orange-600 font-medium">In-person registration closed</span>
+                  )}
+                </div>
+              )}
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-2xl font-semibold text-blue-600">{onlineCount}</div>
@@ -841,9 +866,9 @@ function EventRegistrationsContent() {
                       </td>
                       {isHybridEvent && (
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {registration.attendanceType ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAttendanceTypeBadgeColor(registration.attendanceType)}`}>
-                              {registration.attendanceType === 'in-person' ? 'In-Person' : 'Online'}
+                          {getAttendanceType(registration) ? (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAttendanceTypeBadgeColor(getAttendanceType(registration))}`}>
+                              {attendanceTypeLabel(registration)}
                             </span>
                           ) : (
                             <span className="text-sm text-gray-400">—</span>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { track } from '@vercel/analytics';
 
@@ -26,13 +27,13 @@ export default function Header({ onDonateClick = () => {} }: HeaderProps) {
       // Navigate to homepage and scroll to about section
       if (window.location.pathname === '/') {
         // Already on homepage, just scroll to about section
-        const aboutSection = document.getElementById('about-605-wells');
+        const aboutSection = document.getElementById('about-east-gate');
         if (aboutSection) {
           aboutSection.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
         // Navigate to homepage with about section hash
-        window.location.href = '/#about-605-wells';
+        window.location.href = '/#about-east-gate';
       }
     } else {
       window.location.href = `/${sectionId}`;
@@ -63,9 +64,17 @@ export default function Header({ onDonateClick = () => {} }: HeaderProps) {
           <div className="flex items-center">
             <button
               onClick={() => handleNavClick('home')}
-              className="text-2xl sm:text-3xl font-bold font-montserrat text-white hover:text-yellow-400 transition-colors duration-300"
+              className="hover:opacity-80 transition-opacity duration-300"
+              aria-label="East Gate Revival Hub home"
             >
-              605 Wells
+              <Image
+                src="/brand/eastgate-logo-light.png"
+                alt="East Gate Revival Hub"
+                width={858}
+                height={196}
+                priority
+                className="h-10 sm:h-12 w-auto"
+              />
             </button>
           </div>
 

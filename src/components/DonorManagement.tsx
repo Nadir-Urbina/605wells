@@ -208,7 +208,7 @@ export default function DonorManagement({ customerEmail, onClose }: DonorManagem
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h4 className="font-semibold text-purple-800 mb-2">Your Kingdom Builder Benefits</h4>
                 <ul className="text-purple-700 text-sm space-y-1">
-                  <li>✓ 50% off all registration fees within 605 Wells</li>
+                  <li>✓ 50% off all registration fees within East Gate Revival Hub</li>
                   <li>✓ Waived application fees for trips</li>
                   <li>✓ Waived admission fee into Kingdom Champions College</li>
                 </ul>

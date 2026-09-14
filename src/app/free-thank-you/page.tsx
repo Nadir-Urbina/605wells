@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'Registration Confirmed | 605 Wells',
+  title: 'Registration Confirmed | East Gate Revival Hub',
   description: 'Your event registration has been confirmed.',
 };
 

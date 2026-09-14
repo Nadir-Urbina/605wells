@@ -39,6 +39,8 @@ export interface Booking {
     roomId: string;
     roomName: string;
     joinUrl: string;
+    /** Owner token for the team member; lets them admit the attendee from the lobby */
+    ownerToken?: string;
     createdAt: string;
     expiresAt: string | null;
     // Recording information

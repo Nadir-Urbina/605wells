@@ -31,6 +31,17 @@ export async function GET(
       );
     }
 
+    // This endpoint is unauthenticated, so expose only what the attendee-facing
+    // pages actually render. Allowlisted deliberately: the stored meeting object
+    // also holds the owner token (which would let anyone join as host and admit
+    // others) and recording download URLs.
+    const videoMeeting = booking.videoMeeting
+      ? {
+          provider: booking.videoMeeting.provider,
+          joinUrl: booking.videoMeeting.joinUrl,
+        }
+      : undefined;
+
     return NextResponse.json({
       booking: {
         ministryType: booking.ministryType,
@@ -41,7 +52,7 @@ export async function GET(
         duration: booking.duration,
         attendeeInfo: booking.attendeeInfo,
         payment: booking.payment,
-        videoMeeting: booking.videoMeeting,
+        videoMeeting,
         intakeForm: booking.intakeForm,
       },
     });

@@ -1,4 +1,4 @@
-# 605 Wells Kingdom Builder Setup Guide
+# East Gate Revival Hub Kingdom Builder Setup Guide
 
 ## 🚀 Quick Start
 
@@ -37,7 +37,7 @@ Your Kingdom Builder donation system is ready! Follow these steps to configure S
 
 2. **Verify Domain**:
    - Go to **Domains** in Resend dashboard
-   - Add and verify `605wells.com`
+   - Add and verify `eastgatejax.com`
    - Follow DNS verification steps
 
 3. **Add to `.env.local`**:
@@ -183,7 +183,7 @@ const donationAmounts = [
 
 ### Styling
 - All components use Tailwind CSS
-- Colors follow the 605 Wells brand (yellow/orange gradients)
+- Colors follow the East Gate Revival Hub brand (yellow/orange gradients)
 - Montserrat font for headings, Inter for body text
 
 ## 🚀 Going Live
@@ -216,6 +216,6 @@ Your Kingdom Builder donation system is now fully functional with:
 - ✅ Secure payment processing
 - ✅ Email list management  
 - ✅ Mobile-optimized experience
-- ✅ Professional design matching 605 Wells branding
+- ✅ Professional design matching East Gate Revival Hub branding
 
 **May God bless this tool in building His Kingdom!** 🙏 

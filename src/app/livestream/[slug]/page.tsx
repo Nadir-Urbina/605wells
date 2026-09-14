@@ -156,8 +156,8 @@ export default function LivestreamPage() {
                   </button>
                   <p className="text-sm text-gray-500">
                     Need help? Contact us at{' '}
-                    <a href="mailto:info@605wells.com" className="text-purple-600 hover:underline">
-                      info@605wells.com
+                    <a href="mailto:info@eastgatejax.com" className="text-purple-600 hover:underline">
+                      info@eastgatejax.com
                     </a>
                   </p>
                 </div>
@@ -265,7 +265,7 @@ export default function LivestreamPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
-                href="mailto:info@605wells.com?subject=Livestream Support - {attendeeInfo.event.title}"
+                href="mailto:info@eastgatejax.com?subject=Livestream Support - {attendeeInfo.event.title}"
                 className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm md:text-base"
               >
                 Email Support

@@ -17,7 +17,7 @@ const allRecipients = [
   'jacquis14@aol.com',
   'mssara0704@gmail.com',
   'laneyr.right@gmail.com',
-  'operations@605wells.com',
+  'operations@eastgatejax.com',
   'idancecrldoe@yahoo.com',
   'fitnmack$@aol.com',
   'turners.two@gmail.com',
@@ -180,8 +180,8 @@ const emailHtml = `
 
     <div class="footer">
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
-      <p>📧 For questions, reply to this email or contact us at operations@605wells.com</p>
+      <strong>The East Gate Revival Hub Team</strong></p>
+      <p>📧 For questions, reply to this email or contact us at operations@eastgatejax.com</p>
     </div>
   </div>
 </body>
@@ -211,15 +211,15 @@ We apologize for any confusion this may have caused. If you have any questions o
 We're looking forward to an amazing time of fellowship and discussion!
 
 Blessings,
-The 605 Wells Team
+The East Gate Revival Hub Team
 
-For questions, reply to this email or contact us at operations@605wells.com
+For questions, reply to this email or contact us at operations@eastgatejax.com
 `;
 
 async function sendEmail(to: string | string[], isTest: boolean = false) {
   try {
     const { data, error } = await resend.emails.send({
-      from: '605 Wells <events@605wells.com>',
+      from: 'East Gate Revival Hub <events@eastgatejax.com>',
       to: Array.isArray(to) ? to : [to],
       subject: isTest ? `[TEST] ${emailSubject}` : emailSubject,
       html: emailHtml,

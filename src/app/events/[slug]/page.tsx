@@ -12,6 +12,7 @@ import HybridEventRegistrationForm from '@/components/HybridEventRegistrationFor
 import KingdomBuilderForm from '@/components/KingdomBuilderForm';
 import VideoEmbed from '@/components/VideoEmbed';
 import { client, eventQueries, urlFor, type SanityEvent, type EventSession } from '@/lib/sanity';
+import { getInPersonAvailability } from '@/lib/hybrid-capacity';
 import { PortableText } from '@portabletext/react';
 
 export default function EventDetailPage() {
@@ -171,6 +172,9 @@ export default function EventDetailPage() {
       if (event.registrationType === 'hybrid') {
         const inPersonPrice = formatPrice(event.price);
         const onlinePrice = formatPrice(event.onlinePrice);
+        if (getInPersonAvailability(event).isFull) {
+          return `In-Person Full • Register Online (${onlinePrice})`;
+        }
         return `Register - In-Person ${inPersonPrice} • Online ${onlinePrice}`;
       }
       

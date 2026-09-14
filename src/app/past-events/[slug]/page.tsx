@@ -16,12 +16,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!event) {
     return {
-      title: 'Event Not Found | 605 Wells',
+      title: 'Event Not Found | East Gate Revival Hub',
     }
   }
 
   return {
-    title: `${event.title} | Past Events | 605 Wells`,
+    title: `${event.title} | Past Events | East Gate Revival Hub`,
     description: event.description,
   }
 }

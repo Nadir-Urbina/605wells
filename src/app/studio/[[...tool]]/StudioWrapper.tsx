@@ -216,12 +216,22 @@ const eventSchema = defineType({
       name: 'registrationLimit',
       title: 'Registration Limit',
       type: 'number',
+      description: 'Maximum number of registrations (leave empty for unlimited). For hybrid events this is the in-person room capacity; online is unlimited.',
     }),
     defineField({
       name: 'registrationClosed',
       title: 'Registration Closed',
       type: 'boolean',
+      description: 'Close ALL registration (in-person and online)',
       initialValue: false,
+    }),
+    defineField({
+      name: 'inPersonRegistrationClosed',
+      title: 'In-Person Registration Closed',
+      type: 'boolean',
+      description: 'Stop in-person registration but keep online open. In-person also closes automatically once the Registration Limit is reached.',
+      initialValue: false,
+      hidden: ({document}) => document?.registrationType !== 'hybrid',
     }),
     defineField({
       name: 'requiresKingdomBuilderDiscount',
@@ -1400,7 +1410,7 @@ const ministrySessionRequestSchema = defineType({
 
 const config = defineConfig({
   name: 'default',
-  title: '605 Wells Ministry Hub',
+  title: 'East Gate Revival Hub',
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'ypbczt01',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   basePath: '/studio',

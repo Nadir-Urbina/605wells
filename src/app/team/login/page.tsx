@@ -139,7 +139,7 @@ export default function TeamMemberLoginPage() {
                   type="email"
                   id="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="your.email@605wells.com"
+                  placeholder="your.email@eastgatejax.com"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -220,7 +220,7 @@ export default function TeamMemberLoginPage() {
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="your.email@605wells.com"
+                  placeholder="your.email@eastgatejax.com"
                 />
               </div>
 

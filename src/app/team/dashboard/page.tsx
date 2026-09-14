@@ -9,6 +9,7 @@ import { auth, firestore } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { Booking } from '@/lib/firestore';
+import { withMeetingToken } from '@/lib/daily';
 
 interface TeamMemberInfo {
   firstName: string;
@@ -35,6 +36,7 @@ interface Session {
   videoMeeting?: {
     provider: 'daily' | 'zoom';
     joinUrl: string;
+    ownerToken?: string;
   };
 }
 
@@ -295,7 +297,7 @@ function DashboardContent() {
                     <div className="flex items-center space-x-2 ml-4">
                       {session.videoMeeting && (
                         <a
-                          href={session.videoMeeting.joinUrl}
+                          href={withMeetingToken(session.videoMeeting.joinUrl, session.videoMeeting.ownerToken)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"

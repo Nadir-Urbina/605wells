@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { sendKingdomBuilderWelcomeEmail, sendOneTimeDonorThankYou, sendEventRegistrationConfirmation, sendOnlineEventRegistrationConfirmation } from '@/lib/resend';
 import { createEventRegistration, type SanityEventRegistration, type SanityLivestreamAccess, client, writeClient, eventQueries } from '@/lib/sanity';
 import crypto from 'crypto';
+import { KINGDOM_BUILDERS_MONTHLY_DESCRIPTION } from '@/lib/kingdom-builders';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
@@ -90,6 +91,26 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice & {
     const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
 
     console.log('Monthly donation payment succeeded for:', customer.email);
+
+    // Stripe labels subscription payments "Subscription creation/update" by default.
+    // Give Kingdom Builder charges a clear description for finance. The metadata
+    // check matches both the old ('605Wells Kingdom Builder') and new project names.
+    if (subscription.metadata?.project?.includes('Kingdom Builder') && invoice.payment_intent) {
+      try {
+        const paymentIntent = await stripe.paymentIntents.update(invoice.payment_intent, {
+          description: KINGDOM_BUILDERS_MONTHLY_DESCRIPTION,
+        });
+        // The charge keeps the description it was created with, so update it too
+        if (paymentIntent.latest_charge) {
+          await stripe.charges.update(paymentIntent.latest_charge as string, {
+            description: KINGDOM_BUILDERS_MONTHLY_DESCRIPTION,
+          });
+        }
+      } catch (descriptionError) {
+        // Labeling is cosmetic; never fail the webhook over it
+        console.error('⚠️ Failed to set Kingdom Builder charge description:', descriptionError);
+      }
+    }
 
     // Here you would:
     // 1. Update your database with the successful payment
@@ -324,7 +345,7 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
     // Create Daily.co video meeting room
     let dailyMeetingData = null;
     try {
-      const { createDailyRoom, formatMeetingForFirestore } = await import('@/lib/daily');
+      const { createDailyRoom, createMeetingToken, formatMeetingForFirestore } = await import('@/lib/daily');
 
       // Parse scheduled date and time to create startTime Date object
       const [year, month, day] = scheduledDate.split('-').map(Number);
@@ -344,7 +365,21 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
         teamMemberName,
       });
 
-      dailyMeetingData = formatMeetingForFirestore(dailyRoom);
+      // The room is private, so the team member needs an owner token to get in
+      // and admit the attendee from the lobby. Match the room's own expiry, with
+      // the same fallback the room uses in case Daily omits it from the response.
+      const tokenExpiry =
+        dailyRoom.config.exp ??
+        Math.floor(startTime.getTime() / 1000) + (parseInt(duration) + 1440) * 60;
+
+      const ownerToken = await createMeetingToken({
+        roomName: dailyRoom.name,
+        userName: teamMemberName,
+        isOwner: true,
+        expiresAt: tokenExpiry,
+      });
+
+      dailyMeetingData = formatMeetingForFirestore(dailyRoom, ownerToken);
       console.log('✅ Daily.co meeting room created:', dailyRoom.url);
 
       // Update booking with meeting information
@@ -375,7 +410,7 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
           amount: paymentIntent.amount / 100,
           meetingLink: dailyMeetingData.joinUrl,
           bookingId,
-          intakeFormLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/virtual-hub/intake/${bookingId}`,
+          intakeFormLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/virtual-hub/intake/${bookingId}`,
         });
 
         console.log('✅ Confirmation email sent to:', attendeeEmail);
@@ -388,6 +423,7 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
       if (teamMemberEmail) {
         try {
           const { sendTeamMemberBookingNotification } = await import('@/lib/resend');
+          const { withMeetingToken } = await import('@/lib/daily');
 
           await sendTeamMemberBookingNotification({
             teamMemberEmail,
@@ -400,9 +436,10 @@ async function handleMinistrySessionBookingSuccess(paymentIntent: Stripe.Payment
             scheduledDate,
             scheduledTime,
             duration: parseInt(duration),
-            meetingLink: dailyMeetingData.joinUrl,
+            // Team member joins as owner so they can admit the attendee
+            meetingLink: withMeetingToken(dailyMeetingData.joinUrl, dailyMeetingData.ownerToken),
             bookingId,
-            dashboardLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/team/dashboard`,
+            dashboardLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/team/dashboard`,
           });
 
           console.log('✅ Team member notification email sent to:', teamMemberEmail);
@@ -659,7 +696,7 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
             eventAddress: eventData?.location?.address || '',
             registrationInstructions: metadata.registrationInstructions,
             accessToken,
-            livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/livestream/${metadata.eventId}?token=${accessToken}`,
+            livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/livestream/${metadata.eventId}?token=${accessToken}`,
             finalPrice,
             originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
             discountApplied,

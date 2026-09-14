@@ -7,6 +7,7 @@ import TeamMemberGuard from '@/components/team/TeamMemberGuard';
 import { useTeamMember } from '@/contexts/TeamMemberContext';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { withMeetingToken } from '@/lib/daily';
 
 interface IntakeResponse {
   question: string;
@@ -37,6 +38,7 @@ interface Booking {
     roomId: string;
     roomName: string;
     joinUrl: string;
+    ownerToken?: string;
     createdAt: string;
     expiresAt: string | null;
     // Recording information
@@ -229,7 +231,7 @@ function SessionDetailContent() {
                   {booking.videoMeeting.provider === 'daily' ? 'Daily.co Video Meeting' : 'Zoom Meeting Link'}
                 </h3>
                 <a
-                  href={booking.videoMeeting.joinUrl}
+                  href={withMeetingToken(booking.videoMeeting.joinUrl, booking.videoMeeting.ownerToken)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"

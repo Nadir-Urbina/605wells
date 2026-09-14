@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 export default function Footer() {
@@ -76,7 +77,13 @@ export default function Footer() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
             {/* Brand & Contact Info */}
             <div className="lg:col-span-1">
-              <h3 className="text-2xl font-bold mb-4 font-montserrat">605 Wells</h3>
+              <Image
+                src="/brand/eastgate-logo-light.png"
+                alt="East Gate Revival Hub"
+                width={858}
+                height={196}
+                className="h-12 w-auto mb-4"
+              />
               <p className="text-gray-300 mb-4 text-sm leading-relaxed">
                 A Transformational Gathering Place where people are healed, built, and sent.
               </p>
@@ -86,7 +93,7 @@ export default function Footer() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-gray-300">605 Wells Road, Jacksonville, FL</span>
+                  <span className="text-gray-300">605 Wells Rd, Orange Park, FL 32073</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +252,7 @@ export default function Footer() {
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-400 mb-1">
-                  © {new Date().getFullYear()} 605 Wells. All rights reserved.
+                  © {new Date().getFullYear()} East Gate Revival Hub. All rights reserved.
                 </p>
                 <p className="text-xs text-gray-500">
                   <span className="font-semibold text-yellow-400">Psalm 60:5</span> • 
