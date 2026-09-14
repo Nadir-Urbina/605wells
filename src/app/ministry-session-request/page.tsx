@@ -461,7 +461,7 @@ export default function MinistrySessionRequest() {
                     className={`w-full px-4 py-3 border ${
                       errors.connectedMinistry ? 'border-red-500' : 'border-gray-300'
                     } rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all`}
-                    placeholder="e.g. a small group, connect group, or ministry team at 605 Wells"
+                    placeholder="e.g. a small group, connect group, or ministry team at East Gate Revival Hub"
                   />
                   {errors.connectedMinistry && (
                     <p className="mt-1 text-sm text-red-500">{errors.connectedMinistry}</p>

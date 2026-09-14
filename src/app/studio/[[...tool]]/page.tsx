@@ -2,8 +2,8 @@ import StudioWrapper from './StudioWrapper'
 
 // Metadata for the studio page
 export const metadata = {
-  title: '605 Wells Ministry Hub | Studio',
-  description: 'Content management for 605 Wells Ministry Hub',
+  title: 'East Gate Revival Hub | Studio',
+  description: 'Content management for East Gate Revival Hub',
   robots: 'noindex',
 }
 

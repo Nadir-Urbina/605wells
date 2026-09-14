@@ -130,7 +130,7 @@ export default function CustomKingdomBuilderForm({ onPaymentSuccess }: CustomKin
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <p className="text-sm text-yellow-800">
-                  Your ${watch('amount') || 500}/month commitment over 12 months = <strong>${((watch('amount') || 500) * 12).toLocaleString()}</strong> total impact toward renovating 605 Wells into a Kingdom Hub serving Jacksonville and beyond.
+                  Your ${watch('amount') || 500}/month commitment over 12 months = <strong>${((watch('amount') || 500) * 12).toLocaleString()}</strong> total impact toward renovating our building at 605 Wells Rd into a Kingdom Hub serving Jacksonville and beyond.
                 </p>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function CustomKingdomBuilderForm({ onPaymentSuccess }: CustomKin
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
               <h4 className="font-semibold text-purple-800 mb-3 text-lg">Join Kingdom Builders</h4>
               <p className="text-purple-700">
-                As a custom Kingdom Builder, you&apos;re making an extraordinary commitment to transform 605 Wells
+                As a custom Kingdom Builder, you&apos;re making an extraordinary commitment to transform our building at 605 Wells Rd
                 into a regional Kingdom Hub. Your generous monthly partnership accelerates our mission and makes
                 a profound impact in our community.
               </p>
@@ -158,7 +158,7 @@ export default function CustomKingdomBuilderForm({ onPaymentSuccess }: CustomKin
                   <svg className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span><strong>50% off all registration fees</strong> for any 605 Wells event or conference</span>
+                  <span><strong>50% off all registration fees</strong> for any East Gate Revival Hub event or conference</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

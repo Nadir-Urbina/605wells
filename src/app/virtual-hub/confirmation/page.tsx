@@ -267,7 +267,7 @@ function ConfirmationPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
             Need to reschedule or have questions?{' '}
-            <a href="mailto:support@605wells.com" className="text-purple-600 hover:underline font-medium">
+            <a href="mailto:support@eastgatejax.com" className="text-purple-600 hover:underline font-medium">
               Contact us
             </a>
           </p>

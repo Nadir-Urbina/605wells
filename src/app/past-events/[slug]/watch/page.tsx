@@ -121,8 +121,8 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
               </Link>
               <p className="text-sm text-gray-500">
                 Need help? Contact us at{' '}
-                <a href="mailto:info@605wells.com" className="text-purple-600 hover:underline">
-                  info@605wells.com
+                <a href="mailto:info@eastgatejax.com" className="text-purple-600 hover:underline">
+                  info@eastgatejax.com
                 </a>
               </p>
             </div>
@@ -210,7 +210,7 @@ export default function WatchPastEventPage({ params }: { params: Promise<{ slug:
               Support our Mission
             </h3>
             <p className="text-purple-700 text-sm sm:text-base mb-4 sm:mb-6">
-            Join the Foundational Builders partnering with us to establish 605 Wells as a regional Kingdom Hub. 
+            Join the Foundational Builders partnering with us to establish East Gate Revival Hub as a regional Kingdom Hub. 
             Your monthly giving empowers our outreach efforts, expands our local impact, and helps us release transformational content.
             </p>
             <button

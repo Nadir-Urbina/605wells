@@ -50,14 +50,14 @@ export const KINGDOM_BUILDER_EMAIL = (data: {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
     <!-- Welcome Banner -->
     <div class="welcome-banner">
       <h2>🎉 Welcome, Kingdom Builder!</h2>
-      <p>You've joined our mission to transform 605 Wells into a Kingdom hub!</p>
+      <p>You've joined our mission to transform our building at 605 Wells Rd into a Kingdom hub!</p>
     </div>
 
     <!-- Content -->
@@ -84,7 +84,7 @@ export const KINGDOM_BUILDER_EMAIL = (data: {
       <div class="benefits">
         <h3>🎁 Your Kingdom Builder Benefits</h3>
         <ul>
-          <li><strong>50% off</strong> all registration fees within 605 Wells</li>
+          <li><strong>50% off</strong> all registration fees within East Gate Revival Hub</li>
           <li><strong>Waived application fees</strong> for all trips and missions</li>
           <li><strong>Free admission</strong> to Kingdom Champions College</li>
           <li><strong>Exclusive updates</strong> on renovation progress and ministry impact</li>
@@ -106,16 +106,16 @@ export const KINGDOM_BUILDER_EMAIL = (data: {
       <p>Your faithfulness in sowing into this vision will bear fruit for generations. Together, we're building more than a facility - we're establishing a stronghold for the Kingdom of God.</p>
 
       <p>Blessings and deep gratitude,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep</p>
       <br>
-      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <p>Questions? Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is a thank you message. Your official donation receipt will be sent separately by Stripe.<br>
       You can manage your subscription at any time by contacting us.<br>
@@ -173,7 +173,7 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
@@ -183,7 +183,7 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
       
       <p>Dear ${data.firstName} ${data.lastName},</p>
       
-      <p>Thank you for your generous gift to 605 Wells! Your donation helps us create a transformational gathering place where people are healed, built, and sent to impact the Kingdom of God.</p>
+      <p>Thank you for your generous gift to East Gate Revival Hub! Your donation helps us create a transformational gathering place where people are healed, built, and sent to impact the Kingdom of God.</p>
 
       <!-- Donation Amount -->
       <div class="amount-section">
@@ -208,30 +208,30 @@ export const ONE_TIME_DONOR_EMAIL = (data: {
       <!-- Kingdom Builder CTA -->
       <div class="cta-section">
         <p>Consider joining our <strong>Kingdom Builders</strong> community with a monthly partnership to maximize your impact:</p>
-        <a href="https://605wells.com" class="cta-button">Become a Kingdom Builder</a>
+        <a href="https://www.eastgatejax.com" class="cta-button">Become a Kingdom Builder</a>
       </div>
 
       <!-- Benefits -->
       <div class="benefits">
         <h4>Kingdom Builder Benefits:</h4>
         <ul>
-          <li>50% off all registration fees within 605 Wells</li>
+          <li>50% off all registration fees within East Gate Revival Hub</li>
           <li>Waived application fees for trips</li>
           <li>Waived admission fee into Kingdom Champions College</li>
         </ul>
       </div>
 
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep</p>
       <br>
-      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <p>Questions? Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is a thank you message. Your official donation receipt will be sent separately by Stripe.<br>
       </p>
@@ -321,7 +321,7 @@ export const ONLINE_EVENT_REGISTRATION_CONFIRMATION = (data: {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
@@ -440,26 +440,26 @@ export const ONLINE_EVENT_REGISTRATION_CONFIRMATION = (data: {
           <li><strong>Test your setup</strong> - Ensure you have a stable internet connection</li>
           <li><strong>Join early</strong> - Access will be available 15 minutes before start time</li>
           <li><strong>Engage with Q&A</strong> - Use the live chat to ask questions during the event</li>
-          <li><strong>Technical support</strong> - Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a> if you need help</li>
+          <li><strong>Technical support</strong> - Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a> if you need help</li>
         </ul>
       </div>
 
       <p>We're excited to have you join us online!</p>
       
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep</p>
       <br>
-      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <p>Questions? Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
-      605 Wells • Orange Park, FL</p>
+      East Gate Revival Hub • 605 Wells Rd, Orange Park, FL 32073</p>
     </div>
   </div>
 </body>
@@ -531,7 +531,7 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
@@ -612,26 +612,26 @@ export const FREE_EVENT_REGISTRATION_CONFIRMATION = (data: {
           <li><strong>Save the date</strong> - Add this event to your calendar</li>
           <li><strong>Arrive on time</strong> - Doors open 15 minutes before start time</li>
           <li><strong>Bring a friend</strong> - Share this event with others who might be interested</li>
-          <li><strong>Questions?</strong> Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></li>
+          <li><strong>Questions?</strong> Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></li>
         </ul>
       </div>
 
-      <p>We can't wait to see you at 605 Wells!</p>
+      <p>We can't wait to see you at East Gate Revival Hub!</p>
       
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep</p>
       <br>
-      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <p>Questions? Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">Registration confirmed on ${data.date}<br>
-      605 Wells • Orange Park, FL</p>
+      East Gate Revival Hub • 605 Wells Rd, Orange Park, FL 32073</p>
     </div>
   </div>
 </body>
@@ -716,7 +716,7 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
 
@@ -842,16 +842,16 @@ export const EVENT_REGISTRATION_CONFIRMATION = (data: {
       <p>If you have any questions about this event, please don't hesitate to contact us. We're looking forward to an incredible time together!</p>
 
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep</p>
       <br>
-      <p>Questions? Contact us at <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a></p>
+      <p>Questions? Contact us at <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a></p>
       <br>
       <p style="font-size: 12px; opacity: 0.6;">This is your event registration confirmation. Keep this email for your records.<br>
       ${data.finalPrice > 0 ? 'Your payment receipt has been sent separately by Stripe.<br>' : ''}
@@ -873,7 +873,7 @@ export async function sendKingdomBuilderWelcomeEmail(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: '🎉 Welcome to Kingdom Builders - Your Partnership is Active!',
       html: KINGDOM_BUILDER_EMAIL({
@@ -910,7 +910,7 @@ export async function sendOneTimeDonorThankYou(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: 'Thank You for Your Generous Heart! 💖',
       html: ONE_TIME_DONOR_EMAIL({
@@ -965,7 +965,7 @@ export async function sendOnlineEventRegistrationConfirmation(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `🎥 Online Access Ready: ${data.eventTitle}`,
       html: ONLINE_EVENT_REGISTRATION_CONFIRMATION({
@@ -1013,7 +1013,7 @@ export async function sendFreeEventRegistrationConfirmation(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `🎉 Registration Confirmed: ${data.eventTitle}`,
       html: FREE_EVENT_REGISTRATION_CONFIRMATION({
@@ -1068,7 +1068,7 @@ export async function sendEventRegistrationConfirmation(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `🎉 Registration Confirmed: ${data.eventTitle}`,
       html: EVENT_REGISTRATION_CONFIRMATION({
@@ -1111,7 +1111,7 @@ interface PastEventAccessEmailData {
 
 export async function sendPastEventAccessConfirmation(data: PastEventAccessEmailData) {
   try {
-    const watchUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/past-events/${data.pastEventSlug}/watch?token=${data.accessToken}`;
+    const watchUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/past-events/${data.pastEventSlug}/watch?token=${data.accessToken}`;
 
     const eventDateFormatted = new Date(data.eventDate).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -1120,7 +1120,7 @@ export async function sendPastEventAccessConfirmation(data: PastEventAccessEmail
     });
 
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [data.toEmail],
       subject: `🎥 Your Access is Ready: ${data.pastEventTitle}`,
       html: `
@@ -1166,7 +1166,7 @@ export async function sendPastEventAccessConfirmation(data: PastEventAccessEmail
 <body>
   <div class="container">
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
     </div>
 
     <div class="confirmation-banner">
@@ -1231,16 +1231,16 @@ export async function sendPastEventAccessConfirmation(data: PastEventAccessEmail
 
       <p style="margin-top: 30px;">
         Blessings,<br>
-        <strong>The 605 Wells Team</strong>
+        <strong>The East Gate Revival Hub Team</strong>
       </p>
     </div>
 
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>Orange Park, FL</p>
       <p>
         Questions? Email us at
-        <a href="mailto:info@605wells.com" class="contact-link">info@605wells.com</a>
+        <a href="mailto:info@eastgatejax.com" class="contact-link">info@eastgatejax.com</a>
       </p>
       <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
         This email was sent because you purchased access to ${data.pastEventTitle}
@@ -1296,7 +1296,7 @@ export async function sendMinistrySessionConfirmation(data: {
     });
 
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      from: 'East Gate Virtual Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `✅ Your ${data.ministryTypeTitle} Session is Confirmed!`,
       html: `
@@ -1396,19 +1396,19 @@ export async function sendMinistrySessionConfirmation(data: {
         </ol>
       </div>
 
-      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@605wells.com" style="color: #8b5cf6;">support@605wells.com</a></p>
+      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@eastgatejax.com" style="color: #8b5cf6;">support@eastgatejax.com</a></p>
 
       <p style="margin-top: 30px;">
         We're looking forward to your session!<br>
-        <strong>The 605 Wells Virtual Hub Team</strong>
+        <strong>The East Gate Virtual Hub Team</strong>
       </p>
     </div>
 
     <div class="footer">
-      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p><strong>East Gate Virtual Hub</strong></p>
       <p>Booking ID: ${data.bookingId}</p>
       <p style="margin-top: 15px;">
-        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+        Questions? Email <a href="mailto:support@eastgatejax.com" class="contact-link">support@eastgatejax.com</a>
       </p>
     </div>
   </div>
@@ -1443,7 +1443,7 @@ export async function sendQueueConfirmation(data: {
 }) {
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      from: 'East Gate Virtual Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `You've Joined the ${data.ministryTypeTitle} Queue!`,
       html: `
@@ -1505,14 +1505,14 @@ export async function sendQueueConfirmation(data: {
 
       <p style="margin-top: 30px;">
         Blessings,<br>
-        <strong>The 605 Wells Virtual Hub Team</strong>
+        <strong>The East Gate Virtual Hub Team</strong>
       </p>
     </div>
 
     <div class="footer">
-      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p><strong>East Gate Virtual Hub</strong></p>
       <p style="margin-top: 15px;">
-        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+        Questions? Email <a href="mailto:support@eastgatejax.com" class="contact-link">support@eastgatejax.com</a>
       </p>
     </div>
   </div>
@@ -1560,7 +1560,7 @@ export async function sendQueueAssignmentNotification(data: {
     });
 
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      from: 'East Gate Virtual Hub <noreply@eastgatejax.com>',
       to: [data.email],
       subject: `🎉 You've Been Matched! Your ${data.ministryTypeTitle} Session is Scheduled`,
       html: `
@@ -1659,19 +1659,19 @@ export async function sendQueueAssignmentNotification(data: {
         </ol>
       </div>
 
-      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@605wells.com" style="color: #10b981;">support@605wells.com</a></p>
+      <p><strong>Need to Reschedule?</strong> You can reschedule up to 2 times by contacting us at <a href="mailto:support@eastgatejax.com" style="color: #10b981;">support@eastgatejax.com</a></p>
 
       <p style="margin-top: 30px;">
         We're looking forward to your session!<br>
-        <strong>The 605 Wells Virtual Hub Team</strong>
+        <strong>The East Gate Virtual Hub Team</strong>
       </p>
     </div>
 
     <div class="footer">
-      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p><strong>East Gate Virtual Hub</strong></p>
       <p>Booking ID: ${data.bookingId}</p>
       <p style="margin-top: 15px;">
-        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+        Questions? Email <a href="mailto:support@eastgatejax.com" class="contact-link">support@eastgatejax.com</a>
       </p>
     </div>
   </div>
@@ -1721,7 +1721,7 @@ export async function sendTeamMemberBookingNotification(data: {
     });
 
     const { data: emailData, error } = await resend.emails.send({
-      from: '605 Wells Virtual Hub <noreply@605wells.com>',
+      from: 'East Gate Virtual Hub <noreply@eastgatejax.com>',
       to: [data.teamMemberEmail],
       subject: `📅 New Session Booked: ${data.ministryTypeTitle} with ${data.attendeeFirstName} ${data.attendeeLastName}`,
       html: `
@@ -1808,15 +1808,15 @@ export async function sendTeamMemberBookingNotification(data: {
 
       <p style="margin-top: 30px;">
         Blessings,<br>
-        <strong>The 605 Wells Virtual Hub Team</strong>
+        <strong>The East Gate Virtual Hub Team</strong>
       </p>
     </div>
 
     <div class="footer">
-      <p><strong>605 Wells Virtual Hub</strong></p>
+      <p><strong>East Gate Virtual Hub</strong></p>
       <p>Booking ID: ${data.bookingId}</p>
       <p style="margin-top: 15px;">
-        Questions? Email <a href="mailto:support@605wells.com" class="contact-link">support@605wells.com</a>
+        Questions? Email <a href="mailto:support@eastgatejax.com" class="contact-link">support@eastgatejax.com</a>
       </p>
     </div>
   </div>

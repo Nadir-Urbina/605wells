@@ -478,7 +478,7 @@ export default function ConsentFormPage() {
         </form>
 
         <p className="text-center text-xs text-gray-400 mt-6 mb-2">
-          East Gate Kingdom Fellowship · 605 Wells Road, Orange Park, FL
+          East Gate Kingdom Fellowship · 605 Wells Rd, Orange Park, FL 32073
         </p>
       </div>
     </div>

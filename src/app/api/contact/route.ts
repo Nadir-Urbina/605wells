@@ -32,7 +32,7 @@ const ADMIN_NOTIFICATION_EMAIL = (data: {
   <div class="container">
     <div class="header">
       <h1>New Contact Form Submission</h1>
-      <p>605 Wells Ministry Hub</p>
+      <p>East Gate Revival Hub</p>
     </div>
     
     <div class="content">
@@ -78,7 +78,7 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Thank You for Contacting 605 Wells</title>
+  <title>Thank You for Contacting East Gate Revival Hub</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
     .container { max-width: 600px; margin: 0 auto; background-color: white; }
@@ -95,7 +95,7 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>605 Wells</h1>
+      <h1>East Gate Revival Hub</h1>
       <p>A Transformational Gathering Place</p>
     </div>
     
@@ -107,7 +107,7 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
       
       <p>Dear ${name},</p>
       
-      <p>Thank you for reaching out to 605 Wells! We're grateful for your interest in our ministry and the Kingdom work happening here.</p>
+      <p>Thank you for reaching out to East Gate Revival Hub! We're grateful for your interest in our ministry and the Kingdom work happening here.</p>
       
       <p>We've received your message and will respond within 24-48 hours. In the meantime, feel free to explore our website to learn more about:</p>
       
@@ -117,18 +117,18 @@ const USER_CONFIRMATION_EMAIL = (name: string) => `
         <li><strong>Ministry Activities</strong> - Discipling, deliverance, and equipping</li>
       </ul>
       
-      <p>We're excited to connect with you and share how God is moving at 605 Wells!</p>
+      <p>We're excited to connect with you and share how God is moving at East Gate Revival Hub!</p>
       
       <p>Blessings,<br>
-      <strong>The 605 Wells Team</strong></p>
+      <strong>The East Gate Revival Hub Team</strong></p>
     </div>
     
     <div class="footer">
-      <h3>605 Wells</h3>
+      <h3>East Gate Revival Hub</h3>
       <p>A Transformational Gathering Place</p>
       <p>Where the Waters Run Deep • Where People Are Healed, Built, and Sent</p>
       <br>
-      <p>605 Wells Road, Orange Park, FL</p>
+      <p>605 Wells Rd, Orange Park, FL 32073</p>
       <p>Email: <a href="mailto:admin@eastgatejax.com" class="contact-link">admin@eastgatejax.com</a></p>
     </div>
   </div>
@@ -278,10 +278,10 @@ export async function POST(request: NextRequest) {
 
     // Send notification email to admin
     const adminEmailResult = await resend.emails.send({
-      from: '605 Wells Contact Form <noreply@605wells.com>',
+      from: 'East Gate Contact Form <noreply@eastgatejax.com>',
       to: ['admin@eastgatejax.com'],
       replyTo: email,
-      subject: `New message from 605 Wells Contact Page`,
+      subject: `New message from East Gate Revival Hub Contact Page`,
       html: ADMIN_NOTIFICATION_EMAIL({
         name,
         email,
@@ -298,9 +298,9 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email to user
     const userEmailResult = await resend.emails.send({
-      from: '605 Wells <noreply@605wells.com>',
+      from: 'East Gate Revival Hub <noreply@eastgatejax.com>',
       to: [email],
-      subject: 'Thank You for Contacting 605 Wells!',
+      subject: 'Thank You for Contacting East Gate Revival Hub!',
       html: USER_CONFIRMATION_EMAIL(name),
     });
 

@@ -57,7 +57,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/heroImg.JPG"
-            alt="605 Wells Building"
+            alt="East Gate Revival Hub building"
             fill
             className="object-cover"
             priority
@@ -81,7 +81,10 @@ export default function Home() {
                 style={{
                   textShadow: '0 0 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6), 2px 2px 4px rgba(0,0,0,0.9)'
                 }}>
-              605 Wells
+              East Gate{' '}
+              <span className="block mt-2 sm:mt-4 text-lg sm:text-2xl md:text-3xl lg:text-4xl font-semibold uppercase tracking-[0.35em] text-yellow-400">
+                Revival Hub
+              </span>
             </h1>
           </motion.div>
 
@@ -220,7 +223,7 @@ export default function Home() {
               The Kingdom Hub
             </h2>
             <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-4xl mx-auto">
-              605 Wells isn&apos;t a Sunday-centric church building. It is a <strong className="text-orange-600">Kingdom Hub</strong>, 
+              East Gate Revival Hub isn&apos;t a Sunday-centric church building. It is a <strong className="text-orange-600">Kingdom Hub</strong>, 
               a place where the people of God are not just gathered but grown. They&apos;re not just healed, 
               they&apos;re handed the keys to lead.
             </p>
@@ -273,7 +276,9 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about-605-wells" className="py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+      <section id="about-east-gate" className="py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+        {/* Keeps links to the pre-rebrand anchor (/#about-605-wells) landing here */}
+        <span id="about-605-wells" aria-hidden="true" />
         <div className="max-w-6xl mx-auto">
           <motion.div
             className="text-center mb-10"
@@ -283,7 +288,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-montserrat">
-              About 605 Wells
+              About East Gate Revival Hub
             </h2>
           </motion.div>
 
@@ -298,15 +303,11 @@ export default function Home() {
             >
               <div className="prose prose-lg prose-invert max-w-none">
                 <p className="text-lg leading-relaxed text-gray-200 mb-5">
-                  605 Wells is more than a building. It is a <strong className="text-yellow-400">Kingdom gathering place</strong> where transformation begins with people and overflows into places.
+                  East Gate Revival Hub is more than a building. It is a <strong className="text-yellow-400">Kingdom gathering place</strong> where transformation begins with people and overflows into places.
                 </p>
                 
-                <p className="text-lg leading-relaxed text-gray-200 mb-5">
-                  Right in the heart of Orange Park, Florida, 605 Wells stands as a <strong className="text-blue-300">regional apostolic hub</strong>. This space is built to disciple, develop, and deploy leaders into every sphere of culture.
-                </p>
-
                 <p className="text-lg leading-relaxed text-gray-200 mb-6">
-                  The name 605 Wells carries both a physical location and a <strong className="text-purple-300">prophetic assignment</strong>. Psalm 60:5 and Isaiah 60:5 come together here, marking this place as a well of love and restoration.
+                  Right in the heart of Orange Park, Florida, East Gate Revival Hub stands as a <strong className="text-blue-300">regional apostolic hub</strong>. This space is built to disciple, develop, and deploy leaders into every sphere of culture.
                 </p>
               </div>
 
@@ -390,7 +391,7 @@ export default function Home() {
           >
             <div className="bg-gradient-to-r from-purple-600/30 to-blue-600/30 backdrop-blur-sm rounded-xl p-6 border border-purple-400/30 max-w-4xl mx-auto">
               <h3 className="text-2xl lg:text-3xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400 font-montserrat">
-                This is 605 Wells
+                This is East Gate Revival Hub
               </h3>
               <p className="text-xl lg:text-2xl text-gray-200 font-medium">
                 Where love lives and leaders are launched.
@@ -429,7 +430,7 @@ export default function Home() {
                <p className="text-gray-600 mb-4">
                  {successDonationType === 'monthly' 
                    ? "Thank you for joining our mission! You'll receive a confirmation email shortly with your Kingdom Builder benefits."
-                   : "Thank you for your generous heart and for sowing into God's Kingdom work at 605 Wells! You'll receive a confirmation email shortly."
+                   : "Thank you for your generous heart and for sowing into God's Kingdom work at East Gate Revival Hub! You'll receive a confirmation email shortly."
                  }
                </p>
 

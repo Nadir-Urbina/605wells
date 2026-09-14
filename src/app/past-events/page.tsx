@@ -4,7 +4,7 @@ import { client, pastEventQueries, urlFor, SanityPastEvent } from '@/lib/sanity'
 import Header from '@/components/Header'
 
 export const metadata: Metadata = {
-  title: 'Past Events | 605 Wells',
+  title: 'Past Events | East Gate Revival Hub',
   description: 'Access recordings of our past worship services, teachings, and special events.',
 }
 

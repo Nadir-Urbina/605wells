@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           duration: ministryType.averageDuration,
           meetingLink: dailyMeetingData.joinUrl,
           bookingId,
-          intakeFormLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.605wells.com'}/virtual-hub/intake/${bookingId}`,
+          intakeFormLink: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/virtual-hub/intake/${bookingId}`,
         });
 
         console.log('✅ Queue assignment notification email sent to:', queueEntry.attendeeInfo.email);

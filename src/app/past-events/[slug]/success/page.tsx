@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Purchase Successful | 605 Wells',
+  title: 'Purchase Successful | East Gate Revival Hub',
   description: 'Your purchase was successful. Check your email for access details.',
 }
 
@@ -79,7 +79,7 @@ export default function PastEventSuccessPage() {
                   <li>• Check your spam/junk folder</li>
                   <li>• Make sure you entered the correct email address</li>
                   <li>• Wait a few minutes - it may take a moment to arrive</li>
-                  <li>• Contact us at <a href="mailto:info@605wells.com" className="underline font-semibold">info@605wells.com</a> if you still don&apos;t see it</li>
+                  <li>• Contact us at <a href="mailto:info@eastgatejax.com" className="underline font-semibold">info@eastgatejax.com</a> if you still don&apos;t see it</li>
                 </ul>
               </div>
             </div>
@@ -105,8 +105,8 @@ export default function PastEventSuccessPage() {
           <div className="mt-8 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-600">
               Need help? Contact us at{' '}
-              <a href="mailto:info@605wells.com" className="text-purple-600 hover:underline font-semibold">
-                info@605wells.com
+              <a href="mailto:info@eastgatejax.com" className="text-purple-600 hover:underline font-semibold">
+                info@eastgatejax.com
               </a>
             </p>
           </div>

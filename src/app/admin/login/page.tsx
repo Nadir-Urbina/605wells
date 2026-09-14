@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
           Admin Login
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          605 Wells Ministry Hub
+          East Gate Revival Hub
         </p>
       </div>
 

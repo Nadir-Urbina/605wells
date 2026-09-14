@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const PROMO_CODES = {
-  '605KINGDOMBUILDERS': { discountPercent: 50, description: '605 Kingdom Builders 50% Discount' },
+  '605KINGDOMBUILDERS': { discountPercent: 50, description: 'East Gate Jax Kingdom Builders 50% Discount' },
   '99DEVELOPER': { discountPercent: 99, description: 'Developer Testing 99% Discount' },
   'EGBUILD605': { discountPercent: 50, description: 'East Gate Build 605 50% Discount' },
   '50PERCENT605': { discountPercent: 50, description: '50% Discount' },

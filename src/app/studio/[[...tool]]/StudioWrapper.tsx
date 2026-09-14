@@ -1400,7 +1400,7 @@ const ministrySessionRequestSchema = defineType({
 
 const config = defineConfig({
   name: 'default',
-  title: '605 Wells Ministry Hub',
+  title: 'East Gate Revival Hub',
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'ypbczt01',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   basePath: '/studio',

@@ -19,20 +19,20 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "605 Wells | A Transformational Gathering Place",
-  description: "A Kingdom hub where people are healed, built, and sent. Join us for discipling, deliverance, inner healing, and regional Kingdom impact in Jacksonville, FL.",
-  keywords: ["605 Wells", "ministry", "church", "Jacksonville", "Kingdom", "discipling", "deliverance", "inner healing", "prayer"],
-  authors: [{ name: "605 Wells Ministry" }],
+  title: "East Gate Revival Hub | A Transformational Gathering Place",
+  description: "A Kingdom hub where people are healed, built, and sent. Join us for discipling, deliverance, inner healing, and regional Kingdom impact in Orange Park, FL.",
+  keywords: ["East Gate Revival Hub", "East Gate Jax", "ministry", "church", "Orange Park", "Jacksonville", "Kingdom", "discipling", "deliverance", "inner healing", "prayer"],
+  authors: [{ name: "East Gate Revival Hub" }],
   openGraph: {
-    title: "605 Wells | A Transformational Gathering Place",
+    title: "East Gate Revival Hub | A Transformational Gathering Place",
     description: "Where the waters run deep • Where people are healed, built, and sent",
-    url: "https://605wells.com",
-    siteName: "605 Wells",
+    url: "https://www.eastgatejax.com",
+    siteName: "East Gate Revival Hub",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "605 Wells | A Transformational Gathering Place",
+    title: "East Gate Revival Hub | A Transformational Gathering Place",
     description: "Where the waters run deep • Where people are healed, built, and sent",
   },
   icons: {

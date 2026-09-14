@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import {
+  KINGDOM_BUILDERS_NAME,
+  KINGDOM_BUILDERS_MONTHLY_DESCRIPTION,
+  KINGDOM_BUILDERS_ONE_TIME_DESCRIPTION,
+} from '@/lib/kingdom-builders';
 
 // Initialize Stripe only if the secret key is available
 const getStripeInstance = () => {
@@ -61,7 +66,7 @@ export async function POST(request: NextRequest) {
         },
         metadata: {
           motivationMessage: (motivationMessage || '').substring(0, 500),
-          project: '605Wells Kingdom Builder',
+          project: 'East Gate Jax Kingdom Builders',
           donationType: donationType,
           amount: (donationAmount / 100).toString(),
           customAmount: isCustomAmount ? 'true' : 'false',
@@ -89,6 +94,7 @@ export async function POST(request: NextRequest) {
       const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
         amount: donationAmount,
         currency: 'usd',
+        description: KINGDOM_BUILDERS_ONE_TIME_DESCRIPTION,
         metadata: {
           donationType,
           customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -101,7 +107,7 @@ export async function POST(request: NextRequest) {
             postal_code: customerInfo.zipCode,
           }),
           motivationMessage: motivationMessage || '',
-          project: '605Wells Kingdom Builder',
+          project: 'East Gate Jax Kingdom Builders',
         },
         receipt_email: customerInfo.email,
       };
@@ -149,9 +155,9 @@ async function createSubscriptionWithCustomAmount(stripe: Stripe, customerId: st
   try {
     // Create a custom product for this Kingdom Builder
     const product = await stripe.products.create({
-      name: `Kingdom Builder - Custom $${amountInCents / 100}/month`,
+      name: `${KINGDOM_BUILDERS_NAME} - Custom $${amountInCents / 100}/month`,
       metadata: {
-        project: '605Wells Kingdom Builder',
+        project: 'East Gate Jax Kingdom Builders',
         customAmount: 'true',
       },
     });
@@ -167,7 +173,7 @@ async function createSubscriptionWithCustomAmount(stripe: Stripe, customerId: st
         interval: 'month',
       },
       metadata: {
-        project: '605Wells Kingdom Builder',
+        project: 'East Gate Jax Kingdom Builders',
         customAmount: 'true',
         amount: (amountInCents / 100).toString(),
       },
@@ -199,8 +205,10 @@ async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, p
         save_default_payment_method: 'on_subscription',
       },
       expand: ['latest_invoice.payment_intent'],
+      // Shown on invoices; each monthly charge is labeled in the invoice.payment_succeeded webhook
+      description: KINGDOM_BUILDERS_MONTHLY_DESCRIPTION,
       metadata: {
-        project: '605Wells Kingdom Builder',
+        project: 'East Gate Jax Kingdom Builders',
         donationType: 'monthly',
       },
     });
@@ -300,10 +308,11 @@ async function createSubscriptionWithPrice(stripe: Stripe, customerId: string, p
         amount: invoice.amount_due,
         currency: 'usd',
         customer: customerId,
+        description: KINGDOM_BUILDERS_MONTHLY_DESCRIPTION,
         metadata: {
           subscription_id: subscription.id,
           invoice_id: invoice.id,
-          project: '605Wells Kingdom Builder',
+          project: 'East Gate Jax Kingdom Builders',
           donationType: 'monthly',
           manual_creation: 'true',
         },
