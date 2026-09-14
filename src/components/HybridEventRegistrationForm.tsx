@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { type SanityEvent } from '@/lib/sanity';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '@/lib/stripe';
+import { getInPersonAvailability } from '@/lib/hybrid-capacity';
 
 // Form validation schema for hybrid registration
 const hybridRegistrationSchema = z.object({
@@ -222,6 +223,9 @@ export default function HybridEventRegistrationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const inPersonAvailability = getInPersonAvailability(event);
+  // When in-person is full, online is the only option, so start there
+  const defaultAttendancePrice = inPersonAvailability.isFull ? (event.onlinePrice || 0) : (event.price || 0);
   const [pricing, setPricing] = useState<{
     inPersonPrice: number;
     onlinePrice: number;
@@ -233,7 +237,7 @@ export default function HybridEventRegistrationForm({
   }>({
     inPersonPrice: event.price || 0,
     onlinePrice: event.onlinePrice || 0,
-    finalPrice: event.price || 0,
+    finalPrice: defaultAttendancePrice,
   });
   const [promoCodeStatus, setPromoCodeStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
 
@@ -248,6 +252,7 @@ export default function HybridEventRegistrationForm({
     // Only use resolver on the final step
     resolver: currentStep === 3 ? zodResolver(hybridRegistrationSchema) : undefined,
     mode: 'onChange',
+    defaultValues: inPersonAvailability.isFull ? { attendanceType: 'online' } : undefined,
   });
 
   const selectedAttendanceType = watch('attendanceType');
@@ -495,7 +500,7 @@ export default function HybridEventRegistrationForm({
     setPricing({
       inPersonPrice: event.price || 0,
       onlinePrice: event.onlinePrice || 0,
-      finalPrice: event.price || 0,
+      finalPrice: defaultAttendancePrice,
     });
     onClose();
   };
@@ -627,17 +632,25 @@ export default function HybridEventRegistrationForm({
 
                     {/* Attendance Options */}
                     <div className="space-y-4">
+                      {inPersonAvailability.isFull && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-sm text-orange-800">
+                          In-person seating is full. Online livestream registration is still open.
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* In-Person Option */}
-                        <label className={`relative flex flex-col p-6 border-2 rounded-lg cursor-pointer transition-all ${
-                          selectedAttendanceType === 'in-person' 
-                            ? 'border-purple-500 bg-purple-50' 
-                            : 'border-gray-200 hover:border-purple-300'
+                        <label className={`relative flex flex-col p-6 border-2 rounded-lg transition-all ${
+                          inPersonAvailability.isFull
+                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                            : selectedAttendanceType === 'in-person'
+                              ? 'border-purple-500 bg-purple-50 cursor-pointer'
+                              : 'border-gray-200 hover:border-purple-300 cursor-pointer'
                         }`}>
                           <input
                             type="radio"
                             value="in-person"
                             {...register('attendanceType')}
+                            disabled={inPersonAvailability.isFull}
                             className="sr-only"
                           />
                           <div className="flex items-center justify-between mb-2">
@@ -653,9 +666,17 @@ export default function HybridEventRegistrationForm({
                             • Live interaction with speakers
                             • Networking opportunities
                             • Refreshments included
-                            {event.registrationLimit && (
+                            {inPersonAvailability.isFull ? (
+                              <span className="block text-red-600 font-medium mt-1">
+                                In-person is full
+                              </span>
+                            ) : inPersonAvailability.remaining !== null && inPersonAvailability.remaining <= 20 ? (
                               <span className="block text-orange-600 font-medium mt-1">
-                                ⚠️ Limited to {event.registrationLimit} attendees
+                                ⚠️ Only {inPersonAvailability.remaining} in-person spot{inPersonAvailability.remaining !== 1 ? 's' : ''} left
+                              </span>
+                            ) : inPersonAvailability.limit !== null && (
+                              <span className="block text-orange-600 font-medium mt-1">
+                                ⚠️ Limited to {inPersonAvailability.limit} attendees
                               </span>
                             )}
                           </div>

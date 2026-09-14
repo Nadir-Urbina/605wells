@@ -41,10 +41,14 @@ export async function POST(request: NextRequest, { params }: Props) {
     return NextResponse.json({ error: 'Event not found' }, { status: 404 })
   }
 
+  // Registrations with no attendance type predate the event becoming hybrid
+  // and were in-person, so "in-person" includes them
   const filterClause =
-    attendanceTypeFilter !== 'all'
-      ? `&& attendanceType == $attendanceType`
-      : ''
+    attendanceTypeFilter === 'in-person'
+      ? `&& (attendanceType == "in-person" || !defined(attendanceType))`
+      : attendanceTypeFilter !== 'all'
+        ? `&& attendanceType == $attendanceType`
+        : ''
 
   const registrations: Array<{ attendee: { firstName: string; email: string } }> =
     await client.fetch(

@@ -1,5 +1,6 @@
 import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
+import { IN_PERSON_SEAT_FILTER } from './hybrid-capacity'
 
 export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'new',
@@ -118,6 +119,8 @@ export const eventQueries = {
     registrationType,
     registrationLimit,
     registrationClosed,
+    inPersonRegistrationClosed,
+    "inPersonRegistrationCount": count(*[_type == "eventRegistration" && event._ref == ^._id && ${IN_PERSON_SEAT_FILTER}]),
     requiresKingdomBuilderDiscount,
     registrationDeadline,
     registrationInstructions,
@@ -246,6 +249,10 @@ export interface SanityEvent {
   registrationType?: 'internal' | 'internal-free' | 'hybrid' | 'external' | 'none'
   registrationLimit?: number
   registrationClosed?: boolean
+  // Hybrid events: stop in-person sign-ups while online stays open
+  inPersonRegistrationClosed?: boolean
+  // Computed by eventBySlug: in-person seats taken (see hybrid-capacity.ts)
+  inPersonRegistrationCount?: number
   requiresKingdomBuilderDiscount?: boolean
   registrationDeadline?: string
   registrationInstructions?: string
