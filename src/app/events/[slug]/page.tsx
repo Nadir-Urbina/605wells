@@ -247,6 +247,11 @@ export default function EventDetailPage() {
 
   const { primaryDate, primaryTime, allSessions } = formatSchedule(event.eventSchedule);
 
+  // Hybrid event with in-person seating full: only online attendance remains, so
+  // showing the in-person price is misleading. Show the online price instead.
+  const onlineOnly =
+    event.registrationType === 'hybrid' && getInPersonAvailability(event).isFull;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Header onDonateClick={() => {}} />
@@ -326,8 +331,15 @@ export default function EventDetailPage() {
               </div>
 
               {/* Price */}
-              <div className="text-2xl font-bold text-white mb-8">
-                {formatPrice(event.price)}
+              <div className="mb-8">
+                <div className="text-2xl font-bold text-white">
+                  {formatPrice(onlineOnly ? event.onlinePrice : event.price)}
+                </div>
+                {onlineOnly && (
+                  <div className="mt-1 text-sm font-semibold uppercase tracking-widest text-white/70">
+                    Online attendance
+                  </div>
+                )}
               </div>
 
               {/* Registration Button */}
@@ -516,7 +528,12 @@ export default function EventDetailPage() {
                           </svg>
                           <span className="font-medium">Price</span>
                         </div>
-                        <p className="text-gray-900 ml-6 font-semibold">{formatPrice(event.price)}</p>
+                        <p className="text-gray-900 ml-6 font-semibold">
+                          {formatPrice(onlineOnly ? event.onlinePrice : event.price)}
+                          {onlineOnly && (
+                            <span className="ml-2 text-sm font-normal text-gray-600">online attendance</span>
+                          )}
+                        </p>
                       </div>
 
                       {/* Capacity */}

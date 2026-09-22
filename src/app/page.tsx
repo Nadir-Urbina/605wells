@@ -56,8 +56,8 @@ export default function Home() {
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/heroImg.JPG"
-            alt="East Gate Revival Hub building"
+            src="/eg_hero.webp"
+            alt="East Gate Revival Hub building entrance lit at night"
             fill
             className="object-cover"
             priority
@@ -65,7 +65,7 @@ export default function Home() {
             sizes="100vw"
           />
           {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/75"></div>
         </div>
 
         {/* Content */}
