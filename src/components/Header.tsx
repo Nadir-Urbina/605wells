@@ -6,10 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { track } from '@vercel/analytics';
 
 interface HeaderProps {
+  /** @deprecated Giving now links out to Tithe.ly; kept so existing callers still compile. */
   onDonateClick?: () => void;
 }
 
-export default function Header({ onDonateClick = () => {} }: HeaderProps) {
+const GIVE_URL = 'https://give.tithe.ly/?formId=fc03799a-0541-44e4-91a9-d53c7f5fd9d3';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function Header(_props: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -40,11 +44,10 @@ export default function Header({ onDonateClick = () => {} }: HeaderProps) {
     }
   };
 
-  const handleDonateClick = () => {
-    // Track donate button click
-    track('Donate Button Clicked', { location: 'header' });
+  const handleGiveClick = () => {
+    // Track give button click
+    track('Give Button Clicked', { location: 'header' });
     setIsMobileMenuOpen(false);
-    onDonateClick();
   };
 
   const navItems = [
@@ -91,15 +94,18 @@ export default function Header({ onDonateClick = () => {} }: HeaderProps) {
               </button>
             ))}
             
-            {/* Desktop Donate Button */}
-            <motion.button
-              onClick={handleDonateClick}
+            {/* Desktop Give Button */}
+            <motion.a
+              href={GIVE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleGiveClick}
               className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Donate
-            </motion.button>
+              Give
+            </motion.a>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -145,17 +151,20 @@ export default function Header({ onDonateClick = () => {} }: HeaderProps) {
                 </motion.button>
               ))}
               
-              {/* Mobile Donate Button */}
-              <motion.button
-                onClick={handleDonateClick}
-                className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg mt-4"
+              {/* Mobile Give Button */}
+              <motion.a
+                href={GIVE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleGiveClick}
+                className="block text-center w-full bg-gradient-to-r from-purple-600 via-blue-600 to-purple-700 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-700 hover:via-blue-700 hover:to-purple-800 transition-all duration-300 shadow-lg mt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: navItems.length * 0.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Donate Now
-              </motion.button>
+                Give
+              </motion.a>
             </div>
           </motion.div>
         )}
