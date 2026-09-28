@@ -123,7 +123,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 1.6 }}
           >
             <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-8 font-medium">
-              What&apos;s happening at 605 Wells Rd:
+              What&apos;s happening at East Gate Revival Hub:
             </p>
             
             {/* Typing effect container with fixed height */}
