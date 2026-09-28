@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "email:test": "tsx scripts/send-correction-email.ts test",
-    "email:send": "tsx scripts/send-correction-email.ts send"
+    "email:send": "tsx scripts/send-correction-email.ts send",
+    "promo:seed": "tsx scripts/seed-promo-codes.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",

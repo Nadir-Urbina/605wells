@@ -131,6 +131,12 @@ export default defineType({
           validation: (Rule) => Rule.min(0),
         },
         {
+          name: 'promoCode',
+          title: 'Promo Code Used',
+          type: 'string',
+          description: 'Stored uppercase so usage limits can be counted',
+        },
+        {
           name: 'paymentMethod',
           title: 'Payment Method',
           type: 'string',

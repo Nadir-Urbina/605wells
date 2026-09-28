@@ -639,6 +639,8 @@ async function handleEventRegistrationSuccess(paymentIntent: Stripe.PaymentInten
           originalPrice: parseFloat(metadata.originalPrice || finalPrice.toString()),
           discountApplied,
           discountAmount: discountApplied ? parseFloat(metadata.originalPrice || '0') - finalPrice : 0,
+          // Recorded so promo code usage limits can be counted against registrations
+          promoCode: metadata.promoCode ? metadata.promoCode.toUpperCase() : undefined,
           paymentMethod: 'card', // All webhook payments are card-based
           status: 'completed',
         },

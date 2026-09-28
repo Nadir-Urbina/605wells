@@ -2,17 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { writeClient, eventQueries, type SanityEvent } from '@/lib/sanity';
 import { getInPersonAvailability } from '@/lib/hybrid-capacity';
+import { validatePromoCode, applyPromoDiscount } from '@/lib/promo-codes';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
 });
-
-const PROMO_CODES = {
-  '605KINGDOMBUILDERS': { discountPercent: 50, description: 'East Gate Jax Kingdom Builders 50% Discount' },
-  '99DEVELOPER': { discountPercent: 99, description: 'Developer Testing 99% Discount' },
-  'EGBUILD605': { discountPercent: 50, description: 'East Gate Build 605 50% Discount' },
-  '50PERCENT605': { discountPercent: 50, description: '50% Discount' },
-} as const;
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,18 +58,17 @@ export async function POST(request: NextRequest) {
 
     let finalPrice = originalPrice;
     let promoCodeDiscount = 0;
-    let promoCodeApplied = null;
+    let promoCodeApplied: string | null = null;
 
-    // Apply promo code if provided
+    // Apply promo code if provided. Codes are validated against Sanity, never
+    // against anything the client sends.
     if (promoCode) {
-      const upperPromoCode = promoCode.toUpperCase();
-      const promoCodeInfo = PROMO_CODES[upperPromoCode as keyof typeof PROMO_CODES];
-      
-      if (promoCodeInfo) {
-        promoCodeDiscount = promoCodeInfo.discountPercent;
-        const discountAmount = (originalPrice * promoCodeDiscount) / 100;
-        finalPrice = Math.max(0, originalPrice - discountAmount);
-        promoCodeApplied = upperPromoCode;
+      const promoResult = await validatePromoCode(promoCode, event._id);
+
+      if (promoResult.valid) {
+        promoCodeDiscount = promoResult.discountPercent!;
+        finalPrice = applyPromoDiscount(originalPrice, promoCodeDiscount).finalPrice;
+        promoCodeApplied = promoResult.code!;
       }
     }
 

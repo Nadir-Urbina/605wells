@@ -9,6 +9,17 @@ export const client = createClient({
   apiVersion: '2024-01-01',
 })
 
+// Reads that must never be stale: promo codes are toggled by staff and have to
+// take effect immediately, so this client skips the CDN. `published` keeps
+// unpublished drafts from being treated as live.
+export const liveClient = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'new',
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+  useCdn: false,
+  apiVersion: '2024-01-01',
+  perspective: 'published',
+})
+
 // Write client for creating documents (uses API token)
 export const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'new',
@@ -289,6 +300,7 @@ export interface RegistrationPayment {
   originalPrice?: number
   discountApplied?: boolean
   discountAmount?: number
+  promoCode?: string
   paymentMethod?: 'card' | 'free' | 'online'
   status?: 'completed' | 'pending' | 'failed' | 'refunded'
 }

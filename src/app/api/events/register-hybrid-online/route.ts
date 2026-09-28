@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { client, eventQueries, createEventRegistration, type SanityEvent, type SanityEventRegistration, type EventSession } from '@/lib/sanity';
 import { sendOnlineEventRegistrationConfirmation } from '@/lib/resend';
+import { validatePromoCode, applyPromoDiscount } from '@/lib/promo-codes';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    const { eventId, attendeeInfo, attendanceType, pricing } = await request.json();
+    const { eventId, attendeeInfo, attendanceType, promoCode } = await request.json();
 
     // Validate required fields
     if (!eventId || !attendeeInfo || attendanceType !== 'online') {
@@ -49,9 +50,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // This endpoint only handles free online registrations
-    // Paid online registrations should use the webhook flow via /api/events/register-hybrid
-    if ((event.onlinePrice || 0) > 0 && (!pricing || pricing.finalPrice > 0)) {
+    // This endpoint only handles free online registrations. The price is
+    // recomputed here from Sanity; a paid event is only free with a valid
+    // 100%-off promo code. Paid online registrations use /api/events/register-hybrid.
+    const originalPrice = event.onlinePrice || 0;
+    let finalPrice = originalPrice;
+    let promoCodeApplied: string | undefined;
+    let promoCodeDiscount = 0;
+
+    if (originalPrice > 0 && promoCode) {
+      const promoResult = await validatePromoCode(promoCode, event._id);
+      if (promoResult.valid) {
+        promoCodeDiscount = promoResult.discountPercent!;
+        finalPrice = applyPromoDiscount(originalPrice, promoCodeDiscount).finalPrice;
+        promoCodeApplied = promoResult.code;
+      }
+    }
+
+    if (finalPrice > 0) {
       return NextResponse.json(
         { error: 'Paid online registrations should use the payment flow. This endpoint is for free registrations only.' },
         { status: 400 }
@@ -148,16 +164,17 @@ export async function POST(request: NextRequest) {
         phone: attendeeInfo.phone || undefined,
       },
       attendanceType: 'online',
-      // For free online events, no payment info needed
-      // For paid online events, we'd handle payment here
-      ...(pricing.finalPrice > 0 && {
+      // Free events need no payment info. A paid event made free by a promo
+      // code records the code so its usage limit can be counted.
+      ...(promoCodeApplied && {
         payment: {
-          stripePaymentIntentId: 'online-' + Date.now(), // Placeholder for now
-          amount: pricing.finalPrice,
-          originalPrice: pricing.originalPrice || pricing.finalPrice,
-          discountApplied: pricing.discountApplied || false,
-          discountAmount: pricing.originalPrice ? pricing.originalPrice - pricing.finalPrice : 0,
-          paymentMethod: 'online',
+          stripePaymentIntentId: 'promo-' + Date.now(), // No Stripe charge for a fully discounted registration
+          amount: 0,
+          originalPrice,
+          discountApplied: true,
+          discountAmount: originalPrice,
+          promoCode: promoCodeApplied,
+          paymentMethod: 'free',
           status: 'completed',
         }
       }),
@@ -210,11 +227,11 @@ export async function POST(request: NextRequest) {
         registrationInstructions: event.registrationInstructions,
         accessToken,
         livestreamUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.eastgatejax.com'}/livestream/${event.slug.current}?token=${accessToken}`,
-        finalPrice: pricing.finalPrice,
-        originalPrice: pricing.originalPrice,
-        discountApplied: pricing.discountApplied,
-        promoCode: pricing.promoCodeApplied,
-        promoCodeDiscount: pricing.promoCodeDiscount,
+        finalPrice,
+        originalPrice,
+        discountApplied: Boolean(promoCodeApplied),
+        promoCode: promoCodeApplied,
+        promoCodeDiscount,
       });
       
       console.log('✅ Online event registration confirmation email sent to:', attendeeInfo.email);

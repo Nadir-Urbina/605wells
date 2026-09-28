@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { client, eventQueries } from '@/lib/sanity';
+import { validatePromoCode } from '@/lib/promo-codes';
 
-// Define your promo codes here
-// In a production environment, you might want to store these in a database or CMS
-const PROMO_CODES = {
-  '605KINGDOMBUILDERS': { discountPercent: 50, description: 'East Gate Jax Kingdom Builders 50% Discount' },
-  '99DEVELOPER': { discountPercent: 99, description: 'Developer Testing 99% Discount' },
-  'EGBUILD605': { discountPercent: 50, description: 'East Gate Build 605 50% Discount' },
-  '50PERCENT605': { discountPercent: 50, description: '50% Discount' },
-} as const;
-
+// Display-only validation for the registration forms. The authoritative check
+// runs again inside the registration routes, which recompute the price from
+// Sanity rather than trusting anything the browser sends.
 export async function POST(request: NextRequest) {
   try {
     const { eventId, promoCode } = await request.json();
@@ -21,30 +17,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const upperPromoCode = promoCode.toUpperCase();
-    
-    // Check if promo code exists
-    const promoCodeInfo = PROMO_CODES[upperPromoCode as keyof typeof PROMO_CODES];
-    
-    if (!promoCodeInfo) {
+    // Forms send the event slug; resolve it so event-restricted codes apply.
+    const event = await client.fetch(eventQueries.eventBySlug, { slug: eventId });
+
+    const result = await validatePromoCode(promoCode, event?._id);
+
+    if (!result.valid) {
       return NextResponse.json({
         valid: false,
-        error: 'Invalid promo code',
+        error: result.error,
       });
     }
 
-    // For now, we'll return the discount percentage
-    // In a more complex system, you might:
-    // 1. Check if the code is expired
-    // 2. Check if it's applicable to this specific event
-    // 3. Check usage limits
-    // 4. Fetch event price and calculate actual discount
-
     return NextResponse.json({
       valid: true,
-      promoCode: upperPromoCode,
-      discountPercent: promoCodeInfo.discountPercent,
-      description: promoCodeInfo.description,
+      promoCode: result.code,
+      discountPercent: result.discountPercent,
+      description: result.description,
     });
 
   } catch (error) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validatePromoCode, applyPromoDiscount } from '@/lib/promo-codes';
 import Stripe from 'stripe';
 import { client, eventQueries } from '@/lib/sanity';
 
@@ -14,14 +15,6 @@ const getStripeInstance = () => {
     apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
   });
 };
-
-// Define promo codes
-const PROMO_CODES = {
-  '605KINGDOMBUILDERS': { discountPercent: 50, description: 'East Gate Jax Kingdom Builders 50% Discount' },
-  '99DEVELOPER': { discountPercent: 99, description: 'Developer Testing 99% Discount' },
-  'EGBUILD605': { discountPercent: 50, description: 'East Gate Build 605 50% Discount' },
-  '50PERCENT605': { discountPercent: 50, description: '50% Discount' },
-} as const;
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,21 +70,25 @@ export async function POST(request: NextRequest) {
     // TODO: Check registration limit (would need to implement registration count tracking)
     // This would require querying existing registrations from Stripe or a separate database
 
-    // Calculate price with promo code discounts
+    // Calculate price with promo code discounts. The price comes from Sanity and
+    // the code is re-validated here, so a tampered client cannot fake a discount.
     const originalPrice = event.price || 0;
     let finalPrice = originalPrice;
     let discountApplied = false;
-    let promoCodeInfo = null;
+    let appliedPromoCode: string | null = null;
+    let promoDiscountAmount = 0;
 
-    // Apply promo code discount if provided
+    // An unrecognized code is ignored rather than rejected: the forms submit
+    // whatever is in the box, even when the attendee never pressed Apply.
     if (promoCode) {
-      const upperPromoCode = promoCode.toUpperCase();
-      promoCodeInfo = PROMO_CODES[upperPromoCode as keyof typeof PROMO_CODES];
-      
-      if (promoCodeInfo) {
-        const discountAmount = (originalPrice * promoCodeInfo.discountPercent) / 100;
-        finalPrice = Math.max(0, originalPrice - discountAmount);
+      const promoResult = await validatePromoCode(promoCode, event._id);
+
+      if (promoResult.valid) {
+        const discount = applyPromoDiscount(originalPrice, promoResult.discountPercent!);
+        finalPrice = discount.finalPrice;
+        promoDiscountAmount = discount.discountAmount;
         discountApplied = true;
+        appliedPromoCode = promoResult.code!;
       }
     }
 
@@ -132,8 +129,8 @@ export async function POST(request: NextRequest) {
         originalPrice: originalPrice.toString(),
         finalPrice: finalPrice.toString(),
         discountApplied: discountApplied.toString(),
-        promoCode: promoCode || '',
-        promoCodeDiscount: promoCodeInfo ? ((originalPrice * promoCodeInfo.discountPercent) / 100).toString() : '0',
+        promoCode: appliedPromoCode || '',
+        promoCodeDiscount: promoDiscountAmount.toString(),
         eventSchedule: JSON.stringify(event.eventSchedule?.[0] || {}),
         eventLocation: JSON.stringify(event.location || {}),
         registrationInstructions: event.registrationInstructions || '',
@@ -150,8 +147,8 @@ export async function POST(request: NextRequest) {
         price: originalPrice,
         finalPrice: finalPrice,
         discountApplied,
-        promoCodeApplied: promoCode || null,
-        promoCodeDiscount: promoCodeInfo ? (originalPrice * promoCodeInfo.discountPercent) / 100 : 0,
+        promoCodeApplied: appliedPromoCode,
+        promoCodeDiscount: promoDiscountAmount,
       },
     });
 
